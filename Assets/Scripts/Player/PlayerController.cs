@@ -57,6 +57,7 @@ namespace MonsterKitchen.Player
         // ── 컴포넌트 참조 ─────────────────────────────────────────────
         [SerializeField] Rigidbody2D      _rb;
         [SerializeField] Animator         _anim;
+        [SerializeField] Animator         _overlayAnim;  // Overlay 자식 Animator
         [SerializeField] SpriteRenderer[] _sprites;   // 자신 + 모든 자식 SpriteRenderer
         [SerializeField] Health           _health;
         [SerializeField] PlayerStats    _stats;
@@ -221,9 +222,12 @@ namespace MonsterKitchen.Player
             _anim.SetFloat(HashMoveY, _facingDir.y);
             _anim.SetFloat(HashSpeed, _currentVel.magnitude);
 
+            _overlayAnim?.SetFloat(HashMoveX, _facingDir.x);
+            _overlayAnim?.SetFloat(HashMoveY, _facingDir.y);
+
             if (_facingDir.x != 0f && _sprites != null)
             {
-                bool flip = _facingDir.x < 0f;
+                bool flip = _facingDir.x > 0f;
                 foreach (var sr in _sprites) sr.flipX = flip;
             }
         }
@@ -317,6 +321,7 @@ namespace MonsterKitchen.Player
                 ? HashAttack
                 : Animator.StringToHash(skill.animTriggerOverride);
             _anim.SetTrigger(triggerHash);
+            _overlayAnim?.SetTrigger(HashAttack);
 
             ExecuteSkillStep(skill, dmgFinal, attrFinal);
 
@@ -343,6 +348,7 @@ namespace MonsterKitchen.Player
                 ? HashAttack
                 : Animator.StringToHash(skill.animTriggerOverride);
             _anim.SetTrigger(triggerHash);
+            _overlayAnim?.SetTrigger(HashAttack);
 
             ExecuteSkillStep(skill, dmg, attr);
         }
