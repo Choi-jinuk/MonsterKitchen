@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 299ad49b81fd6c84db39e10f65043579, type: 3}
+  m_Name: SGD_001
+  m_EditorClassIdentifier: Assembly-CSharp::MonsterKitchen.Data.SkillGroupData
+  skillGroupId: SGD_001
+  skillIcon: {fileID: 0}
+  skillName: "\uAC80 \uD3C9\uD0C0"
+  description: "\uAE30\uBCF8 \uAC80 3\uD0C0 \uCF64\uBCF4. \uADFC\uAC70\uB9AC \uBC94\uC704
+    \uACF5\uACA9."
+  skillChain:
+  - {fileID: 11400000, guid: d306b6ce59170be4e895279d12d85f7a, type: 2}
+  - {fileID: 11400000, guid: e00fc70eddd423b47b38bac9746701d2, type: 2}
+  - {fileID: 11400000, guid: 4126d2e951d9c9f4ea82593534509c34, type: 2}
+  skillCooltime: 0
+  allowedWeaponTypes: 

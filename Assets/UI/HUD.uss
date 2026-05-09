@@ -1,0 +1,198 @@
+.hud-root {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 64px;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 20px;
+}
+
+.hud-chip {
+    flex-direction: row;
+    align-items: center;
+    background-color: rgba(0, 0, 0, 0.55);
+    border-radius: 8px;
+    padding: 6px 16px;
+    border-width: 1px;
+    border-color: rgba(255, 255, 255, 0.12);
+}
+
+.hud-label {
+    font-size: 20px;
+    -unity-font-style: bold;
+    color: rgb(255, 255, 255);
+}
+
+.hud-label--day {
+    color: rgb(160, 210, 255);
+}
+
+.hud-label--gold {
+    color: rgb(255, 215, 60);
+}
+
+/* ── HP Bar ─────────────────────────────────── */
+.hp-chip {
+    min-width: 200px;
+}
+
+.hp-icon {
+    font-size: 18px;
+    color: rgb(255, 90, 90);
+    margin-right: 6px;
+}
+
+.hp-bar-bg {
+    flex-grow: 1;
+    height: 14px;
+    background-color: rgba(0, 0, 0, 0.5);
+    border-radius: 7px;
+    overflow: hidden;
+}
+
+.hp-bar-fill {
+    height: 100%;
+    width: 100%;
+    background-color: rgb(220, 60, 60);
+    border-radius: 7px;
+    transition-property: width;
+    transition-duration: 0.15s;
+}
+
+.hp-text {
+    font-size: 14px;
+    color: rgb(255, 200, 200);
+    margin-left: 8px;
+    -unity-font-style: bold;
+}
+
+/* HP 없을 때 칩 숨김 */
+.hp-chip--hidden {
+    display: none;
+}
+
+/* ══════════════════════════════════════════════════
+   하단 스킬 바 (Skill Bar)
+   ══════════════════════════════════════════════════ */
+
+.skill-bar {
+    position: absolute;
+    bottom: 20px;
+    left: 0;
+    right: 0;
+    flex-direction: row;
+    justify-content: center;
+    align-items: flex-end;
+}
+
+/* 슬롯 구분선 */
+.slot-divider {
+    width: 10px;
+}
+
+/* ── 개별 전투 슬롯 ─────────────────────────────── */
+.combat-slot {
+    width: 52px;
+    height: 52px;
+    background-color: rgba(0, 0, 0, 0.6);
+    border-radius: 8px;
+    border-width: 1.5px;
+    border-color: rgba(255, 255, 255, 0.2);
+    overflow: hidden;
+    position: relative;
+    margin: 0 3px;
+}
+
+/* 슬롯 아이콘 배경 (전체 채움) */
+.slot-icon-bg {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-color: rgba(255, 255, 255, 0.08);
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.weapon-icon-bg {
+    background-color: rgba(160, 130, 80, 0.4);
+}
+
+.skill-icon-bg {
+    background-color: rgba(60, 120, 200, 0.35);
+}
+
+.ult-icon-bg {
+    background-color: rgba(140, 60, 200, 0.4);
+}
+
+/* ── 쿨타임 오버레이 ─────────────────────────────── */
+.cool-fill {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 0%;                      /* 코드에서 0~100% 로 제어 */
+    background-color: rgba(0, 0, 0, 0.72);
+    display: none;                   /* 쿨타임 없을 때 숨김 */
+}
+
+.cool-text {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    font-size: 14px;
+    -unity-font-style: bold;
+    color: rgb(255, 255, 255);
+    -unity-text-align: middle-center;
+    display: none;
+}
+
+/* ── 슬롯 키 배지 (Q / R / F / WPN) ─────────────── */
+.slot-badge {
+    position: absolute;
+    bottom: 2px;
+    right: 4px;
+    font-size: 10px;
+    -unity-font-style: bold;
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.ult-badge {
+    color: rgba(210, 160, 255, 0.9);
+}
+
+/* ── 궁극기 READY 표시 ───────────────────────────── */
+.ult-ready-label {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    font-size: 11px;
+    -unity-font-style: bold;
+    color: rgb(220, 160, 255);
+    -unity-text-align: middle-center;
+    display: none;
+}
+
+/* ── 궁극기 컨테이너 (슬롯 + 게이지 바) ─────────── */
+.ult-container {
+    flex-direction: column;
+    align-items: center;
+}
+
+/* ── 궁극기 게이지 바 ─────────────────────────────── */
+.ult-gauge-bg {
+    width: 58px;
+    height: 8px;
+    background-color: rgba(0, 0, 0, 0.6);
+    border-radius: 4px;
+    border-width: 1px;
+    border-color: rgba(200, 120, 255, 0.5);
+    overflow: hidden;
+    margin-top: 4px;
+}
+
+.ult-gauge-fill {
+    height: 100%;
+    width: 0%;
+    background-color: rgb(180, 80, 255);
+    border-radius: 4px;
+    transition-property: width;
+    transition-duration: 0.1s;
+}

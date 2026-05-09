@@ -1,0 +1,68 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" editor-extension-mode="False">
+    <ui:Style src="project://database/Assets/UI/HUD.uss" />
+
+    <!-- 상단 HUD: HP · Day · Gold -->
+    <ui:VisualElement name="hud-root" class="hud-root">
+        <!-- 왼쪽: HP 바 -->
+        <ui:VisualElement name="hp-chip" class="hud-chip hp-chip">
+            <ui:Label name="hp-icon" text="♥" class="hp-icon" />
+            <ui:VisualElement name="hp-bar-bg" class="hp-bar-bg">
+                <ui:VisualElement name="hp-bar-fill" class="hp-bar-fill" />
+            </ui:VisualElement>
+            <ui:Label name="hp-text" text="--/--" class="hp-text" />
+        </ui:VisualElement>
+        <!-- 중앙: Day -->
+        <ui:VisualElement class="hud-chip">
+            <ui:Label name="day-label" text="Day 1" class="hud-label hud-label--day" />
+        </ui:VisualElement>
+        <!-- 오른쪽: 골드 -->
+        <ui:VisualElement class="hud-chip">
+            <ui:Label name="gold-label" text="Gold: 0 G" class="hud-label hud-label--gold" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+
+    <!-- 하단 HUD: 무기 · 스킬1·2 · 궁극기 -->
+    <ui:VisualElement name="skill-bar" class="skill-bar">
+
+        <!-- 무기 슬롯 -->
+        <ui:VisualElement name="weapon-slot" class="combat-slot">
+            <ui:VisualElement name="weapon-icon-bg" class="slot-icon-bg weapon-icon-bg" />
+            <ui:Label text="WPN" class="slot-badge" />
+        </ui:VisualElement>
+
+        <ui:VisualElement class="slot-divider" />
+
+        <!-- 스킬 슬롯 1 (Q) -->
+        <ui:VisualElement name="skill1-slot" class="combat-slot">
+            <ui:VisualElement name="skill1-icon-bg" class="slot-icon-bg skill-icon-bg" />
+            <ui:VisualElement name="skill1-cool-fill" class="cool-fill" />
+            <ui:Label name="skill1-cool-text" text="" class="cool-text" />
+            <ui:Label text="Q" class="slot-badge" />
+        </ui:VisualElement>
+
+        <!-- 스킬 슬롯 2 (R) -->
+        <ui:VisualElement name="skill2-slot" class="combat-slot">
+            <ui:VisualElement name="skill2-icon-bg" class="slot-icon-bg skill-icon-bg" />
+            <ui:VisualElement name="skill2-cool-fill" class="cool-fill" />
+            <ui:Label name="skill2-cool-text" text="" class="cool-text" />
+            <ui:Label text="R" class="slot-badge" />
+        </ui:VisualElement>
+
+        <ui:VisualElement class="slot-divider" />
+
+        <!-- 궁극기 슬롯 (F) + 게이지 바 -->
+        <ui:VisualElement name="ult-container" class="ult-container">
+            <ui:VisualElement name="ult-slot" class="combat-slot">
+                <ui:VisualElement name="ult-icon-bg" class="slot-icon-bg ult-icon-bg" />
+                <ui:VisualElement name="ult-cool-fill" class="cool-fill" />
+                <ui:Label text="F" class="slot-badge ult-badge" />
+                <ui:Label name="ult-ready-label" text="" class="ult-ready-label" />
+            </ui:VisualElement>
+            <!-- 궁극기 게이지 바 -->
+            <ui:VisualElement name="ult-gauge-bg" class="ult-gauge-bg">
+                <ui:VisualElement name="ult-gauge-fill" class="ult-gauge-fill" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+    </ui:VisualElement>
+</ui:UXML>

@@ -1,0 +1,9 @@
+; 완성 요리 데이터
+; buffAttribute: None/Fire/Water/Wind/Earth/Magic/Poison
+#TYPE,string,string,string,int,int,AttributeType,float,int
+id,displayName,description,basePrice,hpRestore,buffAttribute,buffMultiplier,buffDurationDays
+FOOD_001,슬라임 젤리 디저트,달콤한 슬라임 젤리를 굳혀 만든 디저트. 회복 효과가 있다.,50,20,None,1.0,0
+FOOD_002,매콤 슬라임 볶음,불꽃 슬라임 코어를 볶아낸 매콤한 요리. 공격력이 오른다.,80,10,Fire,1.15,1
+FOOD_003,고블린 뼈 육수,고블린 뼈를 우려낸 깊은 육수. 체력 회복에 탁월하다.,70,40,None,1.0,0
+FOOD_004,버섯 갓 구이,버섯인간의 갓을 두툼하게 썰어 구운 요리. 방어력이 오른다.,90,15,Poison,1.1,1
+FOOD_005,그린 웜 스테이크,그린 웜 고기를 두껍게 썬 고급 스테이크. 모든 능력치가 상승한다.,250,50,Earth,1.2,2

@@ -1,0 +1,50 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" editor-extension-mode="False">
+    <ui:Style src="project://database/Assets/UI/CookingPanel.uss" />
+
+    <!-- 배경 오버레이 (클릭 시 닫기) -->
+    <ui:VisualElement name="cook-overlay" class="cook-overlay">
+
+        <!-- 패널 본체 -->
+        <ui:VisualElement name="cook-panel" class="cook-panel">
+
+            <!-- 헤더 -->
+            <ui:VisualElement class="cook-header">
+                <ui:Label text="조리대" class="cook-title" />
+                <ui:Label name="cook-close-btn" text="✕" class="cook-close-btn" />
+            </ui:VisualElement>
+
+            <!-- 재료 슬롯 섹션 -->
+            <ui:Label text="재료 슬롯" class="cook-section-title" />
+            <ui:VisualElement name="cook-slots-row" class="cook-slots-row">
+                <ui:VisualElement name="cook-slot-0" class="cook-slot cook-slot-empty">
+                    <ui:VisualElement name="cook-slot-icon-0" class="cook-slot-icon" />
+                    <ui:Label name="cook-slot-name-0" text="비어 있음" class="cook-slot-name" />
+                </ui:VisualElement>
+                <ui:VisualElement name="cook-slot-1" class="cook-slot cook-slot-empty">
+                    <ui:VisualElement name="cook-slot-icon-1" class="cook-slot-icon" />
+                    <ui:Label name="cook-slot-name-1" text="비어 있음" class="cook-slot-name" />
+                </ui:VisualElement>
+                <ui:VisualElement name="cook-slot-2" class="cook-slot cook-slot-empty">
+                    <ui:VisualElement name="cook-slot-icon-2" class="cook-slot-icon" />
+                    <ui:Label name="cook-slot-name-2" text="비어 있음" class="cook-slot-name" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+
+            <!-- 레시피 매칭 결과 -->
+            <ui:VisualElement class="cook-result-row">
+                <ui:Label name="cook-recipe-label" text="재료를 선택하세요" class="cook-recipe-label" />
+                <ui:Label name="cook-btn" text="요리 시작" class="cook-btn cook-btn-disabled" />
+            </ui:VisualElement>
+
+            <!-- 구분선 -->
+            <ui:VisualElement class="cook-divider" />
+
+            <!-- 인벤토리 그리드 -->
+            <ui:Label text="인벤토리" class="cook-section-title" />
+            <ui:ScrollView name="cook-inv-scroll" class="cook-inv-scroll" horizontal-scroller-visibility="Hidden">
+                <ui:VisualElement name="cook-inv-grid" class="cook-inv-grid" />
+            </ui:ScrollView>
+
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

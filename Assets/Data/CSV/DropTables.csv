@@ -1,0 +1,10 @@
+; 드롭 테이블 데이터
+; entries: "재료ID:드롭확률:최소:최대|..." 형식 (DataManagerWindow에서 편집 권장)
+; dropChance: 0.0~1.0
+#TYPE,string,string
+id,entries
+DRP_001,ING_001:0.8:1:2|ING_003:0.1:1:1
+DRP_002,ING_002:0.75:1:1|ING_001:0.3:1:1
+DRP_003,ING_003:0.6:1:2|ING_004:0.5:1:1
+DRP_004,ING_005:0.7:1:2|ING_006:0.4:1:1
+DRP_005,ING_007:0.5:1:1|ING_008:0.4:1:1

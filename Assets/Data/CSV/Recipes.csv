@@ -1,0 +1,10 @@
+; 레시피 데이터
+; ingredients: "재료ID:수량|재료ID:수량" 형식 (파이프 구분)
+; isUnlockedByDefault: true/false
+#TYPE,string,string,string,string,string,int,int,bool
+id,displayName,description,ingredients,resultFoodId,cookTimeSeconds,unlockDay,isUnlockedByDefault
+RCP_001,슬라임 젤리 디저트 레시피,슬라임 젤리 2개를 틀에 굳혀 완성하는 기본 디저트.,ING_001:2,FOOD_001,10,0,true
+RCP_002,매콤 슬라임 볶음 레시피,불꽃 슬라임 코어 1개와 슬라임 젤리 1개를 볶는다.,ING_002:1|ING_001:1,FOOD_002,15,0,true
+RCP_003,고블린 뼈 육수 레시피,고블린 뼈 3개를 오래 끓여 육수를 낸다.,ING_003:3,FOOD_003,20,1,false
+RCP_004,버섯 갓 구이 레시피,버섯인간 갓 2개를 팬에 굽는다.,ING_005:2,FOOD_004,12,1,false
+RCP_005,그린 웜 스테이크 레시피,그린 웜 고기 1개를 두껍게 썰어 굽는 고급 레시피.,ING_007:1,FOOD_005,30,3,false

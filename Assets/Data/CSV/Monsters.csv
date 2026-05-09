@@ -1,0 +1,10 @@
+; 몬스터 데이터 — 에버그린 숲 (Evergreen Forest)
+; attribute: None/Fire/Water/Wind/Earth/Magic/Poison
+; rarity: Common/Uncommon/Rare/Epic/Legendary
+#TYPE,string,string,string,int,int,int,AttributeType,RarityType
+id,displayName,description,hp,attack,defense,attribute,rarity
+MON_001,초록 슬라임,에버그린 숲에 가장 흔히 출몰하는 젤리형 몬스터. 독성 점액을 분비한다.,30,5,2,Poison,Common
+MON_002,불꽃 슬라임,용암 지대에서 흘러온 슬라임. 몸체가 뜨겁게 달아올라 있다.,35,8,2,Fire,Common
+MON_003,숲 고블린,에버그린 숲을 근거지로 삼는 소형 인간형 몬스터. 뼈 몽둥이를 휘두른다.,45,10,5,None,Uncommon
+MON_004,거대 버섯인간,숲 깊은 곳의 균류에서 태어난 몬스터. 포자를 뿜어 시야를 흐린다.,60,8,8,Poison,Uncommon
+MON_005,숲 보스 — 그린 웜,에버그린 숲 지하에 서식하는 대형 지렁이 몬스터. 땅을 파고들어 기습한다.,200,18,10,Earth,Rare

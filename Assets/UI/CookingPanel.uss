@@ -1,0 +1,242 @@
+/* ── 오버레이 ───────────────────────────────────────────────────── */
+.cook-overlay {
+    flex-grow: 1;
+    background-color: rgba(0, 0, 0, 0.55);
+    align-items: center;
+    justify-content: center;
+}
+
+/* ── 패널 본체 ─────────────────────────────────────────────────── */
+.cook-panel {
+    width: 480px;
+    background-color: rgb(28, 22, 18);
+    border-radius: 12px;
+    border-width: 2px;
+    border-color: rgb(90, 70, 45);
+    padding: 20px;
+    flex-direction: column;
+}
+
+/* ── 헤더 ──────────────────────────────────────────────────────── */
+.cook-header {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.cook-title {
+    font-size: 22px;
+    -unity-font-style: bold;
+    color: rgb(240, 210, 140);
+}
+
+.cook-close-btn {
+    font-size: 20px;
+    color: rgb(180, 150, 100);
+    width: 32px;
+    height: 32px;
+    -unity-text-align: middle-center;
+    border-radius: 6px;
+    border-width: 1px;
+    border-color: rgb(90, 70, 45);
+    background-color: rgba(255,255,255,0.05);
+}
+
+.cook-close-btn:hover {
+    background-color: rgba(255,255,255,0.12);
+    color: rgb(255, 255, 255);
+}
+
+/* ── 섹션 제목 ─────────────────────────────────────────────────── */
+.cook-section-title {
+    font-size: 14px;
+    -unity-font-style: bold;
+    color: rgb(160, 130, 80);
+    margin-bottom: 6px;
+    margin-top: 4px;
+}
+
+/* ── 재료 슬롯 행 ──────────────────────────────────────────────── */
+.cook-slots-row {
+    flex-direction: row;
+    justify-content: center;
+    margin-bottom: 10px;
+}
+
+/* ── 재료 슬롯 ─────────────────────────────────────────────────── */
+.cook-slot {
+    width: 90px;
+    height: 90px;
+    border-radius: 10px;
+    border-width: 2px;
+    border-color: rgb(90, 70, 45);
+    margin: 0 8px;
+    align-items: center;
+    justify-content: flex-end;
+    overflow: hidden;
+    background-color: rgb(38, 30, 20);
+}
+
+.cook-slot:hover {
+    border-color: rgb(200, 170, 90);
+    background-color: rgb(55, 44, 28);
+}
+
+.cook-slot-empty {
+    border-color: rgb(65, 50, 32);
+    border-style: dashed;
+}
+
+.cook-slot-filled {
+    border-color: rgb(120, 180, 90);
+}
+
+.cook-slot-icon {
+    position: absolute;
+    top: 6px;
+    left: 6px;
+    right: 6px;
+    bottom: 22px;
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.cook-slot-name {
+    font-size: 11px;
+    color: rgb(200, 180, 140);
+    -unity-text-align: middle-center;
+    width: 100%;
+    height: 20px;
+    background-color: rgba(0, 0, 0, 0.55);
+    padding: 0 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* ── 레시피 결과 행 ────────────────────────────────────────────── */
+.cook-result-row {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+    padding: 8px 12px;
+    background-color: rgb(22, 17, 12);
+    border-radius: 8px;
+    border-width: 1px;
+    border-color: rgb(70, 55, 35);
+}
+
+.cook-recipe-label {
+    font-size: 15px;
+    color: rgb(200, 180, 130);
+    flex-grow: 1;
+}
+
+.cook-recipe-matched {
+    color: rgb(150, 230, 120);
+    -unity-font-style: bold;
+}
+
+/* ── 요리 버튼 ─────────────────────────────────────────────────── */
+.cook-btn {
+    font-size: 14px;
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+    height: 34px;
+    padding: 0 16px;
+    border-radius: 8px;
+    border-width: 2px;
+}
+
+.cook-btn-enabled {
+    color: rgb(30, 20, 10);
+    background-color: rgb(210, 175, 80);
+    border-color: rgb(240, 210, 100);
+}
+
+.cook-btn-enabled:hover {
+    background-color: rgb(240, 205, 100);
+}
+
+.cook-btn-disabled {
+    color: rgb(100, 85, 60);
+    background-color: rgb(50, 40, 25);
+    border-color: rgb(70, 55, 35);
+}
+
+/* ── 구분선 ────────────────────────────────────────────────────── */
+.cook-divider {
+    height: 1px;
+    background-color: rgb(70, 55, 35);
+    margin-top: 8px;
+    margin-bottom: 10px;
+}
+
+/* ── 인벤토리 스크롤 ───────────────────────────────────────────── */
+.cook-inv-scroll {
+    max-height: 180px;
+}
+
+/* ── 인벤토리 그리드 ───────────────────────────────────────────── */
+.cook-inv-grid {
+    flex-direction: row;
+    flex-wrap: wrap;
+    padding: 4px;
+}
+
+/* ── 인벤토리 아이템 슬롯 ──────────────────────────────────────── */
+.cook-inv-slot {
+    width: 72px;
+    height: 72px;
+    background-color: rgb(45, 35, 22);
+    border-radius: 8px;
+    border-width: 1px;
+    border-color: rgb(90, 70, 45);
+    margin: 4px;
+    align-items: center;
+    justify-content: flex-end;
+    overflow: hidden;
+}
+
+.cook-inv-slot:hover {
+    border-color: rgb(200, 170, 90);
+    background-color: rgb(60, 48, 30);
+}
+
+.cook-inv-slot-icon {
+    position: absolute;
+    top: 4px;
+    left: 4px;
+    right: 4px;
+    bottom: 20px;
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.cook-inv-slot-count {
+    font-size: 13px;
+    -unity-font-style: bold;
+    color: rgb(240, 230, 200);
+    -unity-text-align: middle-center;
+    width: 100%;
+    height: 20px;
+    background-color: rgba(0,0,0,0.5);
+}
+
+.cook-inv-slot-name {
+    font-size: 11px;
+    color: rgb(200, 180, 140);
+    -unity-text-align: middle-center;
+    width: 72px;
+    white-space: normal;
+    margin-top: 2px;
+}
+
+/* ── 빈 메시지 ─────────────────────────────────────────────────── */
+.cook-empty-msg {
+    font-size: 14px;
+    color: rgb(120, 100, 70);
+    -unity-text-align: middle-center;
+    padding: 20px;
+    width: 100%;
+}

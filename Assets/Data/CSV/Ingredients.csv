@@ -1,0 +1,13 @@
+; 식재료 데이터
+; defaultState: Raw/Cooked/Spoiled
+; sourceMonsterIds: 파이프(|) 구분 MON ID
+#TYPE,string,string,string,AttributeType,RarityType,IngredientState,string
+id,displayName,description,attribute,rarity,defaultState,sourceMonsterIds
+ING_001,슬라임 젤리,초록 슬라임에서 채취한 투명한 젤리. 탄력이 있고 달콤하다.,Poison,Common,Raw,MON_001
+ING_002,불꽃 슬라임 코어,불꽃 슬라임의 핵심 부위. 식히면 매콤한 향이 난다.,Fire,Common,Raw,MON_002
+ING_003,고블린 뼈,숲 고블린의 단단한 소형 뼈. 육수 재료로 활용된다.,None,Common,Raw,MON_003
+ING_004,고블린 고기,숲 고블린의 살코기. 잡내가 있어 손질이 필요하다.,None,Uncommon,Raw,MON_003
+ING_005,버섯인간 갓,거대 버섯인간의 우산 부위. 풍미가 깊고 두툼하다.,Poison,Uncommon,Raw,MON_004
+ING_006,버섯인간 포자,버섯인간이 분비하는 포자. 소량이면 향신료로 쓸 수 있다.,Poison,Uncommon,Raw,MON_004
+ING_007,그린 웜 고기,그린 웜의 대형 살코기. 쫄깃하고 영양이 풍부하다.,Earth,Rare,Raw,MON_005
+ING_008,그린 웜 껍질,그린 웜의 두꺼운 외피. 오래 끓이면 국물이 진해진다.,Earth,Rare,Raw,MON_005
