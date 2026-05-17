@@ -21,7 +21,7 @@ MonoBehaviour:
   defaultWeapon: {fileID: 11400000, guid: 6e61aa61bd153544fa447ae8a7e7152d, type: 2}
   defaultSkill1: {fileID: 11400000, guid: 2baf0bbeb4a7739469c6b632ed675e84, type: 2}
   defaultSkill2: {fileID: 11400000, guid: 424e02ea67a03b84983a7db901efb069, type: 2}
-  defaultUltimate: {fileID: 0}
+  defaultUltimate: {fileID: 11400000, guid: b227ef480b3206b45a923c779015db63, type: 2}
   maxUltimateGauge: 100
   gaugeOnHit: 15
   gaugeOnKill: 25

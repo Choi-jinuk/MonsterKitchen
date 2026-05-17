@@ -39,12 +39,17 @@ namespace MonsterKitchen.Core
         int _guestsSpawned;
         int _guestsFinished;
 
-        void Awake()
+        public void Init()
         {
-            if (Instance != null && Instance != this) { Destroy(gameObject); return; }
             Instance = this;
             DontDestroyOnLoad(gameObject);
             CurrentDay = startDay;
+        }
+
+        void Awake()
+        {
+            if (Instance != null && Instance != this) { Destroy(gameObject); return; }
+            if (Instance == null) Init();
         }
 
         public void StartDay()

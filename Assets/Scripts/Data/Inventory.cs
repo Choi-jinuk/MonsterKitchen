@@ -17,11 +17,16 @@ namespace MonsterKitchen.Data
 
         public event Action<string, int> OnItemChanged;  // (id, newQty)
 
+        public void Init()
+        {
+            Instance = this;
+            DontDestroyOnLoad(gameObject);
+        }
+
         void Awake()
         {
             if (Instance != null && Instance != this) { Destroy(gameObject); return; }
-            Instance = this;
-            DontDestroyOnLoad(gameObject);
+            if (Instance == null) Init();
         }
 
         public void Add(string ingredientId, int qty = 1)

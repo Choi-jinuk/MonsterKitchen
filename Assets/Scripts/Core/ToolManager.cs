@@ -35,11 +35,16 @@ namespace MonsterKitchen.Core
 
         public event Action OnUpgraded;
 
+        public void Init()
+        {
+            Instance = this;
+            DontDestroyOnLoad(gameObject);
+        }
+
         void Awake()
         {
             if (Instance != null && Instance != this) { Destroy(gameObject); return; }
-            Instance = this;
-            DontDestroyOnLoad(gameObject);
+            if (Instance == null) Init();
         }
 
         public bool UpgradeDamage()

@@ -35,15 +35,16 @@ namespace MonsterKitchen.Core
 
         // ----------------------------------------------------------------
 
-        void Awake()
+        public void Init()
         {
-            if (Instance != null && Instance != this)
-            {
-                Destroy(gameObject);
-                return;
-            }
             Instance = this;
             DontDestroyOnLoad(gameObject);
+        }
+
+        void Awake()
+        {
+            if (Instance != null && Instance != this) { Destroy(gameObject); return; }
+            if (Instance == null) Init();
         }
 
         void Start()

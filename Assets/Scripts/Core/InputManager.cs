@@ -66,13 +66,17 @@ namespace MonsterKitchen.Core
 
         // ── Unity 생명주기 ────────────────────────────────────────────
 
+        public void Init()
+        {
+            Instance = this;
+            DontDestroyOnLoad(gameObject);
+            _input = new InputSystem_Actions();
+        }
+
         void Awake()
         {
             if (Instance != null && Instance != this) { Destroy(gameObject); return; }
-            Instance = this;
-            DontDestroyOnLoad(gameObject);
-
-            _input = new InputSystem_Actions();
+            if (Instance == null) Init();
         }
 
         void OnEnable()

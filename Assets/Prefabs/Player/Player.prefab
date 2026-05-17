@@ -172,7 +172,7 @@ Animator:
   m_GameObject: {fileID: 5357646181186029780}
   m_Enabled: 1
   m_Avatar: {fileID: 0}
-  m_Controller: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: 916a7b8a55e0fd547ba7cc0066b51cc4, type: 2}
   m_CullingMode: 0
   m_UpdateMode: 0
   m_ApplyRootMotion: 0
@@ -217,6 +217,8 @@ MonoBehaviour:
   fallbackCooltime: 0.4
   moveAcceleration: 30
   attackMovePenalty: 0.5
+  _autoChaseRange: 6
+  _autoStopRatio: 0.85
   dashSpeed: 18
   dashDuration: 0.18
   dashCooldown: 0.9
@@ -253,6 +255,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 57860244b9110994f8b59c3b64b2fabb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MonsterKitchen.Player.PlayerStats
+  _gatheringTool: {fileID: 0}
   _health: {fileID: 5324923133298973795}
 --- !u!1 &6076282370209601616
 GameObject:

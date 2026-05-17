@@ -17,11 +17,16 @@ namespace MonsterKitchen.Core
         public event Action<string> OnSceneLoadStarted;
         public event Action<string> OnSceneLoadFinished;
 
+        public void Init()
+        {
+            Instance = this;
+            DontDestroyOnLoad(gameObject);
+        }
+
         void Awake()
         {
             if (Instance != null && Instance != this) { Destroy(gameObject); return; }
-            Instance = this;
-            DontDestroyOnLoad(gameObject);
+            if (Instance == null) Init();
         }
 
         public void LoadScene(string sceneName)

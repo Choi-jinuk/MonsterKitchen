@@ -21,6 +21,7 @@ namespace MonsterKitchen.Core
     ///   var prefab = AssetLoadManager.Instance.Load<GameObject>(AssetKeys.PrefabHud);
     ///   var data   = AssetLoadManager.Instance.Load<PlayerSpawnData>(AssetKeys.DataPlayerSpawn);
     /// </summary>
+    [DefaultExecutionOrder(-200)]
     [DisallowMultipleComponent]
     public class AssetLoadManager : MonoBehaviour
     {
@@ -42,13 +43,17 @@ namespace MonsterKitchen.Core
 
         // ── Unity ────────────────────────────────────────────────────
 
+        public void Init()
+        {
+            Instance = this;
+            DontDestroyOnLoad(gameObject);
+            _loader = CreateLoader();
+        }
+
         void Awake()
         {
             if (Instance != null && Instance != this) { Destroy(gameObject); return; }
-            Instance = this;
-            DontDestroyOnLoad(gameObject);
-
-            _loader = CreateLoader();
+            if (Instance == null) Init();
         }
 
         // ── Public API ───────────────────────────────────────────────

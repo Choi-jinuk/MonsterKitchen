@@ -43,12 +43,16 @@ namespace MonsterKitchen.Enemy
         //  Mono
         // ================================================================
 
+        public void Init()
+        {
+            Instance = this;
+            SetupLayerCollisions();
+        }
+
         void Awake()
         {
             if (Instance != null && Instance != this) { Destroy(gameObject); return; }
-            Instance = this;
-
-            SetupLayerCollisions();
+            if (Instance == null) Init();
         }
 
         void Start()

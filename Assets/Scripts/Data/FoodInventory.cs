@@ -21,11 +21,16 @@ namespace MonsterKitchen.Data
 
         public event Action<string, int> OnFoodChanged;  // (foodId, newQty)
 
+        public void Init()
+        {
+            Instance = this;
+            DontDestroyOnLoad(gameObject);
+        }
+
         void Awake()
         {
             if (Instance != null && Instance != this) { Destroy(gameObject); return; }
-            Instance = this;
-            DontDestroyOnLoad(gameObject);
+            if (Instance == null) Init();
         }
 
         // ── 추가 ─────────────────────────────────────────────────────

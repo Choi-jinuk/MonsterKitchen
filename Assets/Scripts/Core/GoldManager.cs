@@ -16,12 +16,17 @@ namespace MonsterKitchen.Core
 
         public event Action<int> OnGoldChanged;  // (newAmount)
 
-        void Awake()
+        public void Init()
         {
-            if (Instance != null && Instance != this) { Destroy(gameObject); return; }
             Instance = this;
             DontDestroyOnLoad(gameObject);
             Gold = startingGold;
+        }
+
+        void Awake()
+        {
+            if (Instance != null && Instance != this) { Destroy(gameObject); return; }
+            if (Instance == null) Init();
         }
 
         public void Earn(int amount)
