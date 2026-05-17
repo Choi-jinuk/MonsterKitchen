@@ -4,10 +4,10 @@ using UnityEngine;
 namespace MonsterKitchen.Core
 {
     /// <summary>
-    /// 하루를 세 페이즈로 관리한다: Morning(관리) → Dungeon(던전) → Evening(영업).
-    /// 싱글톤, DontDestroyOnLoad.
+    /// 하루를 세 페이즈로 관리한다: Morning → Dungeon → Evening.
+    /// GlobalController 가 new 로 생성하고 Init() 를 호출한다.
     /// </summary>
-    public class PhaseManager : MonoBehaviour
+    public class PhaseManager
     {
         public static PhaseManager Instance { get; private set; }
 
@@ -17,17 +17,7 @@ namespace MonsterKitchen.Core
 
         public event Action<Phase> OnPhaseChanged;
 
-        public void Init()
-        {
-            Instance = this;
-            DontDestroyOnLoad(gameObject);
-        }
-
-        void Awake()
-        {
-            if (Instance != null && Instance != this) { Destroy(gameObject); return; }
-            if (Instance == null) Init();
-        }
+        public void Init() => Instance = this;
 
         /// <summary>ManagementScene → DungeonScene 진입.</summary>
         public void EnterDungeon()
@@ -43,14 +33,14 @@ namespace MonsterKitchen.Core
             SceneLoader.Instance?.LoadScene("ManagementScene");
         }
 
-        /// <summary>ManagementScene → KitchenScene (요리 준비) → RestaurantScene 순으로 진입.</summary>
+        /// <summary>ManagementScene → KitchenScene → RestaurantScene 진입.</summary>
         public void StartEvening()
         {
             SetPhase(Phase.Evening);
             SceneLoader.Instance?.LoadScene("KitchenScene");
         }
 
-        /// <summary>영업 종료 후 주방으로 이동. 플레이어가 KitchenExit 통과 시 ManagementScene(다음 날)으로 전환.</summary>
+        /// <summary>영업 종료 후 다음 날 KitchenScene 으로.</summary>
         public void EndDay()
         {
             DayManager.Instance?.AdvanceToNextDay();

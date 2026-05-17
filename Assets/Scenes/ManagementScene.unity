@@ -1994,17 +1994,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 837911caa0468d34594e96b5493e61e6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MonsterKitchen.Core.GlobalController
-  _assetLoadManager: {fileID: 265170078}
-  _sceneLoader: {fileID: 265170074}
-  _goldManager: {fileID: 265170070}
-  _inventory: {fileID: 265170073}
-  _foodInventory: {fileID: 265170072}
-  _toolManager: {fileID: 265170068}
-  _dayManager: {fileID: 265170071}
-  _shopManager: {fileID: 265170067}
-  _phaseManager: {fileID: 265170069}
-  _inputManager: {fileID: 668199843}
-  _playerManager: {fileID: 265170076}
+  _manifest: {fileID: 11400000, guid: 7c657022c1d06a54ea8167c1edf4691e, type: 2}
 --- !u!4 &1857601097
 Transform:
   m_ObjectHideFlags: 0

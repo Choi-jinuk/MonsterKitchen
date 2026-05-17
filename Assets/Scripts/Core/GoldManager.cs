@@ -5,12 +5,11 @@ namespace MonsterKitchen.Core
 {
     /// <summary>
     /// 골드 싱글톤. 전 씬 공유.
+    /// GlobalController 가 new 로 생성하고 Init() 를 호출한다.
     /// </summary>
-    public class GoldManager : MonoBehaviour
+    public class GoldManager
     {
         public static GoldManager Instance { get; private set; }
-
-        [SerializeField] int startingGold = 0;
 
         public int Gold { get; private set; }
 
@@ -19,14 +18,7 @@ namespace MonsterKitchen.Core
         public void Init()
         {
             Instance = this;
-            DontDestroyOnLoad(gameObject);
-            Gold = startingGold;
-        }
-
-        void Awake()
-        {
-            if (Instance != null && Instance != this) { Destroy(gameObject); return; }
-            if (Instance == null) Init();
+            Gold     = 0;
         }
 
         public void Earn(int amount)

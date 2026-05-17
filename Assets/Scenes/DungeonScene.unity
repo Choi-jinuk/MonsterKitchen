@@ -210,54 +210,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &111833420
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 111833422}
-  - component: {fileID: 111833421}
-  m_Layer: 0
-  m_Name: SpawnManager
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &111833421
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 111833420}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c3fe6d9678cf0824782e30b1946ac7a4, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::MonsterKitchen.Enemy.SpawnManager
-  monsterLayerName: Enemy
-  playerLayerName: Player
-  _spawnTable: {fileID: 11400000, guid: d2c659687a180104a9d7d5e54781a89a, type: 2}
-  _spawnPoints: []
---- !u!4 &111833422
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 111833420}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &114353586
 GameObject:
   m_ObjectHideFlags: 0
@@ -287,8 +239,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9c02c6cd1b75a0b4494a7c1b46ecc747, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MonsterKitchen.Dungeon.DungeonSceneController
-  _spawnManager: {fileID: 111833421}
-  _monsterRespawnManager: {fileID: 722961073}
+  _spawnTable: {fileID: 11400000, guid: d2c659687a180104a9d7d5e54781a89a, type: 2}
+  _spawnPoints: []
 --- !u!4 &114353588
 Transform:
   m_ObjectHideFlags: 0
@@ -4916,51 +4868,6 @@ MonoBehaviour:
     MaxWindowSize: 0
     Padding: 0
   m_LegacyMaxWindowSize: -2
---- !u!1 &722961072
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 722961074}
-  - component: {fileID: 722961073}
-  m_Layer: 0
-  m_Name: MonsterRespawnManager
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &722961073
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 722961072}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 013811a5435ee7c42849f3cb15a86b32, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::MonsterKitchen.Enemy.MonsterRespawnManager
-  _respawnDelay: 30
---- !u!4 &722961074
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 722961072}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &811611064
 GameObject:
   m_ObjectHideFlags: 0
@@ -7230,7 +7137,6 @@ SceneRoots:
   - {fileID: 619394802}
   - {fileID: 888100001}
   - {fileID: 13585193}
-  - {fileID: 111833422}
   - {fileID: 588317337}
   - {fileID: 1510490914}
   - {fileID: 811611066}
@@ -7240,5 +7146,4 @@ SceneRoots:
   - {fileID: 1189144893}
   - {fileID: 1793469242}
   - {fileID: 1619361889}
-  - {fileID: 722961074}
   - {fileID: 114353588}

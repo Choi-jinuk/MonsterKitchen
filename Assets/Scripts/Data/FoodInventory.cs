@@ -7,12 +7,9 @@ namespace MonsterKitchen.Data
     /// <summary>
     /// 완성된 요리 인벤토리 싱글톤.
     /// foodId → 수량 관리 + 등급(FoodGrade) 큐 관리.
-    ///
-    /// 등급 흐름:
-    ///   CookingUI → Add(id, grade)  → grade 큐 적재
-    ///   ServingSystem → TakeGrade(id) → grade 큐 소비 → EatAndPay(grade) 가격 반영
+    /// GlobalController 가 new 로 생성하고 Init() 를 호출한다.
     /// </summary>
-    public class FoodInventory : MonoBehaviour
+    public class FoodInventory
     {
         public static FoodInventory Instance { get; private set; }
 
@@ -21,17 +18,7 @@ namespace MonsterKitchen.Data
 
         public event Action<string, int> OnFoodChanged;  // (foodId, newQty)
 
-        public void Init()
-        {
-            Instance = this;
-            DontDestroyOnLoad(gameObject);
-        }
-
-        void Awake()
-        {
-            if (Instance != null && Instance != this) { Destroy(gameObject); return; }
-            if (Instance == null) Init();
-        }
+        public void Init() => Instance = this;
 
         // ── 추가 ─────────────────────────────────────────────────────
 
@@ -42,7 +29,7 @@ namespace MonsterKitchen.Data
                 AddWithGrade(foodId, FoodGrade.Normal);
         }
 
-        /// <summary>등급을 지정해 1개 추가. CookingUI → CookingStation 경유 호출.</summary>
+        /// <summary>등급을 지정해 1개 추가.</summary>
         public void AddWithGrade(string foodId, FoodGrade grade)
         {
             if (string.IsNullOrEmpty(foodId)) return;
@@ -63,10 +50,6 @@ namespace MonsterKitchen.Data
 
         // ── 소비 ─────────────────────────────────────────────────────
 
-        /// <summary>
-        /// 등급 큐에서 하나 꺼낸다. 큐가 비어 있으면 Normal 반환.
-        /// ServingSystem이 서빙 직전에 호출해 EatAndPay 가격 산정에 사용.
-        /// </summary>
         public FoodGrade TakeGrade(string foodId)
         {
             if (_grades.TryGetValue(foodId, out var q) && q.Count > 0)

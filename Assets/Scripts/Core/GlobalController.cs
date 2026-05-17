@@ -6,14 +6,21 @@ namespace MonsterKitchen.Core
     // ====================================================================
     //  GlobalController — 씬 전환 후에도 유지되는 글로벌 매니저 총괄
     //
-    //  ▶ 역할
-    //    · Inspector SerializeField 목록으로 글로벌 매니저 전체를 한눈에 파악.
-    //    · Awake() 에서 InitManagers() 를 호출해 초기화 순서를 코드로 명시.
-    //    · [DefaultExecutionOrder(-300)] 으로 다른 모든 Awake() 보다 먼저 실행.
+    //  ▶ 설계 원칙
+    //    모든 글로벌 매니저는 MonoBehaviour 를 상속하지 않는 순수 C# 클래스.
+    //    이 컨트롤러가 유일한 MonoBehaviour 로서 전체 생명주기를 위임 관리한다.
+    //    Inspector 슬롯은 코드로 생성 불가한 에셋(AssetManifest) 하나만 사용.
     //
-    //  ▶ 폴백
-    //    GlobalController 없이 매니저 단독 배치 시(테스트 씬 등)
-    //    각 매니저의 Awake() 에 들어있는 폴백이 자동으로 Init() 를 호출한다.
+    //  ▶ 생성/초기화 순서 (Awake)
+    //    AssetLoadManager → SceneLoader → Gold/Inventory/FoodInv/Tools →
+    //    DayManager → Shop → Phase → Input → Player
+    //
+    //  ▶ 생명주기 위임
+    //    Start()     → Player.Start()    (씬 로드 후 플레이어 스폰)
+    //    OnEnable()  → Input.OnEnable()  (InputSystem 활성화)
+    //    OnDisable() → Input.OnDisable()
+    //    Update()    → Input.Update()    (UI 토글 · 스킬 단축키)
+    //    OnDestroy() → Player.Dispose()  (sceneLoaded 구독 해제)
     //
     //  ▶ 배치
     //    ManagementScene 의 GlobalController GameObject 에 단독 배치.
@@ -26,18 +33,22 @@ namespace MonsterKitchen.Core
     {
         public static GlobalController Instance { get; private set; }
 
-        [Header("── 글로벌 매니저  (위 → 아래 순서로 초기화됩니다)")]
-        [SerializeField] AssetLoadManager _assetLoadManager;
-        [SerializeField] SceneLoader      _sceneLoader;
-        [SerializeField] GoldManager      _goldManager;
-        [SerializeField] Inventory        _inventory;
-        [SerializeField] FoodInventory    _foodInventory;
-        [SerializeField] ToolManager      _toolManager;
-        [SerializeField] DayManager       _dayManager;
-        [SerializeField] ShopManager      _shopManager;
-        [SerializeField] PhaseManager     _phaseManager;
-        [SerializeField] InputManager     _inputManager;
-        [SerializeField] PlayerManager    _playerManager;
+        // 유일한 Inspector 슬롯 — 코드로 생성 불가한 에셋 참조만
+        [Header("Assets")]
+        [SerializeField] AssetManifest _manifest;
+
+        // 매니저 인스턴스 — Awake 에서 new 로 생성, Inspector 슬롯 없음
+        public AssetLoadManager AssetLoad   { get; private set; }
+        public SceneLoader      SceneLoader { get; private set; }
+        public GoldManager      Gold        { get; private set; }
+        public Inventory        Inventory   { get; private set; }
+        public FoodInventory    FoodInv     { get; private set; }
+        public ToolManager      Tools       { get; private set; }
+        public DayManager       Day         { get; private set; }
+        public ShopManager      Shop        { get; private set; }
+        public PhaseManager     Phase       { get; private set; }
+        public InputManager     Input       { get; private set; }
+        public PlayerManager    Player      { get; private set; }
 
         // ================================================================
         //  Mono
@@ -48,7 +59,33 @@ namespace MonsterKitchen.Core
             if (Instance != null && Instance != this) { Destroy(gameObject); return; }
             Instance = this;
             DontDestroyOnLoad(gameObject);
+            CreateManagers();
             InitManagers();
+        }
+
+        void Start()    => Player.Start();
+        void OnEnable() => Input?.OnEnable();
+        void OnDisable()=> Input?.OnDisable();
+        void Update()   => Input?.Update();
+        void OnDestroy()=> Player?.Dispose();
+
+        // ================================================================
+        //  생성 — 의존 주입 (this = 코루틴 러너)
+        // ================================================================
+
+        void CreateManagers()
+        {
+            AssetLoad   = new AssetLoadManager(_manifest);
+            SceneLoader = new SceneLoader(this);
+            Gold        = new GoldManager();
+            Inventory   = new Inventory();
+            FoodInv     = new FoodInventory();
+            Tools       = new ToolManager();
+            Day         = new DayManager(this);
+            Shop        = new ShopManager();
+            Phase       = new PhaseManager();
+            Input       = new InputManager();
+            Player      = new PlayerManager();
         }
 
         // ================================================================
@@ -57,37 +94,23 @@ namespace MonsterKitchen.Core
 
         void InitManagers()
         {
-            _assetLoadManager?.Init();   // 에셋 로딩 기반 — 가장 먼저
-            _sceneLoader?.Init();        // 씬 전환 시스템
-            _goldManager?.Init();        // 독립 데이터
-            _inventory?.Init();
-            _foodInventory?.Init();
-            _toolManager?.Init();
-            _dayManager?.Init();
-            _shopManager?.Init();        // GoldManager 메서드 사용 (Init 이후 메서드만 호출)
-            _phaseManager?.Init();       // SceneLoader 메서드 사용
-            _inputManager?.Init();       // InputSystem_Actions 생성
-            _playerManager?.Init();      // AssetLoadManager 기반 (Start 에서 Load 호출)
+            AssetLoad.Init();   // 에셋 로딩 기반 — 가장 먼저
+            SceneLoader.Init(); // 씬 전환 시스템
+            Gold.Init();
+            Inventory.Init();
+            FoodInv.Init();
+            Tools.Init();
+            Day.Init();
+            Shop.Init();        // GoldManager 메서드 사용 (Init 이후)
+            Phase.Init();       // SceneLoader 메서드 사용
+            Input.Init();       // InputSystem_Actions 생성
+            Player.Init();      // Instance 설정 (Start 에서 스폰)
         }
-
-        // ================================================================
-        //  편의 — Inspector 에서 미연결 슬롯 즉시 감지
-        // ================================================================
 
 #if UNITY_EDITOR
         void OnValidate()
         {
-            if (_assetLoadManager == null) Debug.LogWarning("[GlobalController] AssetLoadManager 미연결");
-            if (_sceneLoader      == null) Debug.LogWarning("[GlobalController] SceneLoader 미연결");
-            if (_goldManager      == null) Debug.LogWarning("[GlobalController] GoldManager 미연결");
-            if (_inventory        == null) Debug.LogWarning("[GlobalController] Inventory 미연결");
-            if (_foodInventory    == null) Debug.LogWarning("[GlobalController] FoodInventory 미연결");
-            if (_toolManager      == null) Debug.LogWarning("[GlobalController] ToolManager 미연결");
-            if (_dayManager       == null) Debug.LogWarning("[GlobalController] DayManager 미연결");
-            if (_shopManager      == null) Debug.LogWarning("[GlobalController] ShopManager 미연결");
-            if (_phaseManager     == null) Debug.LogWarning("[GlobalController] PhaseManager 미연결");
-            if (_inputManager     == null) Debug.LogWarning("[GlobalController] InputManager 미연결");
-            if (_playerManager    == null) Debug.LogWarning("[GlobalController] PlayerManager 미연결");
+            if (_manifest == null) Debug.LogWarning("[GlobalController] AssetManifest 미연결");
         }
 #endif
     }

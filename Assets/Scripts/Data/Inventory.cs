@@ -6,28 +6,17 @@ namespace MonsterKitchen.Data
 {
     /// <summary>
     /// 런타임 재료 인벤토리 싱글톤.
-    /// 씬 전환 시에도 유지된다 (DontDestroyOnLoad).
+    /// GlobalController 가 new 로 생성하고 Init() 를 호출한다.
     /// </summary>
-    public class Inventory : MonoBehaviour
+    public class Inventory
     {
         public static Inventory Instance { get; private set; }
 
-        // ingredientId → 수량
         readonly Dictionary<string, int> _items = new();
 
         public event Action<string, int> OnItemChanged;  // (id, newQty)
 
-        public void Init()
-        {
-            Instance = this;
-            DontDestroyOnLoad(gameObject);
-        }
-
-        void Awake()
-        {
-            if (Instance != null && Instance != this) { Destroy(gameObject); return; }
-            if (Instance == null) Init();
-        }
+        public void Init() => Instance = this;
 
         public void Add(string ingredientId, int qty = 1)
         {
@@ -47,11 +36,8 @@ namespace MonsterKitchen.Data
             return true;
         }
 
-        public int GetCount(string ingredientId)
-            => _items.TryGetValue(ingredientId, out int v) ? v : 0;
-
-        public bool Has(string ingredientId, int qty = 1)
-            => GetCount(ingredientId) >= qty;
+        public int  GetCount(string ingredientId) => _items.TryGetValue(ingredientId, out int v) ? v : 0;
+        public bool Has(string ingredientId, int qty = 1) => GetCount(ingredientId) >= qty;
 
         public IReadOnlyDictionary<string, int> All => _items;
     }

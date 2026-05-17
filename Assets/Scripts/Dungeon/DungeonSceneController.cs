@@ -1,3 +1,4 @@
+using MonsterKitchen.Data;
 using MonsterKitchen.Enemy;
 using UnityEngine;
 
@@ -6,24 +7,26 @@ namespace MonsterKitchen.Dungeon
     // ====================================================================
     //  DungeonSceneController — DungeonScene 전용 씬 매니저 총괄
     //
-    //  ▶ 역할
-    //    · Inspector SerializeField 목록으로 던전 씬 매니저 전체를 한눈에 파악.
-    //    · Awake() 에서 Init() 를 순서대로 호출해 초기화 순서를 보장.
+    //  ▶ 설계 원칙
+    //    SpawnManager / MonsterRespawnManager 는 순수 C# 클래스.
+    //    이 컨트롤러가 유일한 MonoBehaviour 로서 생명주기와 코루틴을 위임한다.
+    //    Inspector 슬롯은 에셋/씬 참조(_spawnTable, _spawnPoints) 만 사용.
     //
-    //  ▶ 초기화 순서 근거
-    //    SpawnManager   : MonsterRespawnManager 보다 먼저 (Respawn 이 Spawn 을 참조)
-    //    MonsterRespawnManager : SpawnManager.Instance 를 코루틴에서 사용
-    //
-    //  ▶ 폴백
-    //    DungeonSceneController 가 없을 때도 각 매니저 Awake() 폴백이 동작한다.
+    //  ▶ 초기화 순서
+    //    MonsterRespawnManager.Init() → SpawnManager.Init() → SpawnAll()
+    //    (Respawn 이 Spawn 을 참조하므로 Respawn 이 먼저 Init)
     // ====================================================================
 
     [DisallowMultipleComponent]
     public class DungeonSceneController : MonoBehaviour
     {
-        [Header("── 던전 씬 매니저  (위 → 아래 순서로 초기화됩니다)")]
-        [SerializeField] SpawnManager          _spawnManager;
-        [SerializeField] MonsterRespawnManager _monsterRespawnManager;
+        [Header("Spawn Config")]
+        [SerializeField] DungeonSpawnTable _spawnTable;
+        [Tooltip("몬스터 배치 포인트 목록. 비우면 (0,0,0) 기준으로 스폰.")]
+        [SerializeField] Transform[]       _spawnPoints;
+
+        SpawnManager          _spawnManager;
+        MonsterRespawnManager _respawnManager;
 
         // ================================================================
         //  Mono
@@ -31,19 +34,19 @@ namespace MonsterKitchen.Dungeon
 
         void Awake()
         {
-            _spawnManager?.Init();
-            _monsterRespawnManager?.Init();
+            _respawnManager = new MonsterRespawnManager(this);
+            _spawnManager   = new SpawnManager(_spawnTable, _spawnPoints);
+
+            _respawnManager.Init();
+            _spawnManager.Init();
         }
 
-        // ================================================================
-        //  편의 — Inspector 에서 미연결 슬롯 즉시 감지
-        // ================================================================
+        void Start() => _spawnManager.SpawnAll();
 
 #if UNITY_EDITOR
         void OnValidate()
         {
-            if (_spawnManager          == null) Debug.LogWarning("[DungeonSceneController] SpawnManager 미연결");
-            if (_monsterRespawnManager == null) Debug.LogWarning("[DungeonSceneController] MonsterRespawnManager 미연결");
+            if (_spawnTable == null) Debug.LogWarning("[DungeonSceneController] DungeonSpawnTable 미연결");
         }
 #endif
     }

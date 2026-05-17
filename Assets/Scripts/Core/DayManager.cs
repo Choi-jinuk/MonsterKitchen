@@ -7,49 +7,46 @@ namespace MonsterKitchen.Core
 {
     /// <summary>
     /// 날 카운터 + 식당 영업 오픈/마감.
-    /// 영업 시작 → 손님 순차 스폰 → 전원 처리 완료 → OnDayEnded.
+    /// GlobalController 가 new DayManager(this) 로 생성하고 Init() 를 호출한다.
+    /// 코루틴은 주입받은 runner(GlobalController) 를 통해 실행한다.
     /// </summary>
-    public class DayManager : MonoBehaviour
+    public class DayManager
     {
         public static DayManager Instance { get; private set; }
 
-        [Header("Day Settings")]
-        [SerializeField] int   startDay         = 1;
-        [SerializeField] float timeBetweenGuests = 8f;   // 손님 등장 간격(초)
-        [SerializeField] int   guestsPerDay      = 3;
+        readonly MonoBehaviour _runner;
 
-        [Header("Spawn")]
-        [SerializeField] Transform        guestSpawnPoint;
-        [SerializeField] CustomerAI       customerPrefab;
-        [SerializeField] RestaurantTable[] tables;
+        // 영업 설정 — RestaurantSetup 이 SetRestaurantConfig() 로 주입
+        Transform        _guestSpawnPoint;
+        CustomerAI       _customerPrefab;
+        RestaurantTable[] _tables;
 
-        public int  CurrentDay    { get; private set; }
-        public bool IsOpen        { get; private set; }
+        const int   InitialDay        = 1;
+        const float TimeBetweenGuests = 8f;
+        const int   GuestsPerDay      = 3;
 
-        /// <summary>PhaseManager에서 호출. 다음 날로 카운터만 증가.</summary>
-        public void AdvanceToNextDay()
-        {
-            CurrentDay++;
-            Debug.Log($"[DayManager] Day {CurrentDay} 시작.");
-        }
+        public int  CurrentDay { get; private set; }
+        public bool IsOpen     { get; private set; }
 
-        public event Action<int>  OnDayStarted;   // (day)
-        public event Action<int>  OnDayEnded;     // (day)
+        public event Action<int> OnDayStarted;
+        public event Action<int> OnDayEnded;
 
         int _guestsSpawned;
         int _guestsFinished;
 
+        public DayManager(MonoBehaviour runner) => _runner = runner;
+
         public void Init()
         {
-            Instance = this;
-            DontDestroyOnLoad(gameObject);
-            CurrentDay = startDay;
+            Instance   = this;
+            CurrentDay = InitialDay;
         }
 
-        void Awake()
+        /// <summary>PhaseManager 에서 호출. 다음 날로 카운터만 증가.</summary>
+        public void AdvanceToNextDay()
         {
-            if (Instance != null && Instance != this) { Destroy(gameObject); return; }
-            if (Instance == null) Init();
+            CurrentDay++;
+            Debug.Log($"[DayManager] Day {CurrentDay} 시작.");
         }
 
         public void StartDay()
@@ -60,14 +57,14 @@ namespace MonsterKitchen.Core
             _guestsFinished = 0;
             OnDayStarted?.Invoke(CurrentDay);
             Debug.Log($"[DayManager] Day {CurrentDay} 영업 시작!");
-            StartCoroutine(SpawnGuestsRoutine());
+            _runner.StartCoroutine(SpawnGuestsRoutine());
         }
 
         IEnumerator SpawnGuestsRoutine()
         {
-            while (_guestsSpawned < guestsPerDay)
+            while (_guestsSpawned < GuestsPerDay)
             {
-                yield return new WaitForSeconds(_guestsSpawned == 0 ? 1f : timeBetweenGuests);
+                yield return new WaitForSeconds(_guestsSpawned == 0 ? 1f : TimeBetweenGuests);
 
                 var table = FindFreeTable();
                 if (table == null) { yield return new WaitForSeconds(2f); continue; }
@@ -79,10 +76,10 @@ namespace MonsterKitchen.Core
 
         void SpawnGuest(RestaurantTable table)
         {
-            if (customerPrefab == null || guestSpawnPoint == null) return;
+            if (_customerPrefab == null || _guestSpawnPoint == null) return;
 
-            var go = Instantiate(customerPrefab, guestSpawnPoint.position, Quaternion.identity);
-            go.gameObject.SetActive(true);   // prefab이 비활성 상태여도 스폰 후 활성화
+            var go = UnityEngine.Object.Instantiate(_customerPrefab, _guestSpawnPoint.position, Quaternion.identity);
+            go.gameObject.SetActive(true);
             go.Init(table);
             go.OnGuestFinished += HandleGuestFinished;
         }
@@ -90,8 +87,8 @@ namespace MonsterKitchen.Core
         void HandleGuestFinished()
         {
             _guestsFinished++;
-            if (_guestsFinished >= guestsPerDay)
-                StartCoroutine(EndDayRoutine());
+            if (_guestsFinished >= GuestsPerDay)
+                _runner.StartCoroutine(EndDayRoutine());
         }
 
         IEnumerator EndDayRoutine()
@@ -102,8 +99,6 @@ namespace MonsterKitchen.Core
             Debug.Log($"[DayManager] Day {CurrentDay} 영업 마감.");
 
             yield return new WaitForSeconds(1.5f);
-            // PhaseManager.EndDay()가 AdvanceToNextDay()로 CurrentDay를 올린다.
-            // 여기서 CurrentDay++ 하면 이중 증가 버그 발생 → 제거.
             if (PhaseManager.Instance != null)
                 PhaseManager.Instance.EndDay();
             else
@@ -112,22 +107,20 @@ namespace MonsterKitchen.Core
 
         RestaurantTable FindFreeTable()
         {
-            foreach (var t in tables)
+            if (_tables == null) return null;
+            foreach (var t in _tables)
                 if (t != null && !t.IsOccupied) return t;
             return null;
         }
 
-        public void SetTables(RestaurantTable[] t) => tables = t;
+        public void SetTables(RestaurantTable[] t) => _tables = t;
 
-        /// <summary>
-        /// RestaurantSetup이 씬 로드 시 호출해 로컬 레퍼런스를 주입한다.
-        /// ManagementScene에서 DontDestroyOnLoad된 인스턴스가 참조를 잃지 않도록 한다.
-        /// </summary>
-        public void SetRestaurantConfig(Transform spawnPoint, CustomerAI prefab, RestaurantTable[] restaurantTables)
+        /// <summary>RestaurantSetup 이 씬 로드 시 호출해 로컬 레퍼런스를 주입한다.</summary>
+        public void SetRestaurantConfig(Transform spawnPoint, CustomerAI prefab, RestaurantTable[] tables)
         {
-            guestSpawnPoint = spawnPoint;
-            customerPrefab  = prefab;
-            tables          = restaurantTables;
+            _guestSpawnPoint = spawnPoint;
+            _customerPrefab  = prefab;
+            _tables          = tables;
         }
     }
 }

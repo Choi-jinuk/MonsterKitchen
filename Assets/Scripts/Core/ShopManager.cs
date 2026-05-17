@@ -5,39 +5,27 @@ namespace MonsterKitchen.Core
 {
     /// <summary>
     /// 가게(레스토랑) 업그레이드 상태 싱글톤.
-    /// 좌석 수와 팁 배율을 관리한다.
-    /// CustomerAI가 EatAndPay에서 TipMultiplier를 참조한다.
+    /// GlobalController 가 new 로 생성하고 Init() 를 호출한다.
     /// </summary>
-    public class ShopManager : MonoBehaviour
+    public class ShopManager
     {
         public static ShopManager Instance { get; private set; }
 
-        [Header("Upgrade Costs (per level)")]
-        [SerializeField] int seatUpgradeCost = 100;
-        [SerializeField] int tipUpgradeCost  = 80;
+        const int SeatUpgradeCostBase = 100;
+        const int TipUpgradeCostBase  = 80;
 
-        public int SeatLevel { get; private set; }   // +1 테이블 per level
-        public int TipLevel  { get; private set; }   // +10% 팁 per level
+        public int SeatLevel { get; private set; }
+        public int TipLevel  { get; private set; }
 
-        public float TipMultiplier => 1f + TipLevel * 0.1f;
-        public int   TotalSeats    => 1  + SeatLevel;          // 기본 1석
+        public float TipMultiplier  => 1f + TipLevel  * 0.1f;
+        public int   TotalSeats     => 1  + SeatLevel;
 
-        public int SeatUpgradeCost => (SeatLevel + 1) * seatUpgradeCost;
-        public int TipUpgradeCost  => (TipLevel  + 1) * tipUpgradeCost;
+        public int SeatUpgradeCost => (SeatLevel + 1) * SeatUpgradeCostBase;
+        public int TipUpgradeCost  => (TipLevel  + 1) * TipUpgradeCostBase;
 
         public event Action OnUpgraded;
 
-        public void Init()
-        {
-            Instance = this;
-            DontDestroyOnLoad(gameObject);
-        }
-
-        void Awake()
-        {
-            if (Instance != null && Instance != this) { Destroy(gameObject); return; }
-            if (Instance == null) Init();
-        }
+        public void Init() => Instance = this;
 
         public bool UpgradeSeats()
         {

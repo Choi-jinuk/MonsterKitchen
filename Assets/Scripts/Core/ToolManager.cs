@@ -5,47 +5,35 @@ namespace MonsterKitchen.Core
 {
     /// <summary>
     /// 플레이어 도구(무기) 업그레이드 상태를 씬 간 유지하는 싱글톤.
-    /// PlayerController가 Start()에서 이 값을 읽어 스탯을 적용한다.
+    /// GlobalController 가 new 로 생성하고 Init() 를 호출한다.
     /// </summary>
-    public class ToolManager : MonoBehaviour
+    public class ToolManager
     {
         public static ToolManager Instance { get; private set; }
 
-        [Header("Base Stats")]
-        [SerializeField] int   baseDamage   = 10;
-        [SerializeField] float baseRange    = 0.8f;
-        [SerializeField] float baseCooldown = 0.4f;
-
-        [Header("Upgrade Costs (per level)")]
-        [SerializeField] int damageUpgradeCost   = 50;
-        [SerializeField] int rangeUpgradeCost    = 60;
-        [SerializeField] int cooldownUpgradeCost = 70;
+        // 기본 스탯
+        const int   BaseDamage          = 10;
+        const float BaseRange           = 0.8f;
+        const float BaseCooldown        = 0.4f;
+        const int   DamageUpgradeCostBase   = 50;
+        const int   RangeUpgradeCostBase    = 60;
+        const int   CooldownUpgradeCostBase = 70;
 
         public int DamageLevel   { get; private set; }
         public int RangeLevel    { get; private set; }
         public int CooldownLevel { get; private set; }
 
-        public int   CurrentDamage   => baseDamage   + DamageLevel   * 5;
-        public float CurrentRange    => baseRange    + RangeLevel    * 0.1f;
-        public float CurrentCooldown => Mathf.Max(0.1f, baseCooldown - CooldownLevel * 0.05f);
+        public int   CurrentDamage   => BaseDamage   + DamageLevel   * 5;
+        public float CurrentRange    => BaseRange    + RangeLevel    * 0.1f;
+        public float CurrentCooldown => Mathf.Max(0.1f, BaseCooldown - CooldownLevel * 0.05f);
 
-        public int DamageUpgradeCost   => (DamageLevel   + 1) * damageUpgradeCost;
-        public int RangeUpgradeCost    => (RangeLevel    + 1) * rangeUpgradeCost;
-        public int CooldownUpgradeCost => (CooldownLevel + 1) * cooldownUpgradeCost;
+        public int DamageUpgradeCost   => (DamageLevel   + 1) * DamageUpgradeCostBase;
+        public int RangeUpgradeCost    => (RangeLevel    + 1) * RangeUpgradeCostBase;
+        public int CooldownUpgradeCost => (CooldownLevel + 1) * CooldownUpgradeCostBase;
 
         public event Action OnUpgraded;
 
-        public void Init()
-        {
-            Instance = this;
-            DontDestroyOnLoad(gameObject);
-        }
-
-        void Awake()
-        {
-            if (Instance != null && Instance != this) { Destroy(gameObject); return; }
-            if (Instance == null) Init();
-        }
+        public void Init() => Instance = this;
 
         public bool UpgradeDamage()
         {
