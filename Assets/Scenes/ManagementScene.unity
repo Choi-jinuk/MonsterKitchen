@@ -462,16 +462,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 265170075}
-  - component: {fileID: 265170074}
-  - component: {fileID: 265170073}
-  - component: {fileID: 265170072}
-  - component: {fileID: 265170071}
-  - component: {fileID: 265170070}
-  - component: {fileID: 265170069}
-  - component: {fileID: 265170068}
-  - component: {fileID: 265170067}
-  - component: {fileID: 265170076}
-  - component: {fileID: 265170078}
   - component: {fileID: 265170077}
   m_Layer: 0
   m_Name: GameManager
@@ -480,117 +470,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &265170067
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 265170066}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 00b111433cb657d4e826018b70e27dea, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::MonsterKitchen.Core.ShopManager
-  seatUpgradeCost: 100
-  tipUpgradeCost: 80
---- !u!114 &265170068
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 265170066}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c5091e21220504f4397517890a36ef50, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::MonsterKitchen.Core.ToolManager
-  baseDamage: 10
-  baseRange: 0.8
-  baseCooldown: 0.4
-  damageUpgradeCost: 50
-  rangeUpgradeCost: 60
-  cooldownUpgradeCost: 70
---- !u!114 &265170069
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 265170066}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 570f0001ca72b3245acd300c065a7e8f, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::MonsterKitchen.Core.PhaseManager
---- !u!114 &265170070
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 265170066}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8542691733e5c8941afbb58473b7b52e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::MonsterKitchen.Core.GoldManager
-  startingGold: 0
---- !u!114 &265170071
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 265170066}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 918dbd6ca4341264d93907d3b8586c94, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::MonsterKitchen.Core.DayManager
-  startDay: 1
-  timeBetweenGuests: 8
-  guestsPerDay: 3
-  guestSpawnPoint: {fileID: 0}
-  customerPrefab: {fileID: 0}
-  tables: []
---- !u!114 &265170072
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 265170066}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 67b8979d12940714f9a0897bc3cee7e9, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::MonsterKitchen.Data.FoodInventory
---- !u!114 &265170073
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 265170066}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 75adab345524b6d4688d56a743c4b17b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::MonsterKitchen.Data.Inventory
---- !u!114 &265170074
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 265170066}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c3a1d5ee167b1d049b4a7640bc8859f3, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::MonsterKitchen.Core.SceneLoader
 --- !u!4 &265170075
 Transform:
   m_ObjectHideFlags: 0
@@ -606,18 +485,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &265170076
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 265170066}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f8ed742e6ed2ede40899cf384fac423b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::MonsterKitchen.Core.PlayerManager
 --- !u!114 &265170077
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -630,20 +497,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 592ad6e439603b14b8ed949cb409f6f9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MonsterKitchen.Data.DataRegistry
---- !u!114 &265170078
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 265170066}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d967260dc13423d468fb503d8ee71f0b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::MonsterKitchen.Core.AssetLoadManager
-  loaderMode: 0
-  manifest: {fileID: 11400000, guid: 7c657022c1d06a54ea8167c1edf4691e, type: 2}
 --- !u!1 &303924673
 GameObject:
   m_ObjectHideFlags: 0
@@ -964,7 +817,6 @@ GameObject:
   m_Component:
   - component: {fileID: 668199842}
   - component: {fileID: 668199841}
-  - component: {fileID: 668199843}
   - component: {fileID: 668199844}
   m_Layer: 0
   m_Name: UIManager
@@ -1000,18 +852,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &668199843
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 668199840}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 80bbf49fed255dc4d99ff62a95252d67, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::MonsterKitchen.Core.InputManager
 --- !u!114 &668199844
 MonoBehaviour:
   m_ObjectHideFlags: 0
