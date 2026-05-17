@@ -50,6 +50,9 @@ namespace MonsterKitchen.UI
         VisualElement _ultGaugeFill;
         Label         _ultReadyLabel;
 
+        // ── 미니맵 (v2 재구현 대기 — 현재 숨김) ─────────────────────
+        VisualElement _minimapRoot;
+
         // ── 플레이어 컴포넌트 참조 ────────────────────────────────────
         Health      _playerHealth;
         PlayerStats _playerStats;
@@ -71,6 +74,9 @@ namespace MonsterKitchen.UI
             _hpChip    = root.Q<VisualElement>("hp-chip");
             _hpFill    = root.Q<VisualElement>("hp-bar-fill");
             _hpText    = root.Q<Label>("hp-text");
+
+            // 미니맵 (Start 시점엔 던전 씬이 아닐 수 있으므로 요소만 캐시)
+            _minimapRoot = root.Q<VisualElement>("minimap-root");
 
             // 하단 스킬 바
             _weaponIconBg   = root.Q<VisualElement>("weapon-icon-bg");
@@ -103,6 +109,7 @@ namespace MonsterKitchen.UI
 
             SceneManager.sceneLoaded += OnSceneLoaded;
             FindAndBindPlayer();
+            FindAndBindMinimap();
         }
 
         void OnDestroy()
@@ -120,12 +127,15 @@ namespace MonsterKitchen.UI
 
             SceneManager.sceneLoaded -= OnSceneLoaded;
             UnbindPlayer();
+            UnbindMinimap();
         }
 
         void OnSceneLoaded(Scene scene, LoadSceneMode mode)
         {
             UnbindPlayer();
             FindAndBindPlayer();
+            UnbindMinimap();
+            FindAndBindMinimap();
         }
 
         // ================================================================
@@ -192,6 +202,26 @@ namespace MonsterKitchen.UI
             SetHpBarVisible(false);
             SetCooldownUI(_skill1CoolFill, _skill1CoolText, 0f, 1f);
             SetCooldownUI(_skill2CoolFill, _skill2CoolText, 0f, 1f);
+        }
+
+        // ================================================================
+        //  미니맵 바인딩 (v2 구현 전 stub — 항상 숨김)
+        // ================================================================
+
+        void FindAndBindMinimap()
+        {
+            // MinimapManager v2 (플레이어 위치 마커) 구현 후 여기에 바인딩 로직 추가.
+            if (_minimapRoot != null)
+                _minimapRoot.style.display = DisplayStyle.None;
+        }
+
+        void UnbindMinimap()
+        {
+            if (_minimapRoot != null)
+            {
+                _minimapRoot.Clear();
+                _minimapRoot.style.display = DisplayStyle.None;
+            }
         }
 
         // ================================================================

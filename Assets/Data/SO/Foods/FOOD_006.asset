@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 46d7ccb87a1be524e8b5a42f1f31624d, type: 3}
+  m_Name: FOOD_006
+  m_EditorClassIdentifier: Assembly-CSharp::MonsterKitchen.Data.FoodData
+  id: FOOD_006
+  displayName: "\uD6C8\uC81C \uACE0\uBE14\uB9B0 \uAD6C\uC774"
+  description: "\uBAA9\uC7AC \uC7A5\uC791\uC73C\uB85C \uCC9C\uCC9C\uD788 \uD6C8\uC81C\uD55C
+    \uACE0\uBE14\uB9B0 \uACE0\uAE30. \uAE4A\uC740 \uD6C8\uC5F0\uD5A5\uC774 \uC77C\uD488\uC774\uB2E4."
+  basePrice: 120
+  hpRestore: 30
+  buffAttribute: 1
+  buffMultiplier: 1.1
+  buffDurationDays: 1
+  goodMultiplier: 1.2
+  perfectMultiplier: 1.5
+  legendaryMultiplier: 2
+  sprite: {fileID: 0}

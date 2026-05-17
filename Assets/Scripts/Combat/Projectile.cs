@@ -49,6 +49,12 @@ namespace MonsterKitchen.Combat
         Transform     _homingTarget;
         float         _homingTurnSpeed;
 
+        // ── CC 파라미터 ──────────────────────────────────────────────────
+        float   _ccForce;         // 양수=넉백, 음수=풀인, 0=없음
+        float   _ccDuration;
+        float   _stunDuration;
+        Vector3 _fireSourcePos;   // 시전자 위치 (풀인 방향 계산용)
+
         Rigidbody2D   _rb;
 
         static Sprite _sharedSprite;
@@ -93,12 +99,19 @@ namespace MonsterKitchen.Combat
         /// <param name="onKill">처치마다 호출되는 콜백 (null 허용)</param>
         /// <param name="homingTarget">유도 타겟. null 이면 직진.</param>
         /// <param name="homingTurnSpeed">유도 선회 속도 (도/초)</param>
+        /// <param name="ccForce">양수=넉백(units/s), 음수=풀인(units/s), 0=CC없음</param>
+        /// <param name="ccDuration">CC 지속 시간(초)</param>
+        /// <param name="stunDuration">0 초과이면 명중 대상에게 스턴 적용 (초)</param>
+        /// <param name="fireSourcePos">시전자 위치. 풀인 방향 계산에 사용된다.</param>
         public void Init(int damage, AttributeType attr,
                          Vector2 direction, float speed, float maxDistance,
                          LayerMask targetLayer,
                          bool isAoe = false, float aoeRadius = 0f,
                          int maxTargets = 1, Action onKill = null,
-                         Transform homingTarget = null, float homingTurnSpeed = 240f)
+                         Transform homingTarget = null, float homingTurnSpeed = 240f,
+                         float ccForce = 0f, float ccDuration = 0.25f,
+                         float stunDuration = 0f,
+                         Vector3 fireSourcePos = default)
         {
             _damage          = damage;
             _attr            = attr;
@@ -113,6 +126,11 @@ namespace MonsterKitchen.Combat
             _homingTurnSpeed = homingTurnSpeed;
             _startPos        = transform.position;
             _hit             = false;
+
+            _ccForce       = ccForce;
+            _ccDuration    = ccDuration;
+            _stunDuration  = stunDuration;
+            _fireSourcePos = fireSourcePos == default ? transform.position : fireSourcePos;
 
             // 색상: AoE(보라) / 유도(노랑) / 직선(주황)
             var sr = GetComponent<SpriteRenderer>();
@@ -188,6 +206,7 @@ namespace MonsterKitchen.Combat
                     hp.TakeDamage(_damage, _attr);
                     if (!wasDead && hp.IsDead) _onKill?.Invoke();
 
+                    ApplyProjectileCC(col.transform);
                     count++;
                 }
             }
@@ -200,9 +219,40 @@ namespace MonsterKitchen.Combat
                     hp.TakeDamage(_damage, _attr);
                     if (!wasDead && hp.IsDead) _onKill?.Invoke();
                 }
+                ApplyProjectileCC(other.transform);
             }
 
             Destroy(gameObject);
+        }
+
+        // ================================================================
+        //  CC 적용 헬퍼
+        // ================================================================
+
+        void ApplyProjectileCC(Transform target)
+        {
+            if (target == null) return;
+
+            var cc = target.GetComponent<CrowdControlComponent>();
+            if (cc == null) return;
+
+            if (_ccForce > 0f)
+            {
+                // 양수 → 넉백: 투사체 진행 방향으로 밀어냄
+                Vector2 dir = _rb.linearVelocity.sqrMagnitude > 0.01f
+                    ? _rb.linearVelocity.normalized
+                    : ((Vector2)(target.position - _fireSourcePos)).normalized;
+                cc.TryApplyKnockback(dir, _ccForce, _ccDuration);
+            }
+            else if (_ccForce < 0f)
+            {
+                // 음수 → 풀인: 시전자 방향으로 끌어당김
+                cc.TryApplyPullIn((Vector2)_fireSourcePos, -_ccForce, _ccDuration);
+            }
+            else if (_stunDuration > 0f)
+            {
+                cc.TryApplyStun(_stunDuration);
+            }
         }
 
         // ================================================================

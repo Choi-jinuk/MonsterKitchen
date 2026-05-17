@@ -66,6 +66,18 @@ namespace MonsterKitchen.Data
         [Min(0.5f)]
         public float missileMaxRange = 8f;
 
+        [Header("Crowd Control")]
+        [Tooltip("0 = CC 없음\n양수 = 넉백 (피격 대상을 시전자 반대 방향으로 밀어냄, units/s)\n음수 = 풀인 (피격 대상을 시전자 방향으로 끌어당김, units/s)")]
+        public float ccForce = 0f;
+
+        [Tooltip("CC 지속 시간(초). ccForce != 0 일 때만 유효.")]
+        [Min(0.05f)]
+        public float ccDuration = 0.25f;
+
+        [Tooltip("0이면 스턴 없음. 0 초과이면 이 시간(초)만큼 대상을 정지시킨다.")]
+        [Min(0f)]
+        public float stunDuration = 0f;
+
         [Header("Animation")]
         [Tooltip("사용할 Animator 트리거 이름.\n비워두면 'Attack' 기본 트리거를 사용한다.")]
         public string animTriggerOverride = "";

@@ -57,19 +57,31 @@ namespace MonsterKitchen
         Spoiled   = 2,
     }
 
-    public enum CharacterRole
-    {
-        Warrior  = 0,
-        Mage     = 1,
-        Ranger   = 2,
-        Support  = 3,
-    }
-
     public enum FoodGrade
     {
         Normal    = 0,
         Good      = 1,
         Perfect   = 2,
         Legendary = 3,
+    }
+
+    // ---------------------------------------------------------------
+    //  채집 노드 종류 — ResourceNodeData.nodeType 에서 사용
+    // ---------------------------------------------------------------
+    public enum ResourceNodeType
+    {
+        Tree    = 0,   // 나무   — 목재(ING_009) 드롭
+        Rock    = 1,   // 돌     — 석재(ING_010) 드롭
+        Ore     = 2,   // 광석   — 철광석(ING_011) / 수정(ING_012) 드롭
+    }
+
+    // ---------------------------------------------------------------
+    //  채집 도구 종류 — GatheringToolData.toolType 에서 사용
+    // ---------------------------------------------------------------
+    public enum GatheringToolType
+    {
+        Axe        = 0,   // 도끼    — 나무(Tree) 특화
+        Pickaxe    = 1,   // 곡괭이  — 돌·광석(Rock/Ore) 특화
+        Universal  = 2,   // 만능 도구 — 모든 노드에 소폭 보너스
     }
 }

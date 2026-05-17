@@ -22,4 +22,7 @@ MonoBehaviour:
   maxTargets: 1
   missileSpeed: 8
   missileMaxRange: 8
+  ccForce: 0
+  ccDuration: 0.25
+  stunDuration: 0.8
   animTriggerOverride: 

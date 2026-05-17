@@ -6,19 +6,22 @@ namespace MonsterKitchen.Enemy
     //  SlimeMovement — 슬라임 전용 이동 패턴
     //
     //  ▶ 정지 → 윈드업 → 대시 사이클 (Patrol / Chase 공용)
-    //    쿨다운 대기 중: 완전 정지 (슬라이딩 방지)
-    //    윈드업 중:      목표 위치 잠금 후 정지
-    //    대시 중:        dashSpeed 로 목표를 향해 이동
+    //    쿨다운 대기:  완전 정지
+    //    윈드업:       목표 방향 잠금 후 정지
+    //    대시:         잠금된 방향으로 dashSpeed 이동
+    //
+    //  ▶ Nav 통합
+    //    윈드업 시작 시 GetNavDirection 으로 A* 경로의 첫 경유지 방향을 잠근다.
+    //    장애물이 있어도 경로를 돌아가 대시하므로 벽에 박히지 않는다.
+    //    NavGrid 가 없으면 기존 직선 대시로 폴백한다.
     //
     //  ▶ Separation Steering 은 MonsterAI.ApplySeparation() 에 위임.
-    //
-    //  MonsterAI Inspector 의 Movement 슬롯에 이 컴포넌트를 연결하면 활성화.
     // ====================================================================
 
     public class SlimeMovement : MonsterMovementBase
     {
         [Header("Dash")]
-        [Tooltip("대시 전 목표 잠금 후 정지 대기 시간 (초).")]
+        [Tooltip("대시 전 목표 방향 잠금 후 정지 대기 시간 (초).")]
         [SerializeField] float dashWindupDuration = 0.55f;
         [Tooltip("대시 이동 속도.")]
         [SerializeField] float dashSpeed          = 7f;
@@ -28,7 +31,7 @@ namespace MonsterKitchen.Enemy
         [SerializeField] float dashCooldown       = 0.6f;
 
         // ── 런타임 상태 ─────────────────────────────────────────────────
-        Vector2 _dashTarget;
+        Vector2 _dashDir;       // 윈드업 시점에 잠근 대시 방향
         float   _dashWindupTimer;
         float   _dashMoveTimer;
         float   _dashCoolTimer;
@@ -49,6 +52,8 @@ namespace MonsterKitchen.Enemy
             _isDashing       = false;
             _dashWindupTimer = 0f;
             _dashMoveTimer   = 0f;
+            _dashCoolTimer   = 0f;  // 즉시 새 대시 사이클 시작 (CC 해제 후 즉각 반응)
+            ResetNavState();
         }
 
         public override void TickPatrol(float dt, Vector2 patrolTarget)
@@ -69,13 +74,12 @@ namespace MonsterKitchen.Enemy
         {
             _dashCoolTimer -= dt;
 
-            // ── 대시 이동 중 ──────────────────────────────────────────
+            // ── 대시 이동 중 ─────────────────────────────────────────
             if (_isDashing)
             {
                 _dashMoveTimer -= dt;
-                Vector2 toDash = _dashTarget - (Vector2)transform.position;
 
-                if (_dashMoveTimer <= 0f || toDash.magnitude < 0.1f)
+                if (_dashMoveTimer <= 0f)
                 {
                     Stop();
                     _isDashing     = false;
@@ -83,7 +87,7 @@ namespace MonsterKitchen.Enemy
                     return;
                 }
 
-                Move(_ai.ApplySeparation(toDash.normalized) * dashSpeed);
+                Move(_ai.ApplySeparation(_dashDir) * dashSpeed);
                 return;
             }
 
@@ -101,16 +105,18 @@ namespace MonsterKitchen.Enemy
                 return;
             }
 
-            // ── 쿨다운 완료 → 윈드업 시작 / 쿨다운 대기 중 정지 ─────
+            // ── 쿨다운 완료 → 윈드업 시작 ────────────────────────────
             if (_dashCoolTimer <= 0f)
             {
-                _dashTarget      = target;              // 현재 목표 위치 잠금
+                // Nav: A* 경로 첫 경유지 방향을 잠근다.
+                // NavGrid 없으면 GetNavDirection 이 직선 방향으로 폴백.
+                _dashDir         = GetNavDirection(target);
                 _dashWindupTimer = dashWindupDuration;
                 Stop();
             }
             else
             {
-                Stop();  // 쿨다운 중 완전 정지 (슬라이딩 방지)
+                Stop(); // 쿨다운 중 정지
             }
         }
     }

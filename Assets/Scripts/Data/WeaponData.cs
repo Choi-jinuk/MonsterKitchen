@@ -41,9 +41,31 @@ namespace MonsterKitchen.Data
                  "공격력뿐 아니라 방어력·속도 등 어떤 AbilType 이든 가능하다.")]
         public List<AbilEntry> abils = new List<AbilEntry>();
 
+        [Header("Durability")]
+        [Tooltip("최대 내구도. 0이면 파괴되지 않는 영구 무기.\n" +
+                 "런타임 현재 내구도는 PlayerStats.WeaponDurability 에서 관리된다.")]
+        [Min(0)]
+        public int maxDurability = 0;
+
+        [Tooltip("내구도 소모 방식.\n" +
+                 "PerHit  = 공격 1회당 1 소모\n" +
+                 "PerKill = 처치 1회당 1 소모\n" +
+                 "None    = 자동 소모 없음 (수동 이벤트로만 소모)")]
+        public DurabilityDecayMode decayMode = DurabilityDecayMode.None;
+
         [Header("Normal Attack")]
         [Tooltip("이 무기의 평타 체인 SkillGroupData.\n" +
                  "무기 장착 시 자동으로 평타로 사용된다.")]
         public SkillGroupData normalAttackGroup;
+    }
+
+    // ----------------------------------------------------------------
+    //  DurabilityDecayMode — 내구도 소모 방식
+    // ----------------------------------------------------------------
+    public enum DurabilityDecayMode
+    {
+        None    = 0,   // 자동 소모 없음
+        PerHit  = 1,   // 공격 1회당 1 소모
+        PerKill = 2,   // 처치 1회당 1 소모
     }
 }

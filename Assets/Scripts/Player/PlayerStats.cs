@@ -50,6 +50,17 @@ namespace MonsterKitchen.Player
         /// <summary>현재 무기의 평타 체인. 무기 미장착 시 null.</summary>
         public SkillGroupData NormalAttackGroup => EquippedWeapon?.normalAttackGroup;
 
+        // ── 채집 도구 슬롯 ────────────────────────────────────────────
+        [SerializeField] GatheringToolData _gatheringTool;
+
+        // ── 내구도 (런타임) ───────────────────────────────────────────
+        int _weaponDurability;
+        int _gatheringToolDurability;
+
+        public GatheringToolData GatheringTool           => _gatheringTool;
+        public int               WeaponDurability        => _weaponDurability;
+        public int               GatheringToolDurability => _gatheringToolDurability;
+
         // ── 스킬 쿨타임 ───────────────────────────────────────────────
         public float Skill1CoolRemaining { get; private set; }
         public float Skill2CoolRemaining { get; private set; }
@@ -143,12 +154,17 @@ namespace MonsterKitchen.Player
         /// <summary>무기를 장착한다. null 을 넣으면 해제.</summary>
         public void EquipWeapon(WeaponData weapon)
         {
-            EquippedWeapon = weapon;
+            EquippedWeapon    = weapon;
+            _weaponDurability = weapon != null ? weapon.maxDurability : 0;
             RecalculateStats();
             OnWeaponChanged?.Invoke(weapon);
-            Debug.Log(weapon != null
-                ? $"[PlayerStats] 무기 장착: {weapon.weaponName} ({weapon.weaponType})"
-                : "[PlayerStats] 무기 해제");
+        }
+
+        /// <summary>채집 도구를 장착한다. null 을 넣으면 해제.</summary>
+        public void EquipGatheringTool(GatheringToolData tool)
+        {
+            _gatheringTool           = tool;
+            _gatheringToolDurability = tool != null ? tool.maxDurability : 0;
         }
 
         /// <summary>
@@ -181,9 +197,6 @@ namespace MonsterKitchen.Player
             }
 
             OnSkillChanged?.Invoke(slot, skill);
-            Debug.Log(skill != null
-                ? $"[PlayerStats] 슬롯{slot} 장착: {skill.skillName}"
-                : $"[PlayerStats] 슬롯{slot} 해제");
             return true;
         }
 
@@ -246,6 +259,39 @@ namespace MonsterKitchen.Player
                 OnUltimateReady?.Invoke();
                 Debug.Log("[PlayerStats] 궁극기 게이지 MAX — 궁극기 사용 가능");
             }
+        }
+
+        // ================================================================
+        //  내구도
+        // ================================================================
+
+        /// <summary>공격 1회 시 PlayerController 에서 호출. PerHit 무기만 소모.</summary>
+        public void ConsumeWeaponDurabilityOnHit()
+        {
+            if (EquippedWeapon == null || EquippedWeapon.maxDurability == 0) return;
+            if (EquippedWeapon.decayMode != DurabilityDecayMode.PerHit) return;
+            _weaponDurability = Mathf.Max(0, _weaponDurability - 1);
+            if (_weaponDurability == 0)
+                Debug.Log($"[PlayerStats] 무기 '{EquippedWeapon.weaponName}' 내구도 소진");
+        }
+
+        /// <summary>처치 시 PlayerController 에서 호출. PerKill 무기만 소모.</summary>
+        public void ConsumeWeaponDurabilityOnKill()
+        {
+            if (EquippedWeapon == null || EquippedWeapon.maxDurability == 0) return;
+            if (EquippedWeapon.decayMode != DurabilityDecayMode.PerKill) return;
+            _weaponDurability = Mathf.Max(0, _weaponDurability - 1);
+            if (_weaponDurability == 0)
+                Debug.Log($"[PlayerStats] 무기 '{EquippedWeapon.weaponName}' 내구도 소진");
+        }
+
+        /// <summary>채집 성공 시 ResourceNode 에서 호출.</summary>
+        public void ConsumeGatheringToolDurability()
+        {
+            if (_gatheringTool == null || _gatheringTool.maxDurability == 0) return;
+            _gatheringToolDurability = Mathf.Max(0, _gatheringToolDurability - 1);
+            if (_gatheringToolDurability == 0)
+                Debug.Log($"[PlayerStats] 채집 도구 '{_gatheringTool.toolName}' 내구도 소진");
         }
 
         // ================================================================

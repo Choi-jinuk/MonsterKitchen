@@ -25,3 +25,6 @@ MonoBehaviour:
   - {fileID: 11400000, guid: b11d0b89f96fee74686f2a5d206fa4a0, type: 2}
   dropTable: {fileID: 11400000, guid: 4c55ba8131dbf0344aeeb807035663ff, type: 2}
   sprite: {fileID: 0}
+  immuneToKnockback: 0
+  immuneToStun: 0
+  immuneToPullIn: 0

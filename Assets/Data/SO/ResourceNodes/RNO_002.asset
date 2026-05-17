@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d59bb3829de0aad4f98e1916b21f77a6, type: 3}
+  m_Name: RNO_002
+  m_EditorClassIdentifier: Assembly-CSharp::MonsterKitchen.Data.ResourceNodeData
+  nodeId: RNO_002
+  displayName: "\uBC14\uC704"
+  nodeType: 1
+  dropIngredient: {fileID: 11400000, guid: d1bc528e60a277e4e8825b82e0d887d8, type: 2}
+  dropMin: 1
+  dropMax: 3
+  maxHp: 40
+  respawnSeconds: 120
+  nodeSprite: {fileID: 0}
+  nodeTint: {r: 0.6, g: 0.6, b: 0.6, a: 1}

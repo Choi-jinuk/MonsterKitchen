@@ -1,6 +1,7 @@
 using System.Collections;
 using MonsterKitchen.Combat;
 using MonsterKitchen.Data;
+using MonsterKitchen.Navigation;
 using UnityEngine;
 
 namespace MonsterKitchen.Enemy
@@ -31,6 +32,7 @@ namespace MonsterKitchen.Enemy
 
     [RequireComponent(typeof(Rigidbody2D))]
     [RequireComponent(typeof(Animator))]
+    [RequireComponent(typeof(CrowdControlComponent))]
     public class MonsterAI : MonsterBase
     {
         [Header("AI")]
@@ -75,6 +77,13 @@ namespace MonsterKitchen.Enemy
         float   _attackGizmoTime = -1f;
 
         readonly Collider2D[] _sepBuffer = new Collider2D[16];
+
+        // ── CC 컴포넌트 ──────────────────────────────────────────────────
+        CrowdControlComponent _cc;
+        bool _prevCCActive;
+
+        // ── Nav 폴백 (_movement 없을 때 MonsterAI 자체 경로 탐색) ────
+        NavAgent _navAgent;
 
         static readonly WaitForFixedUpdate WaitFixed = new WaitForFixedUpdate();
 
@@ -124,6 +133,7 @@ namespace MonsterKitchen.Enemy
         {
             _rb   = GetComponent<Rigidbody2D>();
             _anim = GetComponent<Animator>();
+            _cc   = GetComponent<CrowdControlComponent>();
 
             base.Init(data, player, spawnPos);
 
@@ -136,10 +146,15 @@ namespace MonsterKitchen.Enemy
             int count  = skills != null ? Mathf.Min(skills.Length, 3) : 0;
             _skillTimers = new float[count];
 
+            // _movement 없을 때 폴백용 nav agent (NavGrid 있으면 생성)
+            if (NavGrid.Instance != null)
+                _navAgent = new NavAgent(transform);
+
             // 이동 컴포넌트 초기화 및 스폰 콜백
             if (_movement != null)
             {
                 _movement.Init(_rb, _anim, this);
+                _movement.InitNavAgent();      // NavGrid 유무를 스스로 판단
                 _movement.OnSpawned();
             }
         }
@@ -160,6 +175,8 @@ namespace MonsterKitchen.Enemy
             base.OnDisable();
             StopAiCoroutine();
             if (_rb != null) _rb.linearVelocity = Vector2.zero;
+            _navAgent?.Stop();   // 폴백 nav agent 초기화
+            _cc?.ForceRelease(); // CC 진행 중이면 강제 해제
         }
 
         // ================================================================
@@ -196,10 +213,26 @@ namespace MonsterKitchen.Enemy
         {
             if (_state == State.Die) return;
 
-            // 모든 스킬 쿨타임 감소
+            // 모든 스킬 쿨타임 감소 (CC 중에도 계속 감소)
             if (_skillTimers != null)
                 for (int i = 0; i < _skillTimers.Length; i++)
                     if (_skillTimers[i] > 0f) _skillTimers[i] -= dt;
+
+            // CC 진행 중: FSM 일시 정지 (CrowdControlComponent 가 속도를 직접 제어)
+            bool ccActive = _cc != null && _cc.IsUnderControl;
+            if (ccActive)
+            {
+                _prevCCActive = true;
+                return;
+            }
+
+            // CC 가 방금 끝난 직후: 이동 컴포넌트 상태를 초기화해 즉시 재개
+            if (_prevCCActive)
+            {
+                _prevCCActive          = false;
+                _rb.linearVelocity     = Vector2.zero;
+                _movement?.ResetMovement();
+            }
 
             switch (_state)
             {
@@ -249,7 +282,10 @@ namespace MonsterKitchen.Enemy
             if (_movement != null)
                 _movement.TickPatrol(dt, _patrolTarget);
             else
-                Move(ApplySeparation(toPatrol.normalized) * (moveSpeed * 0.6f));
+            {
+                var navDir = GetFallbackNavDirection(_patrolTarget);
+                Move(ApplySeparation(navDir) * (moveSpeed * 0.6f));
+            }
         }
 
         void TickChase(float dt)
@@ -281,8 +317,8 @@ namespace MonsterKitchen.Enemy
                 _movement.TickChase(dt, _player.position, preferred);
             else
             {
-                Vector2 dir = ((Vector2)_player.position - (Vector2)transform.position).normalized;
-                Move(ApplySeparation(dir) * moveSpeed);
+                var navDir = GetFallbackNavDirection(_player.position);
+                Move(ApplySeparation(navDir) * moveSpeed);
             }
         }
 
@@ -294,10 +330,11 @@ namespace MonsterKitchen.Enemy
             float   preferred = PreferredDistance;
             Vector2 toPlayer  = ((Vector2)_player.position - (Vector2)transform.position).normalized;
 
-            // 너무 멀어지면 다시 추적
-            if (dist > preferred * 2f) { _state = State.Chase; return; }
+            // 적정 거리(preferred)를 벗어나면 즉시 Chase로 전환
+            // — 넉백 등으로 밀려난 경우 슬라임 고유 대시 사이클(윈드업→대시)로 재접근
+            if (dist > preferred) { _state = State.Chase; return; }
 
-            // 너무 가까우면 살짝 후퇴, 아니면 정지
+            // 너무 가까우면 살짝 후퇴, 적정 거리 내면 정지하고 공격
             if (dist < preferred * 0.5f)
                 Move(ApplySeparation(-toPlayer) * (moveSpeed * 0.5f));
             else
@@ -401,6 +438,10 @@ namespace MonsterKitchen.Enemy
             if (col != null) col.enabled = false;
 
             StopAiCoroutine();
+
+            // 리스폰 매니저에 사망 통보 (등록된 경우에만 처리)
+            MonsterRespawnManager.Instance?.NotifyDeath(this);
+
             Destroy(gameObject, 1.5f);
         }
 
@@ -443,6 +484,21 @@ namespace MonsterKitchen.Enemy
         // ================================================================
         //  Helpers
         // ================================================================
+
+        /// <summary>
+        /// _movement 컴포넌트가 없을 때 MonsterAI 자체 폴백용 경로 방향.
+        /// NavGrid 가 있으면 A* 다음 경유지 방향, 없으면 직선 방향을 반환한다.
+        /// </summary>
+        Vector2 GetFallbackNavDirection(Vector2 target)
+        {
+            Vector2 straight = (target - (Vector2)transform.position).normalized;
+
+            if (_navAgent == null) return straight;
+
+            _navAgent.SetDestination(target);
+            var dir = _navAgent.GetDirection();
+            return dir == Vector2.zero ? straight : dir;
+        }
 
         void Move(Vector2 velocity)
         {

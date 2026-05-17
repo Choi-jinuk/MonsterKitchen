@@ -26,5 +26,13 @@ namespace MonsterKitchen.Data
 
         [Header("Visuals")]
         public Sprite sprite;
+
+        [Header("CC 면역")]
+        [Tooltip("true 이면 넉백이 걸리지 않는다.")]
+        public bool immuneToKnockback;
+        [Tooltip("true 이면 스턴이 걸리지 않는다.")]
+        public bool immuneToStun;
+        [Tooltip("true 이면 풀인이 걸리지 않는다.")]
+        public bool immuneToPullIn;
     }
 }

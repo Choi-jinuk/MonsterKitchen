@@ -1,7 +1,10 @@
 using MonsterKitchen.Combat;
 using MonsterKitchen.Core;
 using MonsterKitchen.Data;
+using MonsterKitchen.Dungeon;
+using MonsterKitchen.Navigation;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace MonsterKitchen.Player
 {
@@ -28,6 +31,11 @@ namespace MonsterKitchen.Player
     //  ▶ 궁극기 게이지
     //    적에게 데미지를 줘 처치 시 PlayerStats.AddUltimateGaugeOnKill 호출.
     //    피격 시 게이지 적립은 PlayerStats 가 Health.OnDamaged 를 직접 구독.
+    //
+    //  ▶ 자동 AI (던전 전용)
+    //    DungeonScene 에서 유저 이동 입력이 없으면 자동으로 가장 가까운 적을
+    //    추적한다 (_autoChaseRange 내 탐색). 공격 범위 진입 시 정지.
+    //    WASD 입력이 들어오면 즉시 수동 이동으로 전환.
     // ====================================================================
 
     [RequireComponent(typeof(Rigidbody2D))]
@@ -37,6 +45,7 @@ namespace MonsterKitchen.Player
     {
         [Header("Layer")]
         [SerializeField] LayerMask enemyLayer;
+        // resourceNodeLayer 는 Inspector 설정 없이 런타임 자동 계산 ("ResourceNode" 레이어)
 
         [Header("Fallback (무기 미장착 시 사용되는 기본값)")]
         [SerializeField] float fallbackSearchRange = 2.5f;
@@ -48,6 +57,12 @@ namespace MonsterKitchen.Player
         [SerializeField] float moveAcceleration = 30f;
         [Tooltip("공격 타이머가 남아있는 동안 이동 속도 배율. 0.5 = 절반 속도.")]
         [SerializeField] float attackMovePenalty = 0.5f;
+
+        [Header("Auto AI (던전 전용)")]
+        [Tooltip("자동 추적 감지 반경. 이 범위 내 적이 있으면 자동으로 접근한다.")]
+        [SerializeField] float _autoChaseRange = 6f;
+        [Tooltip("자동 추적 시 공격 범위 앞에서 정지하는 비율 (0~1). 0.85 = 공격 범위의 85% 지점에서 멈춤.")]
+        [SerializeField] float _autoStopRatio  = 0.85f;
 
         [Header("Dash")]
         [SerializeField] float dashSpeed    = 18f;
@@ -75,6 +90,9 @@ namespace MonsterKitchen.Player
         // ── 대시 ──────────────────────────────────────────────────────
         float _dashCooldownTimer;
         bool  _isDashing;
+
+        // ── 자동 AI ───────────────────────────────────────────────────
+        bool _isInDungeon;
 
         // ── Gizmo ─────────────────────────────────────────────────────
         float   _gizmoAttackTime = -1f;
@@ -113,6 +131,9 @@ namespace MonsterKitchen.Player
                 _health.OnDamaged += OnPlayerDamaged;
                 _health.OnDeath   += OnPlayerDied;
             }
+
+            SceneManager.sceneLoaded += OnSceneLoaded;
+            UpdateDungeonState(SceneManager.GetActiveScene().name);
         }
 
         void OnDisable()
@@ -132,6 +153,8 @@ namespace MonsterKitchen.Player
                 _health.OnDamaged -= OnPlayerDamaged;
                 _health.OnDeath   -= OnPlayerDied;
             }
+
+            SceneManager.sceneLoaded -= OnSceneLoaded;
         }
 
         // 씬에 직접 배치된 경우 PlayerManager 없이도 Start 에서 자동 Init
@@ -188,7 +211,7 @@ namespace MonsterKitchen.Player
                 }
             }
 
-            // 자동 공격: 쿨타임 종료 + 감지 범위 내 적 존재 시
+            // 자동 공격: 쿨타임 종료 + 감지 범위 내 적 존재 시. 적 없으면 채집 노드 공격.
             if (_atkTimer <= 0f)
             {
                 float searchRange = GetCurrentSearchRange();
@@ -197,6 +220,10 @@ namespace MonsterKitchen.Player
                 {
                     _facingDir = ((Vector2)(target.position - transform.position)).normalized;
                     DoComboAttack(target);
+                }
+                else
+                {
+                    TryHarvestNode();
                 }
             }
         }
@@ -210,13 +237,16 @@ namespace MonsterKitchen.Player
             // 공격 타이머가 남아있으면 이동 속도 패널티 (공격 모션 중 느려짐)
             if (_atkTimer > 0f) speed *= attackMovePenalty;
 
-            // MoveTowards 로 가속/감속 — 관성감 있는 이동
-            Vector2 targetVel = _moveDir.normalized * speed;
+            // 유저 입력 없고 던전 씬이면 자동 AI 방향 사용
+            Vector2 effectiveDir = GetEffectiveMoveDir();
+
+            // MoveTowards 로 가속/감속 — nav 맵이 있으면 벽 슬라이딩 적용
+            Vector2 targetVel = ComputeNavVelocity(effectiveDir, speed);
             _currentVel = Vector2.MoveTowards(_currentVel, targetVel, moveAcceleration * Time.fixedDeltaTime);
             _rb.linearVelocity = _currentVel;
 
-            if (_moveDir.sqrMagnitude > 0.01f)
-                _facingDir = _moveDir.normalized;
+            if (effectiveDir.sqrMagnitude > 0.01f)
+                _facingDir = effectiveDir.normalized;
 
             _anim.SetFloat(HashMoveX, _facingDir.x);
             _anim.SetFloat(HashMoveY, _facingDir.y);
@@ -231,6 +261,39 @@ namespace MonsterKitchen.Player
                 foreach (var sr in _sprites) sr.flipX = flip;
             }
         }
+
+        // ================================================================
+        //  자동 AI 헬퍼
+        // ================================================================
+
+        /// <summary>
+        /// 이동에 사용할 실제 방향을 반환한다.
+        /// 유저 입력(WASD)이 있으면 수동 우선, 없고 DungeonScene이면 자동 추적.
+        /// </summary>
+        Vector2 GetEffectiveMoveDir()
+        {
+            // 유저 입력 최우선
+            if (_moveDir.sqrMagnitude > 0.01f) return _moveDir;
+
+            // 던전 외 씬이거나 대시 중에는 자동 없음
+            if (!_isInDungeon || _isDashing) return Vector2.zero;
+
+            // 가장 가까운 적 탐색
+            var target = FindNearestEnemy(_autoChaseRange);
+            if (target == null) return Vector2.zero;
+
+            float dist     = Vector2.Distance(transform.position, target.position);
+            float stopDist = GetCurrentSearchRange() * _autoStopRatio;
+
+            // 이미 공격 범위 근처에 있으면 정지 (자동 공격이 처리)
+            if (dist <= stopDist) return Vector2.zero;
+
+            return ((Vector2)(target.position - transform.position)).normalized;
+        }
+
+        void OnSceneLoaded(Scene scene, LoadSceneMode _) => UpdateDungeonState(scene.name);
+
+        void UpdateDungeonState(string sceneName) => _isInDungeon = sceneName == "DungeonScene";
 
         // ================================================================
         //  InputManager 이벤트 핸들러
@@ -291,6 +354,7 @@ namespace MonsterKitchen.Player
                 int   dmg    = _stats != null ? _stats.FinalAttack : 10;
                 AttributeType attr = _stats != null ? _stats.AttackAttribute : AttributeType.None;
                 SimpleMeleeHit(target, dmg, fallbackAttackRange, attr);
+                _stats?.ConsumeWeaponDurabilityOnHit();
                 return;
             }
 
@@ -315,19 +379,24 @@ namespace MonsterKitchen.Player
                 _comboWindowTimer = skill.comboWindow;
             }
 
-            // 애니메이션
+            // 애니메이션 (위쪽 공격은 overlay 제외)
             _anim.SetInteger(HashComboStep, step);
             int triggerHash = string.IsNullOrEmpty(skill.animTriggerOverride)
                 ? HashAttack
                 : Animator.StringToHash(skill.animTriggerOverride);
             _anim.SetTrigger(triggerHash);
-            _overlayAnim?.SetTrigger(HashAttack);
+            if (_facingDir.y < 0.5f)
+            {
+                // 트리거 발동 직전에 파라미터 동기화 (FixedUpdate 딜레이 방지)
+                _overlayAnim?.SetFloat(HashMoveX, _facingDir.x);
+                _overlayAnim?.SetFloat(HashMoveY, _facingDir.y);
+                _overlayAnim?.SetTrigger(HashAttack);
+            }
 
             ExecuteSkillStep(skill, dmgFinal, attrFinal);
+            _stats?.ConsumeWeaponDurabilityOnHit();
 
-            Debug.Log($"[PlayerController] 평타 {step + 1}타 [{skill.skillName}]  " +
-                      $"dmg×{skill.damageMultiplier:F2}→{dmgFinal}  " +
-                      (isLast ? "(체인 종료)" : $"창:{skill.comboWindow:F1}s"));
+            Debug.Log($"[PlayerController] 평타 {step + 1}타");
         }
 
         // ================================================================
@@ -343,14 +412,20 @@ namespace MonsterKitchen.Player
             int           dmg  = Mathf.RoundToInt((_stats?.FinalAttack ?? 10) * skill.damageMultiplier);
             AttributeType attr = _stats?.AttackAttribute ?? AttributeType.None;
 
-            // 애니메이션
+            // 애니메이션 (위쪽 공격은 overlay 제외)
             int triggerHash = string.IsNullOrEmpty(skill.animTriggerOverride)
                 ? HashAttack
                 : Animator.StringToHash(skill.animTriggerOverride);
             _anim.SetTrigger(triggerHash);
-            _overlayAnim?.SetTrigger(HashAttack);
+            if (_facingDir.y < 0.5f)
+            {
+                _overlayAnim?.SetFloat(HashMoveX, _facingDir.x);
+                _overlayAnim?.SetFloat(HashMoveY, _facingDir.y);
+                _overlayAnim?.SetTrigger(HashAttack);
+            }
 
             ExecuteSkillStep(skill, dmg, attr);
+            _stats?.ConsumeWeaponDurabilityOnHit();
         }
 
         // ================================================================
@@ -369,13 +444,13 @@ namespace MonsterKitchen.Player
                 // 단일 근거리
                 var target = FindNearestEnemy(skill.searchRange);
                 if (target != null)
-                    SingleMeleeHit(target, skill.attackRange, dmg, attr);
+                    SingleMeleeHit(target, skill.attackRange, dmg, attr, skill);
             }
             else
             {
                 // 범위 근거리 — OverlapCircle
                 Vector2 center = (Vector2)transform.position + _facingDir * (skill.attackRange * 0.5f);
-                AoeMeleeHit(center, skill.attackRange * 0.5f, skill.maxTargets, dmg, attr);
+                AoeMeleeHit(center, skill.attackRange * 0.5f, skill.maxTargets, dmg, attr, skill);
 
                 _gizmoAttackTime = Time.time;
                 _gizmoRange      = skill.attackRange * 0.5f;
@@ -398,13 +473,17 @@ namespace MonsterKitchen.Player
 
             bool wasDead = hp.IsDead;
             hp.TakeDamage(dmg, attr);
-            if (!wasDead && hp.IsDead) _stats?.AddUltimateGaugeOnKill();
-
-            Debug.Log($"[PlayerController][Melee] → {target.name} -{dmg}");
+            if (!wasDead && hp.IsDead)
+            {
+                _stats?.AddUltimateGaugeOnKill();
+                _stats?.ConsumeWeaponDurabilityOnKill();
+                Debug.Log("[PlayerController] 처치 게이지 적립");
+            }
+            // fallback 공격은 SkillData 없음 → CC 없음
         }
 
         /// <summary>단일 타겟 근거리 (SkillData.maxTargets == 1).</summary>
-        void SingleMeleeHit(Transform target, float attackRange, int dmg, AttributeType attr)
+        void SingleMeleeHit(Transform target, float attackRange, int dmg, AttributeType attr, Data.SkillData skill = null)
         {
             float dist = Vector2.Distance(transform.position, target.position);
             if (dist > attackRange) return;
@@ -418,13 +497,18 @@ namespace MonsterKitchen.Player
 
             bool wasDead = hp.IsDead;
             hp.TakeDamage(dmg, attr);
-            if (!wasDead && hp.IsDead) _stats?.AddUltimateGaugeOnKill();
+            if (!wasDead && hp.IsDead)
+            {
+                _stats?.AddUltimateGaugeOnKill();
+                _stats?.ConsumeWeaponDurabilityOnKill();
+                Debug.Log("[PlayerController] 처치 게이지 적립");
+            }
 
-            Debug.Log($"[PlayerController][MeleeTarget] → {target.name} -{dmg}");
+            TryApplyCC(skill, target, transform.position);
         }
 
         /// <summary>범위 근거리 — OverlapCircle.</summary>
-        void AoeMeleeHit(Vector2 center, float radius, int maxTargets, int dmg, AttributeType attr)
+        void AoeMeleeHit(Vector2 center, float radius, int maxTargets, int dmg, AttributeType attr, Data.SkillData skill = null)
         {
             var hits = Physics2D.OverlapCircleAll(center, radius, enemyLayer);
             int count = 0;
@@ -438,12 +522,15 @@ namespace MonsterKitchen.Player
 
                 bool wasDead = hp.IsDead;
                 hp.TakeDamage(dmg, attr);
-                if (!wasDead && hp.IsDead) _stats?.AddUltimateGaugeOnKill();
+                if (!wasDead && hp.IsDead)
+                {
+                    _stats?.AddUltimateGaugeOnKill();
+                    Debug.Log("[PlayerController] 처치 게이지 적립");
+                }
 
+                TryApplyCC(skill, col.transform, transform.position);
                 count++;
             }
-
-            Debug.Log($"[PlayerController][MeleeRange] center:{center} r:{radius:F2} 적중:{count}명");
         }
 
         // ================================================================
@@ -465,26 +552,111 @@ namespace MonsterKitchen.Player
 
             var proj = go.AddComponent<Projectile>();
             proj.Init(
-                damage:         dmg,
-                attr:           attr,
-                direction:      fireDir,
-                speed:          skill.missileSpeed,
-                maxDistance:    skill.missileMaxRange,
-                targetLayer:    enemyLayer,
-                isAoe:          skill.IsAoe,
-                aoeRadius:      skill.attackRange,
-                maxTargets:     skill.maxTargets,
-                onKill:         () => _stats?.AddUltimateGaugeOnKill(),
-                homingTarget:   target
+                damage:            dmg,
+                attr:              attr,
+                direction:         fireDir,
+                speed:             skill.missileSpeed,
+                maxDistance:       skill.missileMaxRange,
+                targetLayer:       enemyLayer,
+                isAoe:             skill.IsAoe,
+                aoeRadius:         skill.attackRange,
+                maxTargets:        skill.maxTargets,
+                onKill:            () =>
+                {
+                    _stats?.AddUltimateGaugeOnKill();
+                    Debug.Log("[PlayerController] 처치 게이지 적립");
+                },
+                homingTarget:      target,
+                ccForce:       skill.ccForce,
+                ccDuration:    skill.ccDuration,
+                stunDuration:  skill.stunDuration,
+                fireSourcePos: transform.position
             );
+        }
 
-            Debug.Log($"[PlayerController][Projectile] 발사  타겟:{target?.name ?? "없음"}  " +
-                      $"속도:{skill.missileSpeed}  사거리:{skill.missileMaxRange:F1}  AoE:{skill.IsAoe}");
+        // ================================================================
+        //  CC 적용 헬퍼
+        // ================================================================
+
+        /// <summary>
+        /// SkillData 의 CC 파라미터를 읽어 대상에게 적용한다.
+        /// 우선순위: knockbackForce > stunDuration > pullInForce.
+        /// skill 이 null 이거나 모든 CC 값이 0 이면 아무것도 하지 않는다.
+        /// </summary>
+        void TryApplyCC(SkillData skill, Transform target, Vector2 sourcePos)
+        {
+            if (skill == null || target == null) return;
+
+            var cc = target.GetComponent<Combat.CrowdControlComponent>();
+            if (cc == null) return;
+
+            if (skill.ccForce > 0f)
+            {
+                // 양수 → 넉백 (시전자 반대 방향)
+                Vector2 dir = ((Vector2)target.position - sourcePos).normalized;
+                cc.TryApplyKnockback(dir, skill.ccForce, skill.ccDuration);
+            }
+            else if (skill.ccForce < 0f)
+            {
+                // 음수 → 풀인 (시전자 방향으로, 절댓값을 힘으로 사용)
+                cc.TryApplyPullIn(sourcePos, -skill.ccForce, skill.ccDuration);
+            }
+            else if (skill.stunDuration > 0f)
+            {
+                cc.TryApplyStun(skill.stunDuration);
+            }
         }
 
         // ================================================================
         //  내부 유틸
         // ================================================================
+
+        /// <summary>
+        /// NavMapProvider 가 있으면 벽 슬라이딩을 적용한 목표 속도를 반환한다.
+        /// 맵이 없으면 입력 방향 × 속도를 그대로 반환 (기존 동작 유지).
+        ///
+        /// 슬라이딩 우선순위:
+        ///   1. 원하는 방향 전체 이동 가능 → 그대로
+        ///   2. X 축만 이동 가능           → 수평 슬라이드
+        ///   3. Y 축만 이동 가능           → 수직 슬라이드
+        ///   4. 둘 다 불가                 → 정지
+        /// </summary>
+        Vector2 ComputeNavVelocity(Vector2 inputDir, float speed)
+        {
+            if (inputDir.sqrMagnitude < 0.01f)
+                return Vector2.zero;
+
+            var grid = NavGrid.Instance;
+            if (grid == null)
+                return inputDir.normalized * speed; // NavGrid 없는 씬 → 직선 이동
+
+            float   dt      = Time.fixedDeltaTime;
+            Vector2 pos     = transform.position;
+            Vector2 normDir = inputDir.normalized;
+            Vector2 desired = pos + normDir * speed * dt;
+
+            // 원하는 방향으로 이동 가능
+            if (grid.IsWalkable(desired))
+                return normDir * speed;
+
+            // 수평 슬라이드 (X 방향만)
+            if (Mathf.Abs(normDir.x) > 0.01f)
+            {
+                Vector2 hPos = new Vector2(desired.x, pos.y);
+                if (grid.IsWalkable(hPos))
+                    return new Vector2(normDir.x, 0f) * speed;
+            }
+
+            // 수직 슬라이드 (Y 방향만)
+            if (Mathf.Abs(normDir.y) > 0.01f)
+            {
+                Vector2 vPos = new Vector2(pos.x, desired.y);
+                if (grid.IsWalkable(vPos))
+                    return new Vector2(0f, normDir.y) * speed;
+            }
+
+            return Vector2.zero;
+        }
 
         float GetCurrentSearchRange()
         {
@@ -508,6 +680,58 @@ namespace MonsterKitchen.Player
                 if (d < minDist) { minDist = d; nearest = hit.transform; }
             }
             return nearest;
+        }
+
+        /// <summary>
+        /// 적 없을 때 인접한 채집 노드를 공격한다.
+        /// attackRange 내 가장 가까운 미소진 ResourceNode 에 무기 데미지를 전달.
+        /// "ResourceNode" 레이어는 런타임에 자동 계산 — Inspector 연결 불필요.
+        /// </summary>
+        void TryHarvestNode()
+        {
+            int nodeLayerIdx = LayerMask.NameToLayer("ResourceNode");
+            if (nodeLayerIdx < 0) return;          // 레이어 미등록 시 채집 생략
+            LayerMask nodeLayer = 1 << nodeLayerIdx;
+
+            float attackRange = GetCurrentAttackRange();
+            var hits = Physics2D.OverlapCircleAll(transform.position, attackRange, nodeLayer);
+
+            ResourceNode nearest  = null;
+            float        minDist  = float.MaxValue;
+            foreach (var h in hits)
+            {
+                var node = h.GetComponent<ResourceNode>();
+                if (node == null || node.Depleted) continue;
+                float d = Vector2.Distance(transform.position, h.transform.position);
+                if (d < minDist) { minDist = d; nearest = node; }
+            }
+            if (nearest == null) return;
+
+            int dmg = _stats != null ? _stats.FinalAttack : 10;
+            _atkTimer  = GetCurrentCooltime();
+            _facingDir = ((Vector2)(nearest.transform.position - transform.position)).normalized;
+            _anim.SetTrigger(HashAttack);
+
+            nearest.TakeHarvestDamage(dmg, _stats);
+            _stats?.ConsumeWeaponDurabilityOnHit();
+        }
+
+        float GetCurrentAttackRange()
+        {
+            var group = _stats?.NormalAttackGroup;
+            if (group == null || group.ChainLength == 0) return fallbackAttackRange;
+            int  step  = Mathf.Clamp(_comboStep, 0, group.ChainLength - 1);
+            var  skill = group.GetStep(step);
+            return skill != null ? skill.attackRange : fallbackAttackRange;
+        }
+
+        float GetCurrentCooltime()
+        {
+            var group = _stats?.NormalAttackGroup;
+            if (group == null || group.ChainLength == 0) return fallbackCooltime;
+            int  step  = Mathf.Clamp(_comboStep, 0, group.ChainLength - 1);
+            var  skill = group.GetStep(step);
+            return skill != null ? skill.cooltime : fallbackCooltime;
         }
 
         // ================================================================
