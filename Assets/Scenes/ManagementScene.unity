@@ -131,6 +131,7 @@ GameObject:
   - component: {fileID: 8631942}
   - component: {fileID: 8631941}
   - component: {fileID: 8631944}
+  - component: {fileID: 8631945}
   m_Layer: 0
   m_Name: DungeonPortal
   m_TagString: Untagged
@@ -270,6 +271,19 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
+--- !u!114 &8631945
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8631940}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 696771671f68e7149a2afcc1787446b1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MonsterKitchen.Core.PerspectivePlaneSync
+  _isStatic: 1
 --- !u!1 &42895440
 GameObject:
   m_ObjectHideFlags: 0
@@ -313,6 +327,7 @@ GameObject:
   - component: {fileID: 176203872}
   - component: {fileID: 176203871}
   - component: {fileID: 176203874}
+  - component: {fileID: 176203875}
   m_Layer: 0
   m_Name: ToolUpgrade_Range
   m_TagString: Untagged
@@ -388,7 +403,7 @@ Transform:
   m_GameObject: {fileID: 176203870}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -3, y: -0.5, z: 0}
+  m_LocalPosition: {x: -3, y: -0.5, z: -0.17101006}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -453,6 +468,19 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
+--- !u!114 &176203875
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 176203870}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 696771671f68e7149a2afcc1787446b1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MonsterKitchen.Core.PerspectivePlaneSync
+  _isStatic: 1
 --- !u!1 &265170066
 GameObject:
   m_ObjectHideFlags: 0
@@ -509,6 +537,7 @@ GameObject:
   - component: {fileID: 303924675}
   - component: {fileID: 303924674}
   - component: {fileID: 303924677}
+  - component: {fileID: 303924678}
   m_Layer: 0
   m_Name: ShopUpgrade_Tip
   m_TagString: Untagged
@@ -584,7 +613,7 @@ Transform:
   m_GameObject: {fileID: 303924673}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 2, y: 2, z: 0}
+  m_LocalPosition: {x: 2, y: 2, z: 0.68404025}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -649,6 +678,19 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
+--- !u!114 &303924678
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 303924673}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 696771671f68e7149a2afcc1787446b1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MonsterKitchen.Core.PerspectivePlaneSync
+  _isStatic: 1
 --- !u!1 &459648383
 GameObject:
   m_ObjectHideFlags: 0
@@ -877,6 +919,7 @@ GameObject:
   - component: {fileID: 674964625}
   - component: {fileID: 674964628}
   - component: {fileID: 674964629}
+  - component: {fileID: 674964630}
   m_Layer: 0
   m_Name: EveningStarter
   m_TagString: Untagged
@@ -951,7 +994,7 @@ Transform:
   m_GameObject: {fileID: 674964624}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 4, y: -2, z: 0}
+  m_LocalPosition: {x: 4, y: -2, z: -0.68404025}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1031,6 +1074,19 @@ MonoBehaviour:
   promptText: "[E] \uC800\uB141 \uC601\uC5C5 \uC2DC\uC791"
   worldOffset: {x: 0, y: 1.2, z: 0}
   textColor: {r: 1, g: 1, b: 1, a: 1}
+--- !u!114 &674964630
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 674964624}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 696771671f68e7149a2afcc1787446b1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MonsterKitchen.Core.PerspectivePlaneSync
+  _isStatic: 1
 --- !u!1 &779741059
 GameObject:
   m_ObjectHideFlags: 0
@@ -1041,6 +1097,7 @@ GameObject:
   m_Component:
   - component: {fileID: 779741061}
   - component: {fileID: 779741060}
+  - component: {fileID: 779741062}
   m_Layer: 0
   m_Name: Background
   m_TagString: Untagged
@@ -1115,13 +1172,26 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 779741059}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -10.58, y: -5.625, z: 1}
-  m_LocalScale: {x: 2, y: 2, z: 1}
+  m_LocalRotation: {x: 0.38268346, y: 0, z: 0, w: 0.9238795}
+  m_LocalPosition: {x: -10.58, y: 2.6, z: 4}
+  m_LocalScale: {x: 3, y: 3, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 20, y: 0, z: 0}
+--- !u!114 &779741062
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 779741059}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3ac0e2b3f4feda94b87fc00d4b208f24, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MonsterKitchen.Core.PerspectiveMapTilt
+  _config: {fileID: 11400000, guid: 9ef37e65254bf2c4186d3f7995f2b338, type: 2}
 --- !u!1 &1123346466
 GameObject:
   m_ObjectHideFlags: 0
@@ -1266,8 +1336,8 @@ Camera:
     height: 1
   near clip plane: 0.3
   far clip plane: 1000
-  field of view: 60
-  orthographic: 1
+  field of view: 55
+  orthographic: 0
   orthographic size: 5
   m_Depth: -1
   m_CullingMask:
@@ -1513,6 +1583,7 @@ GameObject:
   - component: {fileID: 1527834462}
   - component: {fileID: 1527834461}
   - component: {fileID: 1527834464}
+  - component: {fileID: 1527834465}
   m_Layer: 0
   m_Name: ShopUpgrade_Seats
   m_TagString: Untagged
@@ -1588,7 +1659,7 @@ Transform:
   m_GameObject: {fileID: 1527834460}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 2, z: 0}
+  m_LocalPosition: {x: 0, y: 2, z: 0.68404025}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1653,6 +1724,19 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
+--- !u!114 &1527834465
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1527834460}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 696771671f68e7149a2afcc1787446b1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MonsterKitchen.Core.PerspectivePlaneSync
+  _isStatic: 1
 --- !u!1 &1839769364
 GameObject:
   m_ObjectHideFlags: 0
@@ -1665,6 +1749,7 @@ GameObject:
   - component: {fileID: 1839769366}
   - component: {fileID: 1839769365}
   - component: {fileID: 1839769368}
+  - component: {fileID: 1839769369}
   m_Layer: 0
   m_Name: ToolUpgrade_Cooldown
   m_TagString: Untagged
@@ -1740,7 +1825,7 @@ Transform:
   m_GameObject: {fileID: 1839769364}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -3, y: -2, z: 0}
+  m_LocalPosition: {x: -3, y: -2, z: -0.68404025}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1805,6 +1890,19 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
+--- !u!114 &1839769369
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1839769364}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 696771671f68e7149a2afcc1787446b1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MonsterKitchen.Core.PerspectivePlaneSync
+  _isStatic: 1
 --- !u!1 &1857601095
 GameObject:
   m_ObjectHideFlags: 0
@@ -1860,6 +1958,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1919382652}
   - component: {fileID: 1919382651}
+  - component: {fileID: 1919382653}
   m_Layer: 0
   m_Name: FarmArea
   m_TagString: Untagged
@@ -1897,6 +1996,19 @@ Transform:
   - {fileID: 459648384}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1919382653
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1919382650}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 696771671f68e7149a2afcc1787446b1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MonsterKitchen.Core.PerspectivePlaneSync
+  _isStatic: 1
 --- !u!1 &1951205186
 GameObject:
   m_ObjectHideFlags: 0
@@ -1909,6 +2021,7 @@ GameObject:
   - component: {fileID: 1951205188}
   - component: {fileID: 1951205187}
   - component: {fileID: 1951205190}
+  - component: {fileID: 1951205191}
   m_Layer: 0
   m_Name: ToolUpgrade_Damage
   m_TagString: Untagged
@@ -1984,7 +2097,7 @@ Transform:
   m_GameObject: {fileID: 1951205186}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -3, y: 1, z: 0}
+  m_LocalPosition: {x: -3, y: 1, z: 0.34202012}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -2049,6 +2162,19 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
+--- !u!114 &1951205191
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1951205186}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 696771671f68e7149a2afcc1787446b1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MonsterKitchen.Core.PerspectivePlaneSync
+  _isStatic: 1
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

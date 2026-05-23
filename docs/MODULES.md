@@ -1,6 +1,6 @@
 # 모듈 개발 계획 — 몬스터 키친
 
-> 최종 갱신: 2026-05-09
+> 최종 갱신: 2026-05-23
 > **방침: 위에서 아래 순서대로. 한 모듈이 완전히 끝나야 다음 모듈을 시작한다.**
 > 모듈 완료 테스트를 통과해야 ✅ 완료로 표시한다.
 
@@ -58,7 +58,7 @@
 
 ---
 
-## 모듈 3 — 전투 ✅ 완료 (테스트 전)
+## 모듈 3 — 전투 🔄 진행 중 (애니메이션 구조 작업)
 
 > **범위 기준**: 피격 수신 + 공격 실행 + 무기·스킬 시스템 전체.
 > "데미지가 오가는 모든 것"이 이 모듈에 속한다.
@@ -90,7 +90,7 @@
 | # | 항목 | 상태 |
 |---|---|---|
 | 3-7 | AbilType enum + AbilEntry struct | ✅ |
-| 3-8 | SkillData SO — cooltime·comboWindow·damageMultiplier·searchRange·attackRange·maxTargets·missileSpeed·missileMaxRange·animTriggerOverride | ✅ |
+| 3-8 | SkillData SO — cooltime·comboWindow·damageMultiplier·searchRange·attackRange·maxTargets·missileSpeed·missileMaxRange·animTriggerOverride·ccForce·ccDuration·stunDuration | ✅ |
 | 3-9 | SkillGroupData SO — skillIcon·skillName·description·skillChain·allowedWeaponTypes | ✅ |
 | 3-10 | WeaponData SO — weaponType·abils(List\<AbilEntry\>)·normalAttackGroup(SkillGroupData) | ✅ |
 | 3-11 | AttackPattern enum 제거 (GameEnums.cs), AttackSkillData Obsolete 처리 | ✅ |
@@ -102,6 +102,7 @@
 | 3-12 | PlayerController 공격 실행 리팩터 — SkillData 수치 기반 (searchRange·attackRange·maxTargets·missileSpeed) | ✅ |
 | 3-13 | 평타 콤보 — WeaponData.normalAttackGroup 체인 실행, comboWindow 타이머 | ✅ |
 | 3-14 | 투사체 발사 — Projectile(공용) 생성, 유도·AoE·직선 지원, missileMaxRange 초과 시 소멸 | ✅ |
+| 3-20 | CC 시스템 — CrowdControlComponent (넉백·풀인·스턴), CCType enum, SkillData CC 파라미터 연동 | ✅ |
 
 ### 무기·스킬 장착 시스템
 
@@ -120,6 +121,72 @@
 | 3-UI1 | 스킬 슬롯 1·2 UI — SkillGroupData.skillIcon + 쿨타임 오버레이 | ✅ |
 | 3-UI2 | 궁극기 게이지 UI — 게이지 바 | ✅ |
 | 3-UI3 | 무기 슬롯 UI — 현재 장착 무기 아이콘 표시 | ✅ |
+
+### 2.5D 원근 효과
+
+> **배경**: 배경/맵 GO를 X 축 -5도 기울이고, 엔티티 Z = Y * sin(5°) 로 동기화.
+> Perspective 카메라가 Z 거리 차이를 자연스러운 원근감으로 변환한다.
+> 스케일 조작 없음. Physics2D(XY 평면)와 완전 독립.
+
+| # | 항목 | 상태 |
+|---|---|---|
+| 3-P1 | PerspectivePlaneSync 컴포넌트 (Z = Y·sin(tilt), isStatic 플래그) | ✅ |
+| 3-P2 | Player · Slime · Customer 프리팹에 PerspectivePlaneSync(isStatic=false) 적용 | ✅ |
+| 3-P3 | 전 씬 배경 GO x=-5 회전 + 카메라 Perspective FOV=55, TransparencySort=Distance | ✅ |
+| 3-P4 | PerspectiveManager — static TiltAngleDeg 제공. PerspectivePlaneSync 가 직접 참조 (ScanAndApply 없음) | ✅ |
+| 3-P5 | 씬별 tiltAngleDeg · 카메라 FOV 튜닝 (플레이 후 수치 조정) | ❌ |
+
+### 애니메이션 구조 (무기 분리)
+
+> **배경**: 무기만 WeaponSocket으로 분리. 상하체 Animator Layer 분리 없음.
+> 목표: 무기 교체 용이성 + `_facingDir` 기반 360도 공격 방향 자유도 확보.
+> 에셋(무기 스프라이트) 미준비 상태 → 3-A1~A5 코드/프리팹 작업 먼저 진행,
+> 3-A6·A7은 에셋 완성 후 연동.
+
+> **추가 완료 테스트**
+> 10. WeaponSocket GO에서 무기 스프라이트 런타임 교체 확인
+> 11. `_facingDir` 기반 WeaponSocket Transform 회전 → 360도 공격 방향 정상 동작
+> 12. `_facingDir.y < 0.5f` 핵 제거 후 상하 공격 모두 overlayAnim 정상 재생
+> 13. SkillData.animTriggerOverride — 스킬별 다른 공격 클립 재생 확인
+
+| # | 항목 | 상태 |
+|---|---|---|
+| 3-A1 | WeaponSocket 자식 GameObject 추가 (Player.prefab, SpriteRenderer + Animator) | ✅ |
+| 3-A2 | WeaponData — `weaponSprite`·`weaponAnimController` 필드 추가 | ✅ |
+| 3-A3 | 무기 장착 시 WeaponSocket 스프라이트·AnimatorController 런타임 교체 | ✅ |
+| 3-A4 | WeaponSocket Transform 회전 — `_facingDir` 기반 360도 방향 반영 | ✅ |
+| 3-A5 | `_facingDir.y < 0.5f` 핵 제거 — 방향별 overlay 트리거 정리 | ✅ |
+| 3-A6 | SkillData.animTriggerOverride 실 클립 연결 (에셋 준비 후) | ⚠️ 코드 연결 완료, 실 클립은 에셋 제작 후 |
+| 3-A7 | 무기 스프라이트 Aseprite 임포트 (에셋 제작 후 연동) | ❌ |
+
+### AI 활용 무기 에셋 제작 방식
+
+> **전제**: 캐릭터 본체 파츠 분리는 하지 않음. **WeaponSocket에 붙는 무기 스프라이트만** 확보하면 된다.
+> 무기 1종 = 스프라이트 1장(또는 소수의 프레임). AI는 제작량 감소가 목적이며,
+> 최종 픽셀 정리는 Aseprite에서 수행한다.
+
+#### 무기 에셋 제작 플로우
+
+```
+1. Midjourney / Leonardo.ai (또는 Scenario.gg)
+   └─ 프롬프트 예시: "2D top-down fantasy sword sprite,
+                      transparent background, pixel art, 16x32px"
+
+2. Aseprite로 임포트
+   └─ 픽셀 정리 + 팔레트 통일
+   └─ 캔버스 규격 고정: 무기 16×32px 기준
+
+3. Unity Aseprite Importer로 임포트
+   └─ 개별 Sprite로 슬라이스
+   └─ WeaponData.weaponSprite에 연결
+```
+
+#### 스타일 일관성 유지 포인트
+
+- **팔레트 고정**: 첫 무기 확정 후 Aseprite 팔레트 파일(`.pal`) 저장 → 모든 무기에 동일 적용
+- **캔버스 규격 고정**: 무기 16×32px 기준 문서화
+- **레퍼런스 시트 유지**: 확정된 무기 1종을 `Assets/Art/Reference/` 에 보관, 신규 무기 생성 시 img2img 인풋으로 활용
+- **반복 에셋(스킬 이펙트·아이콘)**: Scenario.gg 파인튜닝 후 대량 생성
 
 ---
 
@@ -143,12 +210,13 @@
 | 4-7 | 적 HP 바 (World Space Canvas, 색상 초록→노랑→빨강) | ✅ |
 | 4-8 | 이동 컴포넌트 패턴 (MonsterMovementBase + SlimeMovement 분리) | ✅ |
 | 4-9 | Separation Steering (동료 몬스터 밀집 방지) | ✅ |
+| 4-10 | 내비게이션 그리드 — NavGrid (IsWalkable 격자), NavPathfinder (A*), NavAgent (이동 위임), 플레이어 벽 슬라이딩 | ✅ |
 
 ---
 
-## 모듈 5 — 던전 ⏳ 대기 중 (모듈 2 완료 후 시작)
+## 모듈 5 — 던전 ⚠️ 부분 완료 (모듈 3 테스트 통과 후 전면 작업)
 
-> 모듈 2(조작) 완전 완료 후 진행.
+> 모듈 3(전투) 테스트 통과 후 전면 작업. 일부 항목은 선행 구현됨.
 
 > **모듈 완료 테스트**
 > 1. ManagementScene 포털 진입 → DungeonScene 전환
@@ -246,7 +314,7 @@
 | 9-7 | HUD — 골드 표시 | ✅ |
 | 9-8 | HUD — 플레이어 HP 바 (색상 변화) | ✅ |
 | 9-9 | HUD — Day 카운터 | ✅ |
-| 9-10 | HUD — 스킬 쿨타임 UI (스킬 1·2·궁극기 아이콘 + 쿨다운 오버레이) | ❌ |
+| 9-10 | HUD — 스킬 쿨타임 UI (스킬 1·2·궁극기 아이콘 + 쿨다운 오버레이) | ✅ |
 | 9-11 | Save / Load (골드·명성·인벤토리·Day → JSON, 씬 전환 시 자동 저장) | ❌ |
 
 ---
@@ -269,9 +337,9 @@
 ```
 모듈 1  기반 인프라     ✅ 완료
 모듈 2  조작           ✅ 완료
-모듈 3  전투           🔄 진행 중  ← 여기
+모듈 3  전투           🔄 진행 중 (애니메이션 구조 작업)  ← 여기
 모듈 4  몬스터 AI       ✅ 완료
-모듈 5  던전            ⏳ 모듈 3 완료 후
+모듈 5  던전            ⚠️ 부분완료 (모듈 3 테스트 통과 후 전면 작업)
 모듈 6  인벤토리        ⏳ 모듈 5 완료 후
 모듈 7  요리 시스템     ⏳ 모듈 6 완료 후
 모듈 8  식당 시스템     ⏳ 모듈 7 완료 후

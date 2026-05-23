@@ -14,6 +14,7 @@ GameObject:
   - component: {fileID: 2446177979915498804}
   - component: {fileID: 2509651903553498199}
   - component: {fileID: 4105252894353530047}
+  - component: {fileID: 361221868471769357}
   m_Layer: 0
   m_Name: Customer
   m_TagString: Untagged
@@ -200,6 +201,20 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 68f4f209ae1a65448be06e1c2934b84a, type: 2}
   - {fileID: 11400000, guid: 5347f983fe0745545b017e3a9eaeb8f6, type: 2}
   - {fileID: 11400000, guid: b4eba1df6b432934eb3f0b8072499a87, type: 2}
+--- !u!114 &361221868471769357
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5015245969387161486}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 696771671f68e7149a2afcc1787446b1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MonsterKitchen.Core.PerspectivePlaneSync
+  _tiltAngleDeg: 5
+  _isStatic: 0
 --- !u!1 &6825581654880481808
 GameObject:
   m_ObjectHideFlags: 0

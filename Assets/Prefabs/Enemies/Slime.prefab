@@ -19,6 +19,8 @@ GameObject:
   - component: {fileID: 8396982730606618849}
   - component: {fileID: 7276641244880455630}
   - component: {fileID: 2434634080673381886}
+  - component: {fileID: 3926549378676827654}
+  - component: {fileID: 4338519199941895464}
   m_Layer: 8
   m_Name: Slime
   m_TagString: Untagged
@@ -35,7 +37,7 @@ Transform:
   m_GameObject: {fileID: 5250572445987000973}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 3, y: 2, z: 0}
+  m_LocalPosition: {x: 3, y: 2, z: 0.17431147}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -225,15 +227,15 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MonsterKitchen.Enemy.MonsterAI
   monsterData: {fileID: 11400000, guid: 8530c29c65750d845a65fec88786766a, type: 2}
-  detectRange: 5
-  preferredDistance: 1
-  attackRange: 1
   moveSpeed: 2.5
-  attackCooldown: 1.2
-  attackDamage: 5
+  _detectRangeBonus: 1.5
   patrolRadius: 3
   patrolWait: 1.5
   _movement: {fileID: 2434634080673381886}
+  _projectilePrefab: {fileID: 0}
+  _playerLayer:
+    serializedVersion: 2
+    m_Bits: 0
   separationRadius: 0.9
   separationWeight: 2
   monsterLayer:
@@ -288,3 +290,29 @@ MonoBehaviour:
   dashSpeed: 7
   dashDuration: 0.35
   dashCooldown: 0.6
+--- !u!114 &3926549378676827654
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5250572445987000973}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3041bed932474364c931719017c6e7c9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MonsterKitchen.Combat.CrowdControlComponent
+--- !u!114 &4338519199941895464
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5250572445987000973}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 696771671f68e7149a2afcc1787446b1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MonsterKitchen.Core.PerspectivePlaneSync
+  _tiltAngleDeg: 5
+  _isStatic: 0
