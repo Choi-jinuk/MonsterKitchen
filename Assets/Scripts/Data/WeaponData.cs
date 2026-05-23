@@ -57,6 +57,16 @@ namespace MonsterKitchen.Data
         [Tooltip("이 무기의 평타 체인 SkillGroupData.\n" +
                  "무기 장착 시 자동으로 평타로 사용된다.")]
         public SkillGroupData normalAttackGroup;
+
+        [Header("Visual (WeaponSocket)")]
+        [Tooltip("WeaponSocket SpriteRenderer 에 런타임 교체되는 무기 스프라이트.\n" +
+                 "에셋 준비 전까지 null 허용 — 소켓에 스프라이트 없이 동작.")]
+        public Sprite weaponSprite;
+
+        [Tooltip("무기 전용 AnimatorController.\n" +
+                 "활 시위 당기기·마법봉 캐스팅 등 무기별 애니메이션이 있는 경우만 설정.\n" +
+                 "null 이면 WeaponSocket Animator 비활성 — 스프라이트만 표시.")]
+        public RuntimeAnimatorController weaponAnimController;
     }
 
     // ----------------------------------------------------------------

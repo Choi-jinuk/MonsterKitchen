@@ -70,12 +70,13 @@ namespace MonsterKitchen.Player
         [SerializeField] float dashCooldown = 0.9f;
 
         // ── 컴포넌트 참조 ─────────────────────────────────────────────
-        [SerializeField] Rigidbody2D      _rb;
-        [SerializeField] Animator         _anim;
-        [SerializeField] Animator         _overlayAnim;  // Overlay 자식 Animator
-        [SerializeField] SpriteRenderer[] _sprites;   // 자신 + 모든 자식 SpriteRenderer
-        [SerializeField] Health           _health;
-        [SerializeField] PlayerStats    _stats;
+        [SerializeField] Rigidbody2D           _rb;
+        [SerializeField] Animator              _anim;
+        [SerializeField] Animator              _overlayAnim;   // Overlay 자식 Animator
+        [SerializeField] WeaponSocketController _weaponSocket; // 무기 소켓 (WeaponSocket 자식 GO)
+        [SerializeField] SpriteRenderer[]      _sprites;      // 자신 + 자식 SpriteRenderer (WeaponSocket 제외)
+        [SerializeField] Health                _health;
+        [SerializeField] PlayerStats           _stats;
 
         // ── 이동 ──────────────────────────────────────────────────────
         Vector2 _moveDir;
@@ -132,6 +133,9 @@ namespace MonsterKitchen.Player
                 _health.OnDeath   += OnPlayerDied;
             }
 
+            if (_stats != null)
+                _stats.OnWeaponChanged += OnWeaponChanged;
+
             SceneManager.sceneLoaded += OnSceneLoaded;
             UpdateDungeonState(SceneManager.GetActiveScene().name);
         }
@@ -154,6 +158,9 @@ namespace MonsterKitchen.Player
                 _health.OnDeath   -= OnPlayerDied;
             }
 
+            if (_stats != null)
+                _stats.OnWeaponChanged -= OnWeaponChanged;
+
             SceneManager.sceneLoaded -= OnSceneLoaded;
         }
 
@@ -171,6 +178,13 @@ namespace MonsterKitchen.Player
         public void Init(PlayerSpawnData data)
         {
             _stats.Init(data);
+
+            // SpawnManager 패턴: Init()은 OnEnable() 전에 호출되므로
+            // OnWeaponChanged 이벤트가 아직 구독 전일 수 있다.
+            // 초기 무기를 WeaponSocket 에 직접 동기화.
+            _weaponSocket?.SetWeapon(_stats.EquippedWeapon);
+            _weaponSocket?.SetFacingDirection(_facingDir);
+
             _initialized = true;
 
             Debug.Log("[PlayerController] Init 완료");
@@ -181,11 +195,19 @@ namespace MonsterKitchen.Player
         // 빌드에 포함되지 않으므로 런타임 비용 없음.
         void Reset()
         {
-            _rb     = GetComponent<Rigidbody2D>();
-            _anim   = GetComponent<Animator>();
-            _sprites = GetComponentsInChildren<SpriteRenderer>(true);
-            _health = GetComponent<Health>();
-            _stats  = GetComponent<PlayerStats>();
+            _rb           = GetComponent<Rigidbody2D>();
+            _anim         = GetComponent<Animator>();
+            _weaponSocket = GetComponentInChildren<WeaponSocketController>(true);
+            _health       = GetComponent<Health>();
+            _stats        = GetComponent<PlayerStats>();
+
+            // WeaponSocket SR 제외하고 나머지 SpriteRenderer 수집
+            var weaponSR = _weaponSocket != null ? _weaponSocket.SR : null;
+            var all = GetComponentsInChildren<SpriteRenderer>(true);
+            var filtered = new System.Collections.Generic.List<SpriteRenderer>();
+            foreach (var sr in all)
+                if (sr != weaponSR) filtered.Add(sr);
+            _sprites = filtered.ToArray();
         }
 #endif
 
@@ -219,6 +241,7 @@ namespace MonsterKitchen.Player
                 if (target != null)
                 {
                     _facingDir = ((Vector2)(target.position - transform.position)).normalized;
+                    _weaponSocket?.SetFacingDirection(_facingDir); // 공격 전 소켓 방향 선반영
                     DoComboAttack(target);
                 }
                 else
@@ -255,10 +278,19 @@ namespace MonsterKitchen.Player
             _overlayAnim?.SetFloat(HashMoveX, _facingDir.x);
             _overlayAnim?.SetFloat(HashMoveY, _facingDir.y);
 
+            // 무기 소켓 방향 갱신 (360도 world space 회전)
+            _weaponSocket?.SetFacingDirection(_facingDir);
+
+            // WeaponSocket SR 은 자체적으로 방향을 처리하므로 flipX 루프에서 제외
             if (_facingDir.x != 0f && _sprites != null)
             {
                 bool flip = _facingDir.x > 0f;
-                foreach (var sr in _sprites) sr.flipX = flip;
+                var  weaponSR = _weaponSocket != null ? _weaponSocket.SR : null;
+                foreach (var sr in _sprites)
+                {
+                    if (sr == weaponSR) continue;
+                    sr.flipX = flip;
+                }
             }
         }
 
@@ -379,19 +411,21 @@ namespace MonsterKitchen.Player
                 _comboWindowTimer = skill.comboWindow;
             }
 
-            // 애니메이션 (위쪽 공격은 overlay 제외)
+            // 애니메이션
             _anim.SetInteger(HashComboStep, step);
             int triggerHash = string.IsNullOrEmpty(skill.animTriggerOverride)
                 ? HashAttack
                 : Animator.StringToHash(skill.animTriggerOverride);
             _anim.SetTrigger(triggerHash);
-            if (_facingDir.y < 0.5f)
-            {
-                // 트리거 발동 직전에 파라미터 동기화 (FixedUpdate 딜레이 방지)
-                _overlayAnim?.SetFloat(HashMoveX, _facingDir.x);
-                _overlayAnim?.SetFloat(HashMoveY, _facingDir.y);
-                _overlayAnim?.SetTrigger(HashAttack);
-            }
+
+            // Overlay: 모든 방향에서 발동 (_facingDir.y < 0.5f 핵 제거)
+            // 트리거 발동 직전에 파라미터 동기화 (FixedUpdate 딜레이 방지)
+            _overlayAnim?.SetFloat(HashMoveX, _facingDir.x);
+            _overlayAnim?.SetFloat(HashMoveY, _facingDir.y);
+            _overlayAnim?.SetTrigger(HashAttack);
+
+            // 무기 소켓 애니메이션 (활 시위 등 무기별 모션)
+            _weaponSocket?.TriggerWeaponAnim(triggerHash);
 
             ExecuteSkillStep(skill, dmgFinal, attrFinal);
             _stats?.ConsumeWeaponDurabilityOnHit();
@@ -412,17 +446,19 @@ namespace MonsterKitchen.Player
             int           dmg  = Mathf.RoundToInt((_stats?.FinalAttack ?? 10) * skill.damageMultiplier);
             AttributeType attr = _stats?.AttackAttribute ?? AttributeType.None;
 
-            // 애니메이션 (위쪽 공격은 overlay 제외)
+            // 애니메이션
             int triggerHash = string.IsNullOrEmpty(skill.animTriggerOverride)
                 ? HashAttack
                 : Animator.StringToHash(skill.animTriggerOverride);
             _anim.SetTrigger(triggerHash);
-            if (_facingDir.y < 0.5f)
-            {
-                _overlayAnim?.SetFloat(HashMoveX, _facingDir.x);
-                _overlayAnim?.SetFloat(HashMoveY, _facingDir.y);
-                _overlayAnim?.SetTrigger(HashAttack);
-            }
+
+            // Overlay: 모든 방향에서 발동
+            _overlayAnim?.SetFloat(HashMoveX, _facingDir.x);
+            _overlayAnim?.SetFloat(HashMoveY, _facingDir.y);
+            _overlayAnim?.SetTrigger(HashAttack);
+
+            // 무기 소켓 애니메이션
+            _weaponSocket?.TriggerWeaponAnim(triggerHash);
 
             ExecuteSkillStep(skill, dmg, attr);
             _stats?.ConsumeWeaponDurabilityOnHit();
@@ -710,6 +746,7 @@ namespace MonsterKitchen.Player
             int dmg = _stats != null ? _stats.FinalAttack : 10;
             _atkTimer  = GetCurrentCooltime();
             _facingDir = ((Vector2)(nearest.transform.position - transform.position)).normalized;
+            _weaponSocket?.SetFacingDirection(_facingDir);
             _anim.SetTrigger(HashAttack);
 
             nearest.TakeHarvestDamage(dmg, _stats);
@@ -743,6 +780,12 @@ namespace MonsterKitchen.Player
 
         void OnPlayerDied(AttributeType killAttr) =>
             Debug.Log($"[PlayerController] 사망  막타속성:{killAttr}");
+
+        /// <summary>
+        /// 무기 교체 이벤트 핸들러.
+        /// PlayerStats.EquipWeapon() 호출 시 발동 — WeaponSocket 시각 갱신.
+        /// </summary>
+        void OnWeaponChanged(Data.WeaponData weapon) => _weaponSocket?.SetWeapon(weapon);
 
         // ================================================================
         //  대시
