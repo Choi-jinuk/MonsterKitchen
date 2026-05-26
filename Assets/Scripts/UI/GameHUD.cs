@@ -268,11 +268,13 @@ namespace MonsterKitchen.UI
         {
             if (_weaponIconBg == null) return;
 
-            if (weapon != null && weapon.normalAttackGroup?.skillIcon != null)
-                _weaponIconBg.style.backgroundImage =
-                    new StyleBackground(weapon.normalAttackGroup.skillIcon);
-            else
-                _weaponIconBg.style.backgroundImage = new StyleBackground(StyleKeyword.None);
+            Sprite icon = null;
+            if (weapon?.normalAttackGroup != null && !string.IsNullOrEmpty(weapon.normalAttackGroup.skillIconAddress))
+                icon = AssetLoadManager.Instance?.Load<Sprite>(weapon.normalAttackGroup.skillIconAddress);
+
+            _weaponIconBg.style.backgroundImage = icon != null
+                ? new StyleBackground(icon)
+                : new StyleBackground(StyleKeyword.None);
         }
 
         /// <summary>스킬 슬롯 변경 시 아이콘 업데이트. slot: 1·2·3(궁극기).</summary>
@@ -287,10 +289,13 @@ namespace MonsterKitchen.UI
             };
             if (iconBg == null) return;
 
-            if (skill?.skillIcon != null)
-                iconBg.style.backgroundImage = new StyleBackground(skill.skillIcon);
-            else
-                iconBg.style.backgroundImage = new StyleBackground(StyleKeyword.None);
+            Sprite icon = null;
+            if (skill != null && !string.IsNullOrEmpty(skill.skillIconAddress))
+                icon = AssetLoadManager.Instance?.Load<Sprite>(skill.skillIconAddress);
+
+            iconBg.style.backgroundImage = icon != null
+                ? new StyleBackground(icon)
+                : new StyleBackground(StyleKeyword.None);
         }
 
         /// <summary>쿨타임 변경 시. slot: 1·2. remaining, total.</summary>

@@ -1,3 +1,4 @@
+using MonsterKitchen.Core;
 using MonsterKitchen.Data;
 using UnityEngine;
 
@@ -56,13 +57,20 @@ namespace MonsterKitchen.Player
         public void SetWeapon(WeaponData weapon)
         {
             if (_sr != null)
-                _sr.sprite = weapon?.weaponSprite;
+            {
+                Sprite sprite = null;
+                if (weapon != null && !string.IsNullOrEmpty(weapon.weaponSpriteAddress))
+                    sprite = AssetLoadManager.Instance?.Load<Sprite>(weapon.weaponSpriteAddress);
+                _sr.sprite = sprite;
+            }
 
             if (_anim != null)
             {
-                bool hasAnim = weapon?.weaponAnimController != null;
-                _anim.runtimeAnimatorController = hasAnim ? weapon.weaponAnimController : null;
-                _anim.enabled = hasAnim;
+                RuntimeAnimatorController animCtrl = null;
+                if (weapon != null && !string.IsNullOrEmpty(weapon.weaponAnimAddress))
+                    animCtrl = AssetLoadManager.Instance?.Load<RuntimeAnimatorController>(weapon.weaponAnimAddress);
+                _anim.runtimeAnimatorController = animCtrl;
+                _anim.enabled = animCtrl != null;
             }
         }
 

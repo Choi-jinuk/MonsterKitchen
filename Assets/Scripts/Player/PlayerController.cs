@@ -111,6 +111,9 @@ namespace MonsterKitchen.Player
 
         static readonly WaitForFixedUpdate _waitFixed = new WaitForFixedUpdate();
 
+        // Physics2D 쿼리용 재사용 버퍼 — OverlapCircleNonAlloc 로 GC 배열 할당 제거
+        static readonly Collider2D[] _overlapBuffer = new Collider2D[32];
+
         // ================================================================
         //  Mono
         // ================================================================
@@ -546,13 +549,17 @@ namespace MonsterKitchen.Player
         /// <summary>범위 근거리 — OverlapCircle.</summary>
         void AoeMeleeHit(Vector2 center, float radius, int maxTargets, int dmg, AttributeType attr, Data.SkillData skill = null)
         {
-            var hits = Physics2D.OverlapCircleAll(center, radius, enemyLayer);
+            var meleeFilter = new ContactFilter2D();
+            meleeFilter.SetLayerMask(enemyLayer);
+            meleeFilter.useTriggers = true;
+            int hitCount = Physics2D.OverlapCircle(center, radius, meleeFilter, _overlapBuffer);
             int count = 0;
 
-            foreach (var col in hits)
+            for (int i = 0; i < hitCount; i++)
             {
                 if (count >= maxTargets) break;
 
+                var col = _overlapBuffer[i];
                 var hp = col.GetComponent<Health>();
                 if (hp == null) continue;
 
@@ -706,14 +713,17 @@ namespace MonsterKitchen.Player
 
         Transform FindNearestEnemy(float range)
         {
-            var hits    = Physics2D.OverlapCircleAll(transform.position, range, enemyLayer);
+            var enemyFilter = new ContactFilter2D();
+            enemyFilter.SetLayerMask(enemyLayer);
+            enemyFilter.useTriggers = true;
+            int hitCount = Physics2D.OverlapCircle(transform.position, range, enemyFilter, _overlapBuffer);
             Transform nearest = null;
             float     minDist = float.MaxValue;
 
-            foreach (var hit in hits)
+            for (int i = 0; i < hitCount; i++)
             {
-                float d = Vector2.Distance(transform.position, hit.transform.position);
-                if (d < minDist) { minDist = d; nearest = hit.transform; }
+                float d = Vector2.Distance(transform.position, _overlapBuffer[i].transform.position);
+                if (d < minDist) { minDist = d; nearest = _overlapBuffer[i].transform; }
             }
             return nearest;
         }
@@ -730,12 +740,16 @@ namespace MonsterKitchen.Player
             LayerMask nodeLayer = 1 << nodeLayerIdx;
 
             float attackRange = GetCurrentAttackRange();
-            var hits = Physics2D.OverlapCircleAll(transform.position, attackRange, nodeLayer);
+            var nodeFilter = new ContactFilter2D();
+            nodeFilter.SetLayerMask(nodeLayer);
+            nodeFilter.useTriggers = true;
+            int hitCount = Physics2D.OverlapCircle(transform.position, attackRange, nodeFilter, _overlapBuffer);
 
             ResourceNode nearest  = null;
             float        minDist  = float.MaxValue;
-            foreach (var h in hits)
+            for (int i = 0; i < hitCount; i++)
             {
+                var h = _overlapBuffer[i];
                 var node = h.GetComponent<ResourceNode>();
                 if (node == null || node.Depleted) continue;
                 float d = Vector2.Distance(transform.position, h.transform.position);

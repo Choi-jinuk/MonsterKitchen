@@ -12,9 +12,9 @@ namespace MonsterKitchen.Management
     public class FarmPlot : MonoBehaviour
     {
         [Header("Crop Settings")]
-        [SerializeField] IngredientData crop;
-        [SerializeField] int            growDays    = 2;
-        [SerializeField] int            yieldAmount = 2;
+        [SerializeField] uint cropIngredientId;
+        [SerializeField] int  growDays    = 2;
+        [SerializeField] int  yieldAmount = 2;
 
         [Header("Visual")]
         [SerializeField] SpriteRenderer plotRenderer;
@@ -22,8 +22,8 @@ namespace MonsterKitchen.Management
         [SerializeField] Sprite         plantedSprite;
         [SerializeField] Sprite         readySprite;
 
-        public IngredientData Crop      => crop;
-        public bool           IsPlanted => _plantedDay >= 0;
+        public uint CropIngredientId => cropIngredientId;
+        public bool IsPlanted        => _plantedDay >= 0;
 
         public bool IsReady
         {
@@ -52,20 +52,22 @@ namespace MonsterKitchen.Management
 
         public bool Plant()
         {
-            if (IsPlanted || crop == null || DayManager.Instance == null) return false;
+            if (IsPlanted || cropIngredientId == 0u || DayManager.Instance == null) return false;
             _plantedDay = DayManager.Instance.CurrentDay;
             UpdateVisual();
-            Debug.Log($"[FarmPlot] {crop.displayName} 심기 (Day {_plantedDay}, {growDays}일 후 수확)");
+            var data = DataRegistry.Instance?.GetIngredient(cropIngredientId);
+            Debug.Log($"[FarmPlot] {(data != null ? data.displayName : cropIngredientId.ToString())} 심기 (Day {_plantedDay}, {growDays}일 후 수확)");
             return true;
         }
 
         public bool Harvest()
         {
             if (!IsReady) return false;
-            string cropName = crop != null ? crop.displayName : "?";
+            var data = DataRegistry.Instance?.GetIngredient(cropIngredientId);
+            string cropName = data != null ? data.displayName : cropIngredientId.ToString();
             _plantedDay = -1;
-            if (crop != null)
-                Inventory.Instance?.Add(crop.id, yieldAmount);
+            if (cropIngredientId != 0u)
+                Inventory.Instance?.Add(cropIngredientId, yieldAmount);
             UpdateVisual();
             Debug.Log($"[FarmPlot] {cropName} x{yieldAmount} 수확!");
             return true;
@@ -80,7 +82,10 @@ namespace MonsterKitchen.Management
             else if (!IsPlanted)
                 Plant();
             else
-                Debug.Log($"[FarmPlot] {crop?.displayName} 성장 중 (남은 {DaysRemaining}일)");
+            {
+                var data = DataRegistry.Instance?.GetIngredient(cropIngredientId);
+                Debug.Log($"[FarmPlot] {(data != null ? data.displayName : cropIngredientId.ToString())} 성장 중 (남은 {DaysRemaining}일)");
+            }
         }
 
         void UpdateVisual()

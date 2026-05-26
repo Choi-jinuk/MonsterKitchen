@@ -33,6 +33,8 @@ namespace MonsterKitchen.Combat
     [RequireComponent(typeof(CircleCollider2D))]
     public class Projectile : MonoBehaviour
     {
+        static readonly Collider2D[] _overlapBuffer = new Collider2D[16];
+
         // ── 런타임 상태 ─────────────────────────────────────────────────
         int           _damage;
         AttributeType _attr;
@@ -193,11 +195,15 @@ namespace MonsterKitchen.Combat
 
             if (_isAoe)
             {
-                var hits  = Physics2D.OverlapCircleAll(transform.position, _aoeRadius, _targetLayer);
+                var aoeFilter = new ContactFilter2D();
+                aoeFilter.SetLayerMask(_targetLayer);
+                aoeFilter.useTriggers = true;
+                int hitCount = Physics2D.OverlapCircle(transform.position, _aoeRadius, aoeFilter, _overlapBuffer);
                 int count = 0;
 
-                foreach (var col in hits)
+                for (int i = 0; i < hitCount; i++)
                 {
+                    var col = _overlapBuffer[i];
                     if (count >= _maxTargets) break;
                     var hp = col.GetComponent<Health>();
                     if (hp == null) continue;
@@ -209,6 +215,7 @@ namespace MonsterKitchen.Combat
                     ApplyProjectileCC(col.transform);
                     count++;
                 }
+
             }
             else
             {

@@ -19,7 +19,7 @@ namespace MonsterKitchen.Restaurant
         [SerializeField] float eatDuration  = 3f;     // 식사 시간
 
         [Header("Order")]
-        [SerializeField] FoodData[] possibleOrders;   // 주문 가능 메뉴 목록
+        [SerializeField] uint[] possibleOrderIds;   // 주문 가능 음식 ID 목록 (FoodData.id)
 
         public FoodData    OrderedFood  { get; private set; }
         public bool        IsWaiting    => _state == State.Waiting;
@@ -106,16 +106,18 @@ namespace MonsterKitchen.Restaurant
 
         FoodData PickOrder()
         {
-            if (possibleOrders == null || possibleOrders.Length == 0) return null;
+            if (possibleOrderIds == null || possibleOrderIds.Length == 0) return null;
 
-            var fi = FoodInventory.Instance;
-            foreach (var food in possibleOrders)
+            var fi       = FoodInventory.Instance;
+            var registry = DataRegistry.Instance;
+            foreach (var foodId in possibleOrderIds)
             {
-                if (food != null && fi != null && fi.GetCount(food.id) > 0)
-                    return food;
+                if (foodId == 0u) continue;
+                if (fi != null && fi.GetCount(foodId) > 0)
+                    return registry?.GetFood(foodId);
             }
             // FoodInventory에 없어도 첫 번째 메뉴로 주문 (MVP 폴백)
-            return possibleOrders[0];
+            return registry?.GetFood(possibleOrderIds[0]);
         }
 
         // ── Waiting ───────────────────────────────────────────────

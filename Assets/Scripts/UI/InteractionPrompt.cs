@@ -1,6 +1,7 @@
 using TMPro; // C-10
+using MonsterKitchen.Core;
 using UnityEngine;
-using UnityEngine.UI;
+using UnityEngine.InputSystem;
 
 namespace MonsterKitchen.UI
 {
@@ -10,83 +11,84 @@ namespace MonsterKitchen.UI
     //  상호작용 가능한 오브젝트에 추가하면, 플레이어가 Trigger에 진입했을 때
     //  오브젝트 위에 "[E] 상호작용" 같은 프롬프트를 월드 스페이스로 표시한다.
     //
-    //  ▶ 사용법
-    //    - 상호작용 오브젝트에 이 컴포넌트를 추가.
-    //    - promptText에 표시할 문자열 입력 (예: "[E] 저녁 영업 시작").
-    //    - 해당 오브젝트의 Collider2D가 isTrigger = true 이어야 한다.
+    //  ▶ 씬 셋업 (필수)
+    //    이 컴포넌트가 붙은 오브젝트의 자식으로 아래 구조를 미리 만들어둔다:
+    //
+    //      PromptRoot          ← Canvas (RenderMode = WorldSpace, SortingOrder = 50)
+    //        Background        ← Image (반투명 배경)
+    //        Label             ← TextMeshProUGUI (프롬프트 전체 텍스트)
+    //
+    //    Inspector에서 _promptRoot, _label 을 각 오브젝트에 연결한다.
+    //    위치/크기는 씬에서 직접 조정한다.
+    //
+    //  ▶ 키 표시 자동화
+    //    Awake 시 InputSystem_Actions.Player.Interact 바인딩을 읽어
+    //    "[E] 던전 입장" 처럼 실제 바인딩된 키 이름을 자동으로 반영한다.
+    //    Interact 키를 Space 등으로 변경하면 "[Space] 던전 입장" 으로 자동 변경.
     //
     //  ▶ 외부 제어
     //    - Show() / Hide() 로 코드에서 직접 표시/숨김 가능.
-    //      (예: CookingStation 요리 중에는 Hide() 호출)
+    //    - SetActionText(string) 으로 키 뒤에 오는 설명 문자열 변경 가능.
     // ====================================================================
 
     public class InteractionPrompt : MonoBehaviour
     {
-        [SerializeField] string  promptText  = "[E] 상호작용";
-        [SerializeField] Vector3 worldOffset = new Vector3(0f, 1.0f, 0f);
-        [SerializeField] Color   textColor   = Color.white;
+        [Header("씬 오브젝트 참조")]
+        [SerializeField] GameObject      _promptRoot;  // Canvas 루트 오브젝트
+        [SerializeField] TextMeshProUGUI _label;       // 프롬프트 전체 텍스트
 
-        // 월드 스페이스 Canvas 설정
-        const float CanvasScale  = 0.01f;   // 1px = 0.01 유닛
-        const float CanvasWidth  = 220f;    // px
-        const float CanvasHeight = 44f;     // px
-        const float FontSize     = 24f;     // px
+        [Header("설정")]
+        [SerializeField] string _actionText = "상호작용";  // 키 이름 뒤에 붙는 설명
 
-        GameObject    _canvasGO;
-        bool          _playerInside;
+        bool _playerInside;
 
         // ----------------------------------------------------------------
 
         void Awake()
         {
-            BuildPromptCanvas();
-            _canvasGO.SetActive(false);
+            if (_promptRoot != null) _promptRoot.SetActive(false);
         }
 
-        void BuildPromptCanvas()
+        void Start()
         {
-            // ── Canvas ──────────────────────────────────────────────────
-            _canvasGO = new GameObject("_InteractionPrompt");
-            _canvasGO.transform.SetParent(transform);
-            _canvasGO.transform.localPosition = worldOffset;
-            _canvasGO.transform.localRotation = Quaternion.identity;
-            _canvasGO.transform.localScale    = Vector3.one * CanvasScale;
+            // InputManager 는 GlobalController 가 초기화하므로 Start 시점에 참조한다.
+            RefreshLabel();
+        }
 
-            var canvas = _canvasGO.AddComponent<Canvas>();
-            canvas.renderMode   = RenderMode.WorldSpace;
-            canvas.sortingOrder = 50;                     // 스프라이트 위에 렌더링
+        // 현재 Interact 바인딩 키 이름을 읽어 레이블을 갱신한다.
+        void RefreshLabel()
+        {
+            if (_label == null) return;
 
-            var rt = _canvasGO.GetComponent<RectTransform>();
-            rt.sizeDelta = new Vector2(CanvasWidth, CanvasHeight);
+            string keyName = GetInteractKeyName();
+            _label.text = keyName != null ? $"[{keyName}] {_actionText}" : _actionText;
+        }
 
-            // ── 배경 패널 (반투명 검정) ─────────────────────────────────
-            var bgGO = new GameObject("Background");
-            bgGO.transform.SetParent(_canvasGO.transform, false);
+        // InputManager 가 보유한 Interact 액션에서 키 이름을 읽는다.
+        // 바인딩을 찾지 못하면 null 을 반환한다.
+        string GetInteractKeyName()
+        {
+            if (InputManager.Instance == null) return null;
 
-            var bgRT = bgGO.AddComponent<RectTransform>();
-            bgRT.anchorMin = Vector2.zero;
-            bgRT.anchorMax = Vector2.one;
-            bgRT.offsetMin = bgRT.offsetMax = Vector2.zero;
+            InputAction action = InputManager.Instance.InteractAction;
+            return TryGetDisplayString(action, "Keyboard")
+                ?? TryGetDisplayString(action, null);
+        }
 
-            var img = bgGO.AddComponent<Image>();
-            img.color = new Color(0f, 0f, 0f, 0.55f);
+        // group 이 null 이면 그룹 무관하게 첫 번째 단순 바인딩을 반환한다.
+        static string TryGetDisplayString(InputAction action, string group)
+        {
+            foreach (var binding in action.bindings)
+            {
+                if (binding.isComposite || binding.isPartOfComposite) continue;
+                if (string.IsNullOrEmpty(binding.effectivePath)) continue;
+                if (group != null && !binding.groups.Contains(group)) continue;
 
-            // ── 텍스트 ─────────────────────────────────────────────────
-            var textGO = new GameObject("Label");
-            textGO.transform.SetParent(_canvasGO.transform, false);
-
-            var textRT = textGO.AddComponent<RectTransform>();
-            textRT.anchorMin = Vector2.zero;
-            textRT.anchorMax = Vector2.one;
-            textRT.offsetMin = textRT.offsetMax = Vector2.zero;
-
-            var tmp = textGO.AddComponent<TextMeshProUGUI>();
-            tmp.text               = promptText;
-            tmp.fontSize           = FontSize;
-            tmp.color              = textColor;
-            tmp.fontStyle          = FontStyles.Bold;
-            tmp.alignment          = TextAlignmentOptions.Center;
-            tmp.enableWordWrapping = false;
+                return InputControlPath.ToHumanReadableString(
+                    binding.effectivePath,
+                    InputControlPath.HumanReadableStringOptions.OmitDevice);
+            }
+            return null;
         }
 
         // ----------------------------------------------------------------
@@ -97,14 +99,14 @@ namespace MonsterKitchen.UI
         {
             if (!other.CompareTag("Player")) return;
             _playerInside = true;
-            _canvasGO?.SetActive(true);
+            _promptRoot?.SetActive(true);
         }
 
         void OnTriggerExit2D(Collider2D other)
         {
             if (!other.CompareTag("Player")) return;
             _playerInside = false;
-            _canvasGO?.SetActive(false);
+            _promptRoot?.SetActive(false);
         }
 
         // ----------------------------------------------------------------
@@ -114,19 +116,17 @@ namespace MonsterKitchen.UI
         /// <summary>플레이어가 범위 안에 있을 때만 표시한다.</summary>
         public void Show()
         {
-            if (_playerInside) _canvasGO?.SetActive(true);
+            if (_playerInside) _promptRoot?.SetActive(true);
         }
 
         /// <summary>강제로 숨긴다 (요리 중, 컷씬 등).</summary>
-        public void Hide() => _canvasGO?.SetActive(false);
+        public void Hide() => _promptRoot?.SetActive(false);
 
-        /// <summary>표시 텍스트를 런타임에 변경한다.</summary>
-        public void SetText(string text)
+        /// <summary>키 이름 뒤에 오는 설명 텍스트를 변경하고 레이블을 즉시 갱신한다.</summary>
+        public void SetActionText(string text)
         {
-            promptText = text;
-            if (_canvasGO == null) return;
-            var tmp = _canvasGO.GetComponentInChildren<TextMeshProUGUI>();
-            if (tmp != null) tmp.text = text;
+            _actionText = text;
+            RefreshLabel();
         }
     }
 }

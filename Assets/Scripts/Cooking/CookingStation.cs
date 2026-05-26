@@ -1,6 +1,6 @@
 using System;
 using System.Collections;
-using System.Collections.Generic;
+using MonsterKitchen.Core;
 using MonsterKitchen.Data;
 using MonsterKitchen.UI;
 using UnityEngine;
@@ -8,8 +8,8 @@ using UnityEngine;
 namespace MonsterKitchen.Cooking
 {
     /// <summary>
-    /// 주방의 조리대. 플레이어가 접근해 Space키 → CookingUI 열기 → 레시피 선택 → 요리.
-    /// allRecipes는 DataRegistry.AllRecipes에서 런타임 조회 (Inspector 참조 제거).
+    /// 주방의 조리대.
+    /// 플레이어가 접근해 Interact 키 → CookingUI 열기 → 레시피 선택 → 요리.
     /// </summary>
     public class CookingStation : MonoBehaviour
     {
@@ -21,38 +21,33 @@ namespace MonsterKitchen.Cooking
 
         public event Action<RecipeData, FoodData> OnCookComplete;
 
-        bool _playerNearby;
         bool _isCooking;
-
-        void Update()
-        {
-            if (!_playerNearby || _isCooking) return;
-
-            if (UnityEngine.InputSystem.Keyboard.current != null &&
-                UnityEngine.InputSystem.Keyboard.current.spaceKey.wasPressedThisFrame)
-            {
-                OpenCookingUI();
-            }
-        }
 
         void OnTriggerEnter2D(Collider2D other)
         {
-            if (other.CompareTag("Player"))
-                _playerNearby = true;
+            if (!other.CompareTag("Player")) return;
+            if (InputManager.Instance != null)
+                InputManager.Instance.OnInteract += TryOpenUI;
         }
 
         void OnTriggerExit2D(Collider2D other)
         {
-            if (other.CompareTag("Player"))
-            {
-                _playerNearby = false;
-                // 플레이어가 조리대 범위를 벗어나면 UI 닫기
-                UIManager.Instance?.Close("CookingUI");
-            }
+            if (!other.CompareTag("Player")) return;
+            if (InputManager.Instance != null)
+                InputManager.Instance.OnInteract -= TryOpenUI;
+            UIManager.Instance?.Close("CookingUI");
         }
 
-        void OpenCookingUI()
+        void OnDisable()
         {
+            if (InputManager.Instance != null)
+                InputManager.Instance.OnInteract -= TryOpenUI;
+        }
+
+        void TryOpenUI()
+        {
+            if (_isCooking) return;
+
             var ui = UIManager.Instance?.GetPanel<CookingUI>("CookingUI");
             if (ui == null)
             {
@@ -83,9 +78,9 @@ namespace MonsterKitchen.Cooking
                 yield break;
             }
 
-            FoodData food = recipe.resultFood;
+            FoodData food = DataRegistry.Instance?.GetFood(recipe.resultFoodId);
             if (food != null)
-                FoodInventory.Instance?.AddWithGrade(food.id, grade);
+                FoodInventory.Instance?.AddWithGrade(recipe.resultFoodId, grade);
 
             if (cookCompleteVFX != null)
                 cookCompleteVFX.Play();

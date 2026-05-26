@@ -1012,17 +1012,21 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 4105252894353530047, guid: 957783e1d5b08964688de7935deee5b6, type: 3}
-      propertyPath: possibleOrders.Array.size
+      propertyPath: possibleOrderIds.Array.size
       value: 3
       objectReference: {fileID: 0}
     - target: {fileID: 4105252894353530047, guid: 957783e1d5b08964688de7935deee5b6, type: 3}
-      propertyPath: 'possibleOrders.Array.data[1]'
-      value: 
-      objectReference: {fileID: 11400000, guid: 5347f983fe0745545b017e3a9eaeb8f6, type: 2}
+      propertyPath: 'possibleOrderIds.Array.data[0]'
+      value: 3001
+      objectReference: {fileID: 0}
     - target: {fileID: 4105252894353530047, guid: 957783e1d5b08964688de7935deee5b6, type: 3}
-      propertyPath: 'possibleOrders.Array.data[2]'
-      value: 
-      objectReference: {fileID: 11400000, guid: b4eba1df6b432934eb3f0b8072499a87, type: 2}
+      propertyPath: 'possibleOrderIds.Array.data[1]'
+      value: 3002
+      objectReference: {fileID: 0}
+    - target: {fileID: 4105252894353530047, guid: 957783e1d5b08964688de7935deee5b6, type: 3}
+      propertyPath: 'possibleOrderIds.Array.data[2]'
+      value: 3003
+      objectReference: {fileID: 0}
     - target: {fileID: 5015245969387161486, guid: 957783e1d5b08964688de7935deee5b6, type: 3}
       propertyPath: m_Name
       value: Customer_Template

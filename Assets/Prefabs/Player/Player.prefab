@@ -401,7 +401,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 696771671f68e7149a2afcc1787446b1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MonsterKitchen.Core.PerspectivePlaneSync
-  _tiltAngleDeg: 5
   _isStatic: 0
 --- !u!1 &6076282370209601616
 GameObject:

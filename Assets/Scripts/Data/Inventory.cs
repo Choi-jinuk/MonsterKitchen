@@ -12,22 +12,22 @@ namespace MonsterKitchen.Data
     {
         public static Inventory Instance { get; private set; }
 
-        readonly Dictionary<string, int> _items = new();
+        readonly Dictionary<uint, int> _items = new();
 
-        public event Action<string, int> OnItemChanged;  // (id, newQty)
+        public event Action<uint, int> OnItemChanged;  // (id, newQty)
 
         public void Init() => Instance = this;
 
-        public void Add(string ingredientId, int qty = 1)
+        public void Add(uint ingredientId, int qty = 1)
         {
-            if (string.IsNullOrEmpty(ingredientId) || qty <= 0) return;
+            if (qty <= 0) return;
             _items.TryGetValue(ingredientId, out int cur);
             _items[ingredientId] = cur + qty;
             OnItemChanged?.Invoke(ingredientId, _items[ingredientId]);
-            Debug.Log($"[Inventory] +{qty} {ingredientId}  (total: {_items[ingredientId]})");
+            Debug.Log($"[Inventory] +{qty} id:{ingredientId}  (total: {_items[ingredientId]})");
         }
 
-        public bool Remove(string ingredientId, int qty = 1)
+        public bool Remove(uint ingredientId, int qty = 1)
         {
             if (!_items.TryGetValue(ingredientId, out int cur) || cur < qty) return false;
             _items[ingredientId] = cur - qty;
@@ -36,9 +36,9 @@ namespace MonsterKitchen.Data
             return true;
         }
 
-        public int  GetCount(string ingredientId) => _items.TryGetValue(ingredientId, out int v) ? v : 0;
-        public bool Has(string ingredientId, int qty = 1) => GetCount(ingredientId) >= qty;
+        public int  GetCount(uint ingredientId) => _items.TryGetValue(ingredientId, out int v) ? v : 0;
+        public bool Has(uint ingredientId, int qty = 1) => GetCount(ingredientId) >= qty;
 
-        public IReadOnlyDictionary<string, int> All => _items;
+        public IReadOnlyDictionary<uint, int> All => _items;
     }
 }

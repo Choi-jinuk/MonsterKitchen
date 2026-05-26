@@ -1,6 +1,6 @@
 # 모듈 개발 계획 — 몬스터 키친
 
-> 최종 갱신: 2026-05-23
+> 최종 갱신: 2026-05-25
 > **방침: 위에서 아래 순서대로. 한 모듈이 완전히 끝나야 다음 모듈을 시작한다.**
 > 모듈 완료 테스트를 통과해야 ✅ 완료로 표시한다.
 
@@ -124,17 +124,21 @@
 
 ### 2.5D 원근 효과
 
-> **배경**: 배경/맵 GO를 X 축 -5도 기울이고, 엔티티 Z = Y * sin(5°) 로 동기화.
+> **배경**: 배경/맵 GO를 X 축 기울이고, 엔티티 Z = Y * tan(tilt°) 로 동기화.
 > Perspective 카메라가 Z 거리 차이를 자연스러운 원근감으로 변환한다.
 > 스케일 조작 없음. Physics2D(XY 평면)와 완전 독립.
+>
+> **tilt 값 관리**: `GameConfig.asset` 단일 SO에 맵 공통 고정값으로 보관.
+> `PerspectiveMapTilt` 컴포넌트가 씬 로드 시 `GameConfig.Current` 자동 등록 → 전체 시스템이 동일 값을 읽는다.
 
 | # | 항목 | 상태 |
 |---|---|---|
-| 3-P1 | PerspectivePlaneSync 컴포넌트 (Z = Y·sin(tilt), isStatic 플래그) | ✅ |
+| 3-P1 | PerspectivePlaneSync 컴포넌트 (Z = Y·**tan**(tilt), isStatic 플래그, 인스턴스 tilt 필드 없음) | ✅ |
 | 3-P2 | Player · Slime · Customer 프리팹에 PerspectivePlaneSync(isStatic=false) 적용 | ✅ |
-| 3-P3 | 전 씬 배경 GO x=-5 회전 + 카메라 Perspective FOV=55, TransparencySort=Distance | ✅ |
-| 3-P4 | PerspectiveManager — static TiltAngleDeg 제공. PerspectivePlaneSync 가 직접 참조 (ScanAndApply 없음) | ✅ |
-| 3-P5 | 씬별 tiltAngleDeg · 카메라 FOV 튜닝 (플레이 후 수치 조정) | ❌ |
+| 3-P3 | 전 씬 카메라 Perspective FOV=55, TransparencySort=Distance | ✅ |
+| 3-P4 | PerspectiveManager — pure static class, `GameConfig.Current.tiltAngleDeg` 읽기, 미로드 시 기본값 5° | ✅ |
+| 3-P5 | PerspectiveMapTilt 컴포넌트 신규 — 배경/맵 GO에 배치, `_config` 슬롯 연결 → X 회전 자동 적용 + `GameConfig.Current` 등록 | ✅ |
+| 3-P6 | GameConfig SO (`tiltAngleDeg` 필드) — 맵 공통 static 고정값, Inspector 수정 가능, Resources.Load 없음 | ✅ |
 
 ### 애니메이션 구조 (무기 분리)
 
@@ -214,7 +218,7 @@
 
 ---
 
-## 모듈 5 — 던전 ⚠️ 부분 완료 (모듈 3 테스트 통과 후 전면 작업)
+## 모듈 5 — 던전 🔄 진행 중 (구현 완료, 플레이 테스트 대기)
 
 > 모듈 3(전투) 테스트 통과 후 전면 작업. 일부 항목은 선행 구현됨.
 
@@ -226,8 +230,8 @@
 
 | # | 항목 | 상태 |
 |---|---|---|
-| 5-1 | 타일맵 방 (Rule Tile 기반, 벽 충돌, 카메라 경계) | ⚠️ BoxCollider 벽만, 타일맵 미적용 |
-| 5-2 | 다방 구조 & 방 간 이동 (DungeonDoor 텔레포트, 방 클리어 → 문 개방) | ⚠️ Room1→복도→Room2 직렬 동작, 일반화 미완 |
+| 5-1 | 타일맵 방 (Rule Tile 기반, 벽 충돌, 카메라 경계) | ⚠️ BoxCollider2D 벽 4개로 방 경계 구현, 타일맵 미페인트 (에셋 미준비) |
+| 5-2 | 다방 구조 & 방 간 이동 (DungeonRoom, DungeonDoor, 방 클리어 → 문 개방) | ✅ Room1→DungeonDoor→Room2 구현, auto-discover 포함 |
 | 5-3 | 몬스터 스폰 포인트 & SpawnTable SO | ✅ |
 | 5-4 | 던전 클리어 & 귀환 (OnRoomCleared → DungeonExit → ReturnFromDungeon) | ✅ |
 | 5-5 | 던전 미니맵 (탐색 방 표시, 현재 위치 마커) | ❌ |

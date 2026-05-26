@@ -1,3 +1,4 @@
+using MonsterKitchen.Core;
 using UnityEngine;
 
 namespace MonsterKitchen.Enemy
@@ -44,7 +45,7 @@ namespace MonsterKitchen.Enemy
         public override void OnSpawned()
         {
             // 동시 스폰 시 전체 슬라임이 같은 프레임에 대시하는 것을 방지
-            _dashCoolTimer = Random.Range(0f, dashCooldown);
+            _dashCoolTimer = RandomUtil.Range(0f, dashCooldown);
         }
 
         public override void ResetMovement()

@@ -1,3 +1,4 @@
+using MonsterKitchen.Core;
 using MonsterKitchen.Data;
 using UnityEngine;
 
@@ -11,17 +12,21 @@ namespace MonsterKitchen.Combat
         [SerializeField] SpriteRenderer spriteRenderer;
         [SerializeField] float pickupRadius = 0.35f;
 
-        IngredientData _ingredient;
-        int            _qty;
-        bool           _pickedUp;
+        uint _ingredientId;
+        int  _qty;
+        bool _pickedUp;
 
-        public void Init(IngredientData ingredient, int qty)
+        public void Init(uint ingredientId, int qty)
         {
-            _ingredient = ingredient;
-            _qty        = qty;
+            _ingredientId = ingredientId;
+            _qty          = qty;
 
-            if (spriteRenderer != null && ingredient.sprite != null)
-                spriteRenderer.sprite = ingredient.sprite;
+            if (spriteRenderer != null)
+            {
+                var data   = DataRegistry.Instance?.GetIngredient(ingredientId);
+                var sprite = AssetLoadManager.Instance?.Load<Sprite>(data?.spriteAddress);
+                if (sprite != null) spriteRenderer.sprite = sprite;
+            }
         }
 
         void OnTriggerEnter2D(Collider2D other)
@@ -30,7 +35,7 @@ namespace MonsterKitchen.Combat
             if (!other.CompareTag("Player")) return;
 
             _pickedUp = true;
-            Inventory.Instance?.Add(_ingredient.id, _qty);
+            Inventory.Instance?.Add(_ingredientId, _qty);
             Destroy(gameObject);
         }
 

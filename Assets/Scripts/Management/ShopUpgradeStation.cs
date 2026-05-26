@@ -1,12 +1,11 @@
 using MonsterKitchen.Core;
 using UnityEngine;
-using UnityEngine.InputSystem;
 
 namespace MonsterKitchen.Management
 {
     /// <summary>
     /// 가게 업그레이드 스테이션.
-    /// Player 접근 후 E키 → ShopManager를 통해 좌석 또는 팁 배율 업그레이드.
+    /// 플레이어가 Trigger 안에 있는 동안 Interact 키 → ShopManager를 통해 좌석 또는 팁 배율 업그레이드.
     /// </summary>
     public class ShopUpgradeStation : MonoBehaviour
     {
@@ -14,13 +13,24 @@ namespace MonsterKitchen.Management
 
         [SerializeField] UpgradeType upgradeType = UpgradeType.Seats;
 
-        bool _playerNearby;
-
-        void Update()
+        void OnTriggerEnter2D(Collider2D other)
         {
-            if (!_playerNearby) return;
-            if (Keyboard.current != null && Keyboard.current.eKey.wasPressedThisFrame)
-                Upgrade();
+            if (!other.CompareTag("Player")) return;
+            if (InputManager.Instance != null)
+                InputManager.Instance.OnInteract += Upgrade;
+        }
+
+        void OnTriggerExit2D(Collider2D other)
+        {
+            if (!other.CompareTag("Player")) return;
+            if (InputManager.Instance != null)
+                InputManager.Instance.OnInteract -= Upgrade;
+        }
+
+        void OnDisable()
+        {
+            if (InputManager.Instance != null)
+                InputManager.Instance.OnInteract -= Upgrade;
         }
 
         void Upgrade()
@@ -47,16 +57,6 @@ namespace MonsterKitchen.Management
 
             if (!success)
                 Debug.Log($"[ShopUpgradeStation] 골드 부족. 필요: {cost}G");
-        }
-
-        void OnTriggerEnter2D(Collider2D other)
-        {
-            if (other.CompareTag("Player")) _playerNearby = true;
-        }
-
-        void OnTriggerExit2D(Collider2D other)
-        {
-            if (other.CompareTag("Player")) _playerNearby = false;
         }
     }
 }

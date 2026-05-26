@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using MonsterKitchen.Core;
 using MonsterKitchen.Data;
 using MonsterKitchen.UI;
 using UnityEngine;
@@ -20,7 +21,7 @@ namespace MonsterKitchen.Cooking
         const int MaxSlots = 3;
 
         // ── 슬롯 상태 ────────────────────────────────────────────────
-        readonly List<string>       _slotIds  = new();   // 현재 슬롯 재료 ID
+        readonly List<uint>         _slotIds  = new();   // 현재 슬롯 재료 ID
         CookingStation              _station;
         RecipeData                  _matched;
 
@@ -128,16 +129,18 @@ namespace MonsterKitchen.Cooking
             }
 
             var registry = DataRegistry.Instance;
+            var loader   = AssetLoadManager.Instance;
             foreach (var kv in all)
             {
                 if (kv.Value <= 0) continue;
-                var d   = registry?.GetIngredient(kv.Key);
-                var wrap = BuildInvSlot(d?.sprite, kv.Value.ToString(), d != null ? d.displayName : kv.Key, kv.Key);
+                var d      = registry?.GetIngredient(kv.Key);
+                var sprite = loader?.Load<Sprite>(d?.spriteAddress);
+                var wrap   = BuildInvSlot(sprite, kv.Value.ToString(), d?.displayName ?? kv.Key.ToString(), kv.Key);
                 _invGrid.Add(wrap);
             }
         }
 
-        VisualElement BuildInvSlot(Sprite sprite, string count, string name, string ingredientId)
+        VisualElement BuildInvSlot(Sprite sprite, string count, string name, uint ingredientId)
         {
             var wrap = new VisualElement();
             wrap.style.alignItems = Align.Center;
@@ -181,15 +184,16 @@ namespace MonsterKitchen.Cooking
 
                 if (filled)
                 {
-                    string id = _slotIds[i];
-                    var d = DataRegistry.Instance?.GetIngredient(id);
+                    uint id    = _slotIds[i];
+                    var d      = DataRegistry.Instance?.GetIngredient(id);
+                    var sprite = AssetLoadManager.Instance?.Load<Sprite>(d?.spriteAddress);
 
                     if (si != null)
-                        si.style.backgroundImage = d?.sprite != null
-                            ? Background.FromSprite(d.sprite)
+                        si.style.backgroundImage = sprite != null
+                            ? Background.FromSprite(sprite)
                             : StyleKeyword.None;
 
-                    if (sn != null) sn.text = d != null ? d.displayName : id;
+                    if (sn != null) sn.text = d?.displayName ?? id.ToString();
                     se.AddToClassList("cook-slot-filled");
                 }
                 else
@@ -230,7 +234,7 @@ namespace MonsterKitchen.Cooking
 
         // ── 슬롯 조작 ────────────────────────────────────────────────
 
-        void AddIngredientToSlot(string id)
+        void AddIngredientToSlot(uint id)
         {
             if (_slotIds.Count >= MaxSlots) return;
             if (!Inventory.Instance.Has(id, 1)) return;

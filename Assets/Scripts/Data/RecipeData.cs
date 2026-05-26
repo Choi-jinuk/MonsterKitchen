@@ -1,26 +1,30 @@
+using System;
 using UnityEngine;
 
 namespace MonsterKitchen.Data
 {
-    [System.Serializable]
+    [Serializable]
     public struct RecipeIngredient
     {
-        public IngredientData ingredient;
-        public int            quantity;
+        [Tooltip("재료 ID (TableData.Ingredients 키)")]
+        public uint ingredientId;
+        public int  quantity;
     }
 
-    [CreateAssetMenu(menuName = "MonsterKitchen/Data/RecipeData", fileName = "RCP_")]
-    public class RecipeData : ScriptableObject
+    [Serializable]
+    public class RecipeData
     {
         [Header("Identity")]
-        public string id;           // RCP_001
+        public uint   id;
         public string displayName;
         [TextArea] public string description;
 
         [Header("Recipe")]
         public RecipeIngredient[] ingredients;
-        public FoodData           resultFood;
-        public int                cookTimeSeconds;
+
+        [Tooltip("완성 음식 ID (TableData.Foods 키)")]
+        public uint resultFoodId;
+        public int  cookTimeSeconds;
 
         [Header("Unlock")]
         public int  unlockDay;

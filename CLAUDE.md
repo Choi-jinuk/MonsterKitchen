@@ -116,14 +116,83 @@ Assets/Scripts/
 - `Input.GetKey` 등 레거시 입력 API 사용 금지.
 
 ### 에셋 로딩
-- MVP 단계: ScriptableObject를 `[SerializeField]`로 직접 참조 (Inspector 연결).
 - `Resources.Load` 사용 금지.
-- `DataRegistry` + Addressable은 인프라가 존재하지만 MVP에서는 미사용.
-  추후 에셋 수가 많아지면 전환 검토.
+- 에셋 로딩은 반드시 `AssetLoadManager.Instance.Load<T>(key)` 를 통한다.
+- 에셋 키는 `AssetKeys` 정적 클래스 또는 헬퍼 메서드로 생성한다 (e.g. `AssetKeys.MonsterPrefab(id)`).
+- 런타임에 필요한 에셋은 `AssetManifest` SO 에 `key + asset` 쌍으로 등록한다.
+
+### 데이터 클래스 순수성 규칙 (필수 준수)
+
+`TableData` 에 포함되는 모든 데이터 클래스(MonsterData, IngredientData, RecipeData, FoodData, DropTableData, WeaponData, SkillGroupData 등)는 **CSV 에서 읽을 수 있는 값만** 가져야 한다.
+
+**금지 — 데이터 클래스에 아래 타입 필드를 선언하지 않는다:**
+```csharp
+// ❌ Unity Object 직접 참조 — CSV 직렬화 불가
+public Sprite                    icon;
+public RuntimeAnimatorController animCtrl;
+public MonsterBase               prefab;
+public GameObject                go;
+```
+
+**올바른 패턴 — string 주소 키 + uint ID:**
+```csharp
+// ✅ 에셋은 AssetManifest 등록 키(string)로 참조
+public string spriteAddress;      // 형식: "sprite/ingredient/{id}"
+public string prefabAddress;      // 형식: "prefab/monster/{id}"
+public string animAddress;        // 형식: "anim/weapon/{id}"
+
+// ✅ 다른 데이터는 uint ID 로 참조 → DataRegistry 경유 조회
+public uint dropTableId;          // DataRegistry.GetDropTable(id)
+public uint resultFoodId;         // DataRegistry.GetFood(id)
+```
+
+**런타임 에셋 로딩 패턴:**
+```csharp
+// 에셋 로드
+var sprite = AssetLoadManager.Instance?.Load<Sprite>(data.spriteAddress);
+var prefab = AssetLoadManager.Instance?.Load<MonsterBase>(data.prefabAddress);
+
+// 크로스 데이터 조회
+var food = DataRegistry.Instance?.GetFood(recipe.resultFoodId);
+```
 
 ### LayerMask 직렬화
 `enemyLayer = {"value": 256}` 형태 (Layer 8 = Enemy, LayerMask bit format).
 `manage_components`로 설정 시 int가 아닌 object 형태로 전달해야 한다.
+
+### Inspector 캐싱 원칙 (필수 준수)
+
+씬 오브젝트 참조는 **반드시 `[SerializeField]` 로 Inspector 에서 직접 연결**한다.
+
+**금지 패턴 — 아래 API 는 최소한으로만 사용한다:**
+```csharp
+// ❌ 절대 사용 금지 — 런타임 탐색은 GC·성능 비용이 크고 버그 추적이 어렵다
+FindObjectsByType<T>()
+FindFirstObjectByType<T>()
+FindObjectsOfType<T>()
+GameObject.Find()
+transform.Find()          // 씬 오브젝트 탐색 용도로 사용 시
+```
+
+**허용 예외 — 진짜 런타임 의존성만:**
+```csharp
+// ✅ 동적 스폰 오브젝트에 한해 허용, 결과는 반드시 필드에 캐시
+Transform _cachedPlayer;
+Transform GetPlayer()
+{
+    if (_cachedPlayer != null) return _cachedPlayer;
+    _cachedPlayer = GameObject.FindGameObjectWithTag("Player")?.transform;
+    return _cachedPlayer;
+}
+
+// ✅ Instantiate — 몬스터·투사체 등 런타임 생성 오브젝트만 허용
+Instantiate(prefab, pos, Quaternion.identity);
+```
+
+**참조가 없을 때 처리 방법:**
+- 필수 참조가 null 이면 `Debug.LogError(message, this)` 출력 후 해당 기능을 건너뛴다.
+- `OnValidate()` 에서도 동일하게 경고를 출력해 Editor 에서 미리 발견할 수 있게 한다.
+- AutoDiscover / 자동 탐색 fallback 패턴은 작성하지 않는다.
 
 ---
 

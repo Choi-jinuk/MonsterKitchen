@@ -1,42 +1,42 @@
+using MonsterKitchen.Core;
 using MonsterKitchen.Data;
 using UnityEngine;
-using UnityEngine.InputSystem;
 
 namespace MonsterKitchen.Restaurant
 {
     /// <summary>
     /// 플레이어가 대기 중인 손님에게 음식을 서빙한다.
-    /// E 키(또는 게임패드 South 버튼)를 누르면 근처 Waiting 손님에게 서빙.
+    /// Interact 키를 누르면 근처 Waiting 손님에게 서빙.
     /// </summary>
     public class ServingSystem : MonoBehaviour
     {
+        static readonly Collider2D[] _overlapBuffer = new Collider2D[16];
+
         [SerializeField] float serveRadius = 1.5f;
 
-        void Update()
+        void OnEnable()
         {
-            bool interact = false;
+            if (InputManager.Instance != null)
+                InputManager.Instance.OnInteract += TryServe;
+        }
 
-            // 키보드 E
-            if (Keyboard.current != null && Keyboard.current.eKey.wasPressedThisFrame)
-                interact = true;
-
-            // 게임패드 South(Xbox A / PS Cross)
-            if (Gamepad.current != null && Gamepad.current.buttonSouth.wasPressedThisFrame)
-                interact = true;
-
-            if (interact) TryServe();
+        void OnDisable()
+        {
+            if (InputManager.Instance != null)
+                InputManager.Instance.OnInteract -= TryServe;
         }
 
         void TryServe()
         {
-            // Player 위치 기준으로 탐색 (ServingSystem이 Player와 다른 GO일 때도 동작)
-            Vector2 origin = Core.PlayerManager.Instance?.Player != null
-                ? (Vector2)Core.PlayerManager.Instance.Player.transform.position
+            Vector2 origin = PlayerManager.Instance?.Player != null
+                ? (Vector2)PlayerManager.Instance.Player.transform.position
                 : (Vector2)transform.position;
 
-            var cols = Physics2D.OverlapCircleAll(origin, serveRadius);
-            foreach (var col in cols)
+            var serveFilter = ContactFilter2D.noFilter;
+            int hitCount = Physics2D.OverlapCircle(origin, serveRadius, serveFilter, _overlapBuffer);
+            for (int i = 0; i < hitCount; i++)
             {
+                var col = _overlapBuffer[i];
                 var customer = col.GetComponent<CustomerAI>();
                 if (customer == null || !customer.IsWaiting) continue;
 

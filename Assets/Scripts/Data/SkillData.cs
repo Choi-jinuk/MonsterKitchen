@@ -1,11 +1,12 @@
+using System;
 using UnityEngine;
 
 namespace MonsterKitchen.Data
 {
     // ====================================================================
-    //  SkillData — 단일 타격의 수치 데이터 ScriptableObject
+    //  SkillData — 단일 타격의 수치 데이터
     //
-    //  콤보 체인의 각 타격(1타, 2타, 3타…)을 독립 에셋으로 정의한다.
+    //  콤보 체인의 각 타격(1타, 2타, 3타…)을 독립 데이터로 정의한다.
     //  SkillGroupData.skillChain 리스트에 순서대로 등록해 콤보화한다.
     //
     //  ▶ 공격 방식은 enum 분기 없이 수치만으로 결정된다.
@@ -13,13 +14,10 @@ namespace MonsterKitchen.Data
     //    missileSpeed  > 0  → 투사체 발사. attackRange 를 폭발 반지름(AoE)으로 사용.
     //    maxTargets == 1    → 단일 대상.
     //    maxTargets  > 1    → 범위 (OverlapCircle 또는 AoE 폭발).
-    //
-    //  메뉴: Create → MonsterKitchen → Data → SkillData
-    //  파일명 규칙: SKL_001, SKL_002 …
     // ====================================================================
 
-    [CreateAssetMenu(menuName = "MonsterKitchen/Data/SkillData", fileName = "SKL_")]
-    public class SkillData : ScriptableObject
+    [Serializable]
+    public class SkillData
     {
         [Header("Identity")]
         [Tooltip("스킬 고유 ID. 예: SKL_001")]

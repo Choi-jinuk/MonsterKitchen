@@ -7,8 +7,11 @@ namespace MonsterKitchen.Enemy
     // ====================================================================
     //  SpawnManager — 던전 몬스터 초기 스폰 매니저 (씬 단위 싱글톤)
     //
-    //  DungeonSceneController 가 new SpawnManager(spawnTable, spawnPoints) 로
+    //  DungeonSceneController 가 new SpawnManager(spawnTableData, spawnPoints) 로
     //  생성하고 Init() → SpawnAll() 순으로 호출한다.
+    //
+    //  스폰 항목의 monsterId 로 DataRegistry.GetMonster() 를 조회한 뒤
+    //  MonsterData.prefabAddress 키로 AssetLoadManager 에서 프리팹을 로드해 인스턴스화한다.
     // ====================================================================
 
     public class SpawnManager
@@ -18,10 +21,10 @@ namespace MonsterKitchen.Enemy
         const string MonsterLayerName = "Enemy";
         const string PlayerLayerName  = "Player";
 
-        readonly DungeonSpawnTable _spawnTable;
-        readonly Transform[]       _spawnPoints;
+        readonly DungeonSpawnTableData _spawnTable;
+        readonly Transform[]           _spawnPoints;
 
-        public SpawnManager(DungeonSpawnTable spawnTable, Transform[] spawnPoints)
+        public SpawnManager(DungeonSpawnTableData spawnTable, Transform[] spawnPoints)
         {
             _spawnTable  = spawnTable;
             _spawnPoints = spawnPoints;
@@ -44,7 +47,7 @@ namespace MonsterKitchen.Enemy
         {
             if (_spawnTable == null)
             {
-                Debug.LogWarning("[SpawnManager] DungeonSpawnTable 이 연결되지 않았습니다.");
+                Debug.LogWarning("[SpawnManager] DungeonSpawnTableData 가 연결되지 않았습니다.");
                 return;
             }
 
@@ -53,34 +56,46 @@ namespace MonsterKitchen.Enemy
             int pointIndex = 0;
             foreach (var entry in _spawnTable.monsters)
             {
-                if (entry.prefab == null) continue;
-
-                MonsterData data = entry.dataOverride != null ? entry.dataOverride : entry.prefab.Data;
+                var data = DataRegistry.Instance?.GetMonster(entry.monsterId);
+                if (data == null || string.IsNullOrEmpty(data.prefabAddress))
+                {
+                    Debug.LogWarning($"[SpawnManager] monsterId={entry.monsterId} 의 MonsterData 또는 prefabAddress 가 없습니다. 건너뜁니다.");
+                    continue;
+                }
 
                 for (int i = 0; i < entry.count; i++)
                 {
                     Vector3 spawnPos = PickSpawnPoint(ref pointIndex, entry.spawnRadius);
-                    SpawnSingle(entry.prefab, data, playerTf, spawnPos);
+                    SpawnSingle(data, playerTf, spawnPos);
                 }
             }
         }
 
         /// <summary>단일 몬스터를 지정 위치에 스폰한다. MonsterRespawnManager 에서도 호출.</summary>
-        public MonsterAI SpawnSingle(MonsterAI prefab, MonsterData data, Vector3 position)
+        public MonsterBase SpawnSingle(MonsterData data, Vector3 position)
         {
             Transform playerTf = Player != null ? Player.transform : FindPlayerTransform();
-            return SpawnSingle(prefab, data, playerTf, position);
+            return SpawnSingle(data, playerTf, position);
         }
 
         // ── Helpers ───────────────────────────────────────────────────
 
-        MonsterAI SpawnSingle(MonsterAI prefab, MonsterData data, Transform playerTf, Vector3 position)
+        MonsterBase SpawnSingle(MonsterData data, Transform playerTf, Vector3 position)
         {
+            if (data == null || string.IsNullOrEmpty(data.prefabAddress)) return null;
+
+            var prefab = AssetLoadManager.Instance?.Load<MonsterBase>(data.prefabAddress);
+            if (prefab == null)
+            {
+                Debug.LogWarning($"[SpawnManager] prefabAddress='{data.prefabAddress}' 프리팹 로드 실패.");
+                return null;
+            }
+
             var monster = InstantiateDisabled(prefab, position);
             monster.Init(data, playerTf, position);
             monster.gameObject.SetActive(true);
 
-            MonsterRespawnManager.Instance?.Track(monster, prefab, data, position);
+            MonsterRespawnManager.Instance?.Track(monster, data, position);
 
             return monster;
         }
@@ -100,7 +115,7 @@ namespace MonsterKitchen.Enemy
                 center = Vector3.zero;
             }
 
-            return center + (Vector3)(Random.insideUnitCircle * radius);
+            return center + RandomUtil.InCircle3D(radius);
         }
 
         void SetupLayerCollisions()

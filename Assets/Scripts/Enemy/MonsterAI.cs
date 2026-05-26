@@ -1,5 +1,6 @@
 using System.Collections;
 using MonsterKitchen.Combat;
+using MonsterKitchen.Core;
 using MonsterKitchen.Data;
 using MonsterKitchen.Navigation;
 using UnityEngine;
@@ -35,6 +36,8 @@ namespace MonsterKitchen.Enemy
     [RequireComponent(typeof(CrowdControlComponent))]
     public class MonsterAI : MonsterBase
     {
+        static readonly Collider2D[] _overlapBuffer = new Collider2D[16];
+
         [Header("AI")]
         [SerializeField] float moveSpeed = 2.5f;
         [Tooltip("가장 긴 스킬 감지 범위에 더하는 여유 거리.\n이 범위 안에 들어오면 추적을 시작한다.")]
@@ -402,12 +405,15 @@ namespace MonsterKitchen.Enemy
             }
 
             // 다중 대상: OverlapCircle 로 attackRange 내 최대 maxTargets 명
-            var hits  = Physics2D.OverlapCircleAll(transform.position, skill.attackRange, _playerLayer);
+            var attackFilter = new ContactFilter2D();
+            attackFilter.SetLayerMask(_playerLayer);
+            attackFilter.useTriggers = true;
+            int hitCount = Physics2D.OverlapCircle(transform.position, skill.attackRange, attackFilter, _overlapBuffer);
             int count = 0;
-            foreach (var col in hits)
+            for (int i = 0; i < hitCount; i++)
             {
                 if (count >= skill.maxTargets) break;
-                var hp = col.GetComponent<Health>();
+                var hp = _overlapBuffer[i].GetComponent<Health>();
                 if (hp == null) continue;
                 hp.TakeDamage(damage, attr);
                 count++;
@@ -440,7 +446,7 @@ namespace MonsterKitchen.Enemy
             StopAiCoroutine();
 
             // 리스폰 매니저에 사망 통보 (등록된 경우에만 처리)
-            MonsterRespawnManager.Instance?.NotifyDeath(this);
+            MonsterRespawnManager.Instance?.NotifyDeath((MonsterBase)this);
 
             Destroy(gameObject, 1.5f);
         }
@@ -521,7 +527,7 @@ namespace MonsterKitchen.Enemy
 
         void PickPatrolTarget()
         {
-            Vector2 offset = Random.insideUnitCircle * patrolRadius;
+            Vector2 offset = RandomUtil.InCircle(patrolRadius);
             _patrolTarget  = (Vector2)_spawnPos + offset;
         }
 

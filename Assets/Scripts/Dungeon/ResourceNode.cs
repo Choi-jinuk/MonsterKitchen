@@ -1,4 +1,5 @@
 using System.Collections;
+using MonsterKitchen.Core;
 using MonsterKitchen.Data;
 using UnityEngine;
 
@@ -62,7 +63,10 @@ namespace MonsterKitchen.Dungeon
                 var sr = GetComponent<SpriteRenderer>();
                 if (sr != null)
                 {
-                    sr.sprite = data.nodeSprite != null ? data.nodeSprite : GetPlaceholder();
+                    var loadedSprite = !string.IsNullOrEmpty(data.nodeSpriteAddress)
+                        ? AssetLoadManager.Instance?.Load<Sprite>(data.nodeSpriteAddress)
+                        : null;
+                    sr.sprite = loadedSprite != null ? loadedSprite : GetPlaceholder();
                     sr.color  = data.nodeTint;
                 }
             }
@@ -115,24 +119,26 @@ namespace MonsterKitchen.Dungeon
             if (_depleted) return;
             _depleted = true;
 
-            if (data.dropIngredient == null)
+            if (data.dropIngredientId == 0u)
             {
-                Debug.LogWarning($"[ResourceNode] {name}: dropIngredient 가 연결되지 않았습니다.");
+                Debug.LogWarning($"[ResourceNode] {name}: dropIngredientId 가 설정되지 않았습니다.");
             }
             else
             {
                 // 채집 도구 gatherMultiplier 적용
                 float gatherMult = GetGatherMultiplier(harvester);
-                int baseCount = Random.Range(data.dropMin, data.dropMax + 1);
+                int baseCount = RandomUtil.Range(data.dropMin, data.dropMax + 1);
                 int count     = Mathf.Max(1, Mathf.RoundToInt(baseCount * gatherMult));
 
                 var inventory = Inventory.Instance;
                 if (inventory != null)
                 {
-                    inventory.Add(data.dropIngredient.id, count);
+                    inventory.Add(data.dropIngredientId, count);
                 }
 
-                Debug.Log($"[ResourceNode] '{data.displayName}' 채집 완료 → {data.dropIngredient.displayName} ×{count}");
+                var ingredientData = DataRegistry.Instance?.GetIngredient(data.dropIngredientId);
+                string ingName = ingredientData != null ? ingredientData.displayName : data.dropIngredientId.ToString();
+                Debug.Log($"[ResourceNode] '{data.displayName}' 채집 완료 → {ingName} ×{count}");
             }
 
             // 채집 도구 내구도 소모

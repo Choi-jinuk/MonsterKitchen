@@ -1,3 +1,4 @@
+using MonsterKitchen.Core;
 using MonsterKitchen.Data;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -81,10 +82,12 @@ namespace MonsterKitchen.UI
             }
 
             var registry = DataRegistry.Instance;
+            var loader   = AssetLoadManager.Instance;
             foreach (var kv in all)
             {
-                var d = registry?.GetIngredient(kv.Key);
-                _ingGrid.Add(Slot(d?.sprite, kv.Value.ToString(), d != null ? d.displayName : kv.Key));
+                var d      = registry?.GetIngredient(kv.Key);
+                var sprite = loader?.Load<Sprite>(d?.spriteAddress);
+                _ingGrid.Add(Slot(sprite, kv.Value.ToString(), d?.displayName ?? CommonString.Unknown));
             }
         }
 
@@ -101,10 +104,12 @@ namespace MonsterKitchen.UI
             }
 
             var registry = DataRegistry.Instance;
+            var loader   = AssetLoadManager.Instance;
             foreach (var kv in all)
             {
-                var d = registry?.GetFood(kv.Key);
-                _foodGrid.Add(Slot(d?.sprite, kv.Value.ToString(), d != null ? d.displayName : kv.Key));
+                var d      = registry?.GetFood(kv.Key);
+                var sprite = loader?.Load<Sprite>(d?.spriteAddress);
+                _foodGrid.Add(Slot(sprite, kv.Value.ToString(), d?.displayName ?? CommonString.Unknown));
             }
         }
 

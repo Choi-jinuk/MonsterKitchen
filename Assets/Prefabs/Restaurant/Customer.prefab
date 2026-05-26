@@ -197,10 +197,10 @@ MonoBehaviour:
   moveSpeed: 2.5
   patience: 20
   eatDuration: 3
-  possibleOrders:
-  - {fileID: 11400000, guid: 68f4f209ae1a65448be06e1c2934b84a, type: 2}
-  - {fileID: 11400000, guid: 5347f983fe0745545b017e3a9eaeb8f6, type: 2}
-  - {fileID: 11400000, guid: b4eba1df6b432934eb3f0b8072499a87, type: 2}
+  possibleOrderIds:
+  - 3001
+  - 3002
+  - 3003
 --- !u!114 &361221868471769357
 MonoBehaviour:
   m_ObjectHideFlags: 0

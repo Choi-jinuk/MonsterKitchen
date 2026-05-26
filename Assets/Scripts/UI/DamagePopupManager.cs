@@ -53,7 +53,7 @@ namespace MonsterKitchen.UI
             }
 
             // 살짝 랜덤 오프셋으로 겹침 방지
-            Vector3 offset = new Vector3(Random.Range(-0.2f, 0.2f), 0.3f, 0f);
+            Vector3 offset = new Vector3(RandomUtil.Range(-0.2f, 0.2f), 0.3f, 0f);
             var popup = _pool.Get(worldPos + offset);
             popup.Show(amount, isCrit, this);
         }

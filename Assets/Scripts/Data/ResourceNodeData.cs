@@ -9,7 +9,7 @@ namespace MonsterKitchen.Data
     //
     //  ▶ 채집 방식
     //    플레이어가 무기로 공격해서 채집한다 (전투 우선, 전투 대상 없을 때 채집).
-    //    maxHp 만큼 데미지를 누적하면 채집 완료 → dropIngredient 를 dropMin~Max 수량 드롭.
+    //    maxHp 만큼 데미지를 누적하면 채집 완료 → dropIngredientId 의 재료를 dropMin~Max 수량 드롭.
     //
     //  ▶ 리스폰
     //    채집 완료 후 respawnSeconds 초 뒤에 같은 위치에 재활성화된다.
@@ -37,8 +37,8 @@ namespace MonsterKitchen.Data
         public ResourceNodeType nodeType;
 
         [Header("Drop")]
-        [Tooltip("채집 완료 시 드롭할 재료 데이터.")]
-        public IngredientData dropIngredient;
+        [Tooltip("채집 완료 시 드롭할 재료 ID (IngredientData.id).")]
+        public uint dropIngredientId;
 
         [Tooltip("최소 드롭 수량.")]
         [Min(1)]
@@ -59,8 +59,8 @@ namespace MonsterKitchen.Data
         public float respawnSeconds = 120f;
 
         [Header("Visual")]
-        [Tooltip("씬에서 노드를 표시할 스프라이트. 없으면 기본 흰 사각형에 nodeTint 색상만 적용.")]
-        public Sprite nodeSprite;
+        [Tooltip("씬에서 노드를 표시할 스프라이트 주소 (AssetManifest 키). 비어 있으면 nodeTint 단색만 적용.")]
+        public string nodeSpriteAddress;
 
         [Tooltip("스프라이트가 없을 때 SpriteRenderer 에 적용할 단색 틴트. 스프라이트가 있으면 색조 보정으로 작동.")]
         public Color nodeTint = Color.white;

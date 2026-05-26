@@ -1,10 +1,10 @@
 ; 드롭 테이블 데이터
-; entries: "재료ID:드롭확률:최소:최대|..." 형식 (DataManagerWindow에서 편집 권장)
-; dropChance: 0.0~1.0
-#TYPE,string,string
-id,entries
-DRP_001,ING_001:0.8:1:2|ING_003:0.1:1:1
-DRP_002,ING_002:0.75:1:1|ING_001:0.3:1:1
-DRP_003,ING_003:0.6:1:2|ING_004:0.5:1:1
-DRP_004,ING_005:0.7:1:2|ING_006:0.4:1:1
-DRP_005,ING_007:0.5:1:1|ING_008:0.4:1:1
+; id: uint (DRP_001=5001 ~ DRP_005=5005)
+; entries: "uint재료ID:dropChance:min:max|..." 형식 (dropChance: 0.0~1.0)
+#TYPE,string,uint,string
+_key,id,entries
+DRP_001,5001,2001:0.8:1:2|2003:0.1:1:1
+DRP_002,5002,2002:0.75:1:1|2001:0.3:1:1
+DRP_003,5003,2003:0.6:1:2|2004:0.5:1:1
+DRP_004,5004,2005:0.7:1:2|2006:0.4:1:1
+DRP_005,5005,2007:0.5:1:1|2008:0.4:1:1

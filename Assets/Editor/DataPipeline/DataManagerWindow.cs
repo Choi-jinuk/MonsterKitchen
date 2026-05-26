@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using MonsterKitchen.Core;
 using MonsterKitchen.Data;
 using MonsterKitchen.Data.Pipeline;
 using UnityEditor;
@@ -11,123 +12,300 @@ namespace MonsterKitchen.Editor
 {
     public class DataManagerWindow : EditorWindow
     {
-        const string CSV_ROOT = "Assets/Data/CSV";
-        const string SO_ROOT  = "Assets/Data/SO";
+        // ── 경로 상수 ────────────────────────────────────────────────
+        const string CSV_ROOT           = "Assets/Data/CSV";
+        const string TABLE_DATA_PATH    = "Assets/Data/SO/TableData.asset";
+        const string MANIFEST_PATH      = "Assets/Data/AssetManifest.asset";
         const int    ROW_H    = 20;
-        const int    DETAIL_H = 200;
+        const int    DETAIL_H = 180;
 
-        static readonly string[] TABLE_LABELS  = { "Monsters", "Ingredients", "Recipes", "Foods", "Drop Tables" };
-        static readonly string[] TABLE_FILES   = { "Monsters.csv", "Ingredients.csv", "Recipes.csv", "Foods.csv", "DropTables.csv" };
-        static readonly string[] TABLE_FOLDERS = { "Monsters", "Ingredients", "Recipes", "Foods", "DropTables" };
+        // ── 테이블 메타 ─────────────────────────────────────────────
+        static readonly string[] TABLE_LABELS = { "Monsters", "Ingredients", "Recipes", "Foods", "Drop Tables", "Dungeon Spawn Tables" };
+        static readonly string[] TABLE_FILES  = { "Monsters.csv", "Ingredients.csv", "Recipes.csv", "Foods.csv", "DropTables.csv", "DungeonSpawnTables.csv" };
 
         static readonly string[][] DEFAULT_HEADERS =
         {
-            new[] { "id","displayName","description","hp","attack","defense","attribute","rarity" },
-            new[] { "id","displayName","description","attribute","rarity","defaultState","sourceMonsterIds" },
-            new[] { "id","displayName","description","ingredients","resultFoodId","cookTimeSeconds","unlockDay","isUnlockedByDefault" },
-            new[] { "id","displayName","description","basePrice","hpRestore","buffAttribute","buffMultiplier","buffDurationDays" },
-            new[] { "id","entries" },
+            // Monsters
+            new[] { "_key","id","displayName","description","hp","attack","defense","attribute","rarity","dropTableId","immuneToKnockback","immuneToStun","immuneToPullIn" },
+            // Ingredients
+            new[] { "_key","id","displayName","description","attribute","rarity","defaultState","sourceMonsterIds" },
+            // Recipes
+            new[] { "_key","id","displayName","description","ingredients","resultFoodId","cookTimeSeconds","unlockDay","isUnlockedByDefault" },
+            // Foods
+            new[] { "_key","id","displayName","description","basePrice","hpRestore","buffAttribute","buffMultiplier","buffDurationDays" },
+            // Drop Tables
+            new[] { "_key","id","entries" },
+            // Dungeon Spawn Tables
+            new[] { "_key","id","monsters" },
         };
 
-        int     _tableIdx = 0;
-        int     _selRow   = -1;
-        string  _search   = "";
-        int     _sortCol  = 0;
-        bool    _sortAsc  = true;
-        bool    _dirty    = false;
+        // ── 창 상태 ──────────────────────────────────────────────────
+        int    _tableIdx = 0;
+        int    _selRow   = -1;
+        string _search   = "";
+        int    _sortCol  = 0;
+        bool   _sortAsc  = true;
+        bool   _dirty    = false;
 
         Vector2 _tableScroll;
         Vector2 _detailScroll;
+        Vector2 _manifestScroll;
 
-        CsvParser.ParseResult _parsed;
+        bool _showManifest = false;
+        List<string> _manifestMissing;
+
+        CsvParser.ParseResult            _parsed;
         List<Dictionary<string, string>> _filtered;
 
-        // ---- Menu ----
+        // ================================================================
+        //  메뉴
+        // ================================================================
+
         [MenuItem("MonsterKitchen/Data Manager")]
         public static void Open()
         {
             var w = GetWindow<DataManagerWindow>("Data Manager");
-            w.minSize = new Vector2(800, 500);
+            w.minSize = new Vector2(860, 560);
         }
 
-        /// <summary>
-        /// 메뉴에서 직접 호출 가능. 창을 열지 않아도 전체 SO를 일괄 동기화한다.
-        /// </summary>
         [MenuItem("MonsterKitchen/Sync All SO")]
         public static void SyncAllSO()
         {
-            int grandTotal = 0;
+            int total = 0;
             try
             {
                 for (int i = 0; i < TABLE_FILES.Length; i++)
                 {
-                    EditorUtility.DisplayProgressBar(
-                        "Syncing All SO",
-                        $"[{i + 1}/{TABLE_FILES.Length}] {TABLE_LABELS[i]}...",
+                    EditorUtility.DisplayProgressBar("Syncing All SO",
+                        $"[{i+1}/{TABLE_FILES.Length}] {TABLE_LABELS[i]}...",
                         (float)i / TABLE_FILES.Length);
-
-                    grandTotal += SyncTableAtIndex(i);
+                    total += SyncTableAtIndex(i);
                 }
             }
-            finally
-            {
-                EditorUtility.ClearProgressBar();
-            }
+            finally { EditorUtility.ClearProgressBar(); }
 
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
-            Debug.Log($"[DataManager] Sync All 완료 — 총 {grandTotal}개 SO 동기화.");
-            EditorUtility.DisplayDialog("Sync All SO", $"전체 동기화 완료\n총 {grandTotal}개 SO", "OK");
+            Debug.Log($"[DataManager] Sync All 완료 — 총 {total}개 항목");
+            EditorUtility.DisplayDialog("Sync All SO", $"전체 동기화 완료\n총 {total}개 항목", "OK");
         }
 
-        /// <summary>idx번 테이블 CSV를 읽어 SO를 생성/갱신한다. 동기화된 SO 수를 반환.</summary>
+        [MenuItem("MonsterKitchen/Check Manifest")]
+        public static void CheckManifestMenu()
+        {
+            var missing = GetMissingManifestKeys();
+            if (missing.Count == 0)
+                EditorUtility.DisplayDialog("Manifest Check", "모든 에셋 키가 AssetManifest에 등록되어 있습니다.", "OK");
+            else
+                EditorUtility.DisplayDialog("Manifest Check — 누락 키",
+                    $"누락된 키 {missing.Count}개:\n\n" + string.Join("\n", missing.Take(20))
+                    + (missing.Count > 20 ? $"\n... 외 {missing.Count - 20}개" : ""), "OK");
+        }
+
+        // ================================================================
+        //  SO 동기화 — 테이블별 fieldMapper 포함
+        // ================================================================
+
+        static TableData GetOrCreateTableData()
+        {
+            var td = AssetDatabase.LoadAssetAtPath<TableData>(TABLE_DATA_PATH);
+            if (td != null) return td;
+
+            Directory.CreateDirectory(
+                Path.GetDirectoryName(Path.Combine(
+                    Application.dataPath.Replace("Assets", ""), TABLE_DATA_PATH)) ?? "");
+            td = ScriptableObject.CreateInstance<TableData>();
+            AssetDatabase.CreateAsset(td, TABLE_DATA_PATH);
+            AssetDatabase.SaveAssets();
+            Debug.Log($"[DataManager] TableData 생성: {TABLE_DATA_PATH}");
+            return td;
+        }
+
         static int SyncTableAtIndex(int idx)
         {
-            string dataPath = Application.dataPath;
-            string root     = dataPath.Substring(0, dataPath.Length - "Assets".Length);
-            string csvPath  = Path.Combine(root, CSV_ROOT, TABLE_FILES[idx]);
+            string root    = Application.dataPath[..^"Assets".Length];
+            string csvPath = Path.Combine(root, CSV_ROOT, TABLE_FILES[idx]);
 
             if (!File.Exists(csvPath))
             {
-                Debug.LogWarning($"[DataManager] CSV 없음: {TABLE_FILES[idx]} — 건너뜀.");
+                Debug.LogWarning($"[DataManager] CSV 없음: {TABLE_FILES[idx]}");
                 return 0;
             }
 
             var parsed = CsvReadWriter.ReadFromFullPath(csvPath);
             if (parsed?.Rows == null || parsed.Rows.Count == 0) return 0;
 
-            string folder = SO_ROOT + "/" + TABLE_FOLDERS[idx];
-            int count = 0;
-            switch (idx)
+            TableData td = GetOrCreateTableData();
+            return idx switch
             {
-                case 0: count = ScriptableObjectSync.Sync<MonsterData>   (parsed, folder)?.Count ?? 0; break;
-                case 1: count = ScriptableObjectSync.Sync<IngredientData>(parsed, folder)?.Count ?? 0; break;
-                case 2: count = ScriptableObjectSync.Sync<RecipeData>    (parsed, folder)?.Count ?? 0; break;
-                case 3: count = ScriptableObjectSync.Sync<FoodData>      (parsed, folder)?.Count ?? 0; break;
-                case 4: count = ScriptableObjectSync.Sync<DropTableData> (parsed, folder)?.Count ?? 0; break;
-            }
-            return count;
+                0 => ScriptableObjectSync.Sync<MonsterData>           (parsed, td.Monsters,           td, MonsterMapper),
+                1 => ScriptableObjectSync.Sync<IngredientData>        (parsed, td.Ingredients,        td, IngredientMapper),
+                2 => ScriptableObjectSync.Sync<RecipeData>            (parsed, td.Recipes,            td, RecipeMapper),
+                3 => ScriptableObjectSync.Sync<FoodData>              (parsed, td.Foods,              td, FoodMapper),
+                4 => ScriptableObjectSync.Sync<DropTableData>         (parsed, td.DropTables,         td, DropTableMapper),
+                5 => ScriptableObjectSync.Sync<DungeonSpawnTableData> (parsed, td.DungeonSpawnTables, td, DungeonSpawnTableMapper),
+                _ => 0,
+            };
         }
 
-        void OnEnable() { DoReload(); }
+        // ── 테이블별 fieldMapper ─────────────────────────────────────
+
+        /// <summary>MonsterData: prefabAddress / spriteAddress 자동 생성 (빈 경우만)</summary>
+        static void MonsterMapper(MonsterData d, Dictionary<string, string> _)
+        {
+            if (string.IsNullOrEmpty(d.prefabAddress))
+                d.prefabAddress = AssetKeys.MonsterPrefab(d.id);
+            if (string.IsNullOrEmpty(d.spriteAddress))
+                d.spriteAddress = AssetKeys.MonsterSprite(d.id);
+        }
+
+        /// <summary>IngredientData: spriteAddress 자동 생성</summary>
+        static void IngredientMapper(IngredientData d, Dictionary<string, string> _)
+        {
+            if (string.IsNullOrEmpty(d.spriteAddress))
+                d.spriteAddress = AssetKeys.IngredientSprite(d.id);
+        }
+
+        /// <summary>FoodData: spriteAddress 자동 생성</summary>
+        static void FoodMapper(FoodData d, Dictionary<string, string> _)
+        {
+            if (string.IsNullOrEmpty(d.spriteAddress))
+                d.spriteAddress = AssetKeys.FoodSprite(d.id);
+        }
+
+        /// <summary>RecipeData: ingredients 배열 파싱 ("2001:2|2002:1" 형식)</summary>
+        static void RecipeMapper(RecipeData d, Dictionary<string, string> row)
+        {
+            if (!row.TryGetValue("ingredients", out string raw) || string.IsNullOrWhiteSpace(raw))
+                return;
+
+            var list = new List<RecipeIngredient>();
+            foreach (var part in raw.Split('|'))
+            {
+                var segs = part.Trim().Split(':');
+                if (segs.Length >= 2
+                    && uint.TryParse(segs[0].Trim(), out uint ingId)
+                    && int.TryParse(segs[1].Trim(), out int qty))
+                {
+                    list.Add(new RecipeIngredient { ingredientId = ingId, quantity = qty });
+                }
+            }
+            d.ingredients = list.ToArray();
+        }
+
+        /// <summary>DungeonSpawnTableData: monsters 배열 파싱 ("1001:2:0.5|..." 형식)</summary>
+        static void DungeonSpawnTableMapper(DungeonSpawnTableData d, Dictionary<string, string> row)
+        {
+            if (!row.TryGetValue("monsters", out string raw) || string.IsNullOrWhiteSpace(raw))
+                return;
+
+            var list = new List<MonsterSpawnEntry>();
+            foreach (var part in raw.Split('|'))
+            {
+                var segs = part.Trim().Split(':');
+                if (segs.Length >= 2
+                    && uint.TryParse(segs[0].Trim(), out uint monId)
+                    && int.TryParse(segs[1].Trim(), out int count))
+                {
+                    float radius = segs.Length >= 3
+                        && float.TryParse(segs[2].Trim(),
+                            System.Globalization.NumberStyles.Float,
+                            System.Globalization.CultureInfo.InvariantCulture,
+                            out float r) ? r : 0.5f;
+                    list.Add(new MonsterSpawnEntry { monsterId = monId, count = count, spawnRadius = radius });
+                }
+            }
+            d.monsters = list;
+        }
+
+        /// <summary>DropTableData: entries 배열 파싱 ("2001:0.8:1:2|..." 형식)</summary>
+        static void DropTableMapper(DropTableData d, Dictionary<string, string> row)
+        {
+            if (!row.TryGetValue("entries", out string raw) || string.IsNullOrWhiteSpace(raw))
+                return;
+
+            var list = new List<DropEntry>();
+            foreach (var part in raw.Split('|'))
+            {
+                var segs = part.Trim().Split(':');
+                if (segs.Length >= 4
+                    && uint.TryParse(segs[0].Trim(), out uint ingId)
+                    && float.TryParse(segs[1].Trim(),
+                        System.Globalization.NumberStyles.Float,
+                        System.Globalization.CultureInfo.InvariantCulture,
+                        out float chance)
+                    && int.TryParse(segs[2].Trim(), out int minQ)
+                    && int.TryParse(segs[3].Trim(), out int maxQ))
+                {
+                    list.Add(new DropEntry
+                    {
+                        ingredientId = ingId,
+                        dropChance   = Mathf.Clamp01(chance),
+                        minQuantity  = minQ,
+                        maxQuantity  = maxQ,
+                    });
+                }
+            }
+            d.entries = list.ToArray();
+        }
+
+        // ================================================================
+        //  Manifest 누락 키 검사
+        // ================================================================
+
+        static List<string> GetMissingManifestKeys()
+        {
+            var manifest = AssetDatabase.LoadAssetAtPath<AssetManifest>(MANIFEST_PATH);
+            var td       = AssetDatabase.LoadAssetAtPath<TableData>(TABLE_DATA_PATH);
+            if (manifest == null || td == null) return new List<string> { "AssetManifest 또는 TableData 없음" };
+
+            var registered = manifest.BuildDictionary().Keys.ToHashSet();
+            var missing    = new List<string>();
+
+            void Check(string key, string hint)
+            {
+                if (!registered.Contains(key))
+                    missing.Add($"{key}  [{hint}]");
+            }
+
+            foreach (var d in td.Monsters.All)
+            {
+                if (!string.IsNullOrEmpty(d.prefabAddress))  Check(d.prefabAddress,  d.displayName);
+                if (!string.IsNullOrEmpty(d.spriteAddress))  Check(d.spriteAddress,  d.displayName);
+            }
+            foreach (var d in td.Ingredients.All)
+                if (!string.IsNullOrEmpty(d.spriteAddress))  Check(d.spriteAddress,  d.displayName);
+            foreach (var d in td.Foods.All)
+                if (!string.IsNullOrEmpty(d.spriteAddress))  Check(d.spriteAddress,  d.displayName);
+
+            return missing;
+        }
+
+        // ================================================================
+        //  OnEnable / OnDestroy
+        // ================================================================
+
+        void OnEnable()  { DoReload(); }
         void OnDestroy() { DoPromptSave(); }
 
-        // ============================================================
+        // ================================================================
         //  GUI
-        // ============================================================
+        // ================================================================
 
         void OnGUI()
         {
             DrawToolbar();
             DrawTable();
             DrawDetail();
+            if (_showManifest) DrawManifestChecker();
         }
 
         void DrawToolbar()
         {
             EditorGUILayout.BeginHorizontal(EditorStyles.toolbar);
 
-            int newIdx = EditorGUILayout.Popup(_tableIdx, TABLE_LABELS, EditorStyles.toolbarPopup, GUILayout.Width(120));
+            int newIdx = EditorGUILayout.Popup(_tableIdx, TABLE_LABELS,
+                EditorStyles.toolbarPopup, GUILayout.Width(120));
             if (newIdx != _tableIdx)
             {
                 DoPromptSave();
@@ -138,24 +316,27 @@ namespace MonsterKitchen.Editor
 
             GUILayout.Space(8);
             EditorGUILayout.LabelField("Search:", GUILayout.Width(46));
-            string ns = EditorGUILayout.TextField(_search, EditorStyles.toolbarSearchField, GUILayout.Width(160));
+            string ns = EditorGUILayout.TextField(_search,
+                EditorStyles.toolbarSearchField, GUILayout.Width(160));
             if (ns != _search) { _search = ns; DoFilter(); }
 
             GUILayout.FlexibleSpace();
 
-            if (GUILayout.Button("+ Row",   EditorStyles.toolbarButton, GUILayout.Width(56))) DoAddRow();
-
+            if (GUILayout.Button("+ Row",    EditorStyles.toolbarButton, GUILayout.Width(56))) DoAddRow();
             GUI.enabled = _selRow >= 0;
-            if (GUILayout.Button("- Row",   EditorStyles.toolbarButton, GUILayout.Width(56))) DoRemoveRow();
+            if (GUILayout.Button("- Row",    EditorStyles.toolbarButton, GUILayout.Width(56))) DoRemoveRow();
             GUI.enabled = true;
-
             GUI.enabled = _dirty;
-            if (GUILayout.Button("Save",    EditorStyles.toolbarButton, GUILayout.Width(50)))  DoSave();
+            if (GUILayout.Button("Save",     EditorStyles.toolbarButton, GUILayout.Width(50)))  DoSave();
             GUI.enabled = true;
-
             if (GUILayout.Button("Sync SO",  EditorStyles.toolbarButton, GUILayout.Width(62)))  DoSyncSO();
-            if (GUILayout.Button("Sync All", EditorStyles.toolbarButton, GUILayout.Width(62)))  SyncAllSO();
+            if (GUILayout.Button("Sync All", EditorStyles.toolbarButton, GUILayout.Width(66)))  SyncAllSO();
             if (GUILayout.Button("Reload",   EditorStyles.toolbarButton, GUILayout.Width(56)))  DoReload();
+
+            bool wasShow = _showManifest;
+            _showManifest = GUILayout.Toggle(_showManifest, "Manifest",
+                EditorStyles.toolbarButton, GUILayout.Width(66));
+            if (_showManifest && !wasShow) RefreshManifestCheck();
 
             EditorGUILayout.EndHorizontal();
         }
@@ -172,7 +353,6 @@ namespace MonsterKitchen.Editor
                 .Select((h, i) => new { h, i })
                 .Where(x => !CsvParser.IsIgnoredColumn(x.h))
                 .ToArray();
-
             if (cols.Length == 0) return;
 
             float colW = Mathf.Max(70, (position.width - 24) / cols.Length);
@@ -192,10 +372,10 @@ namespace MonsterKitchen.Editor
             EditorGUILayout.EndHorizontal();
 
             // 데이터 행
-            float tableH = position.height - DETAIL_H - 80;
-            _tableScroll = EditorGUILayout.BeginScrollView(_tableScroll, GUILayout.Height(tableH));
-
-            int cnt = _filtered == null ? 0 : _filtered.Count;
+            float usedH = DETAIL_H + (_showManifest ? 120 : 0) + 80;
+            _tableScroll = EditorGUILayout.BeginScrollView(
+                _tableScroll, GUILayout.Height(position.height - usedH));
+            int cnt = _filtered?.Count ?? 0;
             for (int ri = 0; ri < cnt; ri++)
             {
                 var  row  = _filtered[ri];
@@ -218,14 +398,14 @@ namespace MonsterKitchen.Editor
                 }
                 EditorGUILayout.EndHorizontal();
 
-                if (Event.current.type == EventType.MouseDown && rect.Contains(Event.current.mousePosition))
+                if (Event.current.type == EventType.MouseDown
+                    && rect.Contains(Event.current.mousePosition))
                 {
                     _selRow = ri;
                     Event.current.Use();
                     Repaint();
                 }
             }
-
             EditorGUILayout.EndScrollView();
         }
 
@@ -234,7 +414,8 @@ namespace MonsterKitchen.Editor
             if (_parsed == null) return;
 
             EditorGUILayout.LabelField("Detail", EditorStyles.boldLabel);
-            _detailScroll = EditorGUILayout.BeginScrollView(_detailScroll, GUI.skin.box, GUILayout.Height(DETAIL_H));
+            _detailScroll = EditorGUILayout.BeginScrollView(
+                _detailScroll, GUI.skin.box, GUILayout.Height(DETAIL_H));
 
             if (_selRow >= 0 && _filtered != null && _selRow < _filtered.Count)
             {
@@ -242,12 +423,11 @@ namespace MonsterKitchen.Editor
                     .Select((h, i) => new { h, i })
                     .Where(x => !CsvParser.IsIgnoredColumn(x.h))
                     .ToArray();
-
                 var selRow = _filtered[_selRow];
                 foreach (var col in cols)
                 {
                     EditorGUILayout.BeginHorizontal();
-                    EditorGUILayout.LabelField(col.h, GUILayout.Width(150));
+                    EditorGUILayout.LabelField(col.h, GUILayout.Width(160));
                     string cur = selRow.TryGetValue(col.h, out var cv) ? cv : "";
                     string nv  = EditorGUILayout.TextField(cur);
                     if (nv != cur) { selRow[col.h] = nv; _dirty = true; }
@@ -256,15 +436,47 @@ namespace MonsterKitchen.Editor
             }
             else
             {
-                EditorGUILayout.LabelField("Select a row to edit.", EditorStyles.centeredGreyMiniLabel);
+                EditorGUILayout.LabelField(
+                    "Select a row to edit.", EditorStyles.centeredGreyMiniLabel);
             }
-
             EditorGUILayout.EndScrollView();
         }
 
-        // ============================================================
-        //  Data Logic (Do* prefix to avoid validator false-positives)
-        // ============================================================
+        void DrawManifestChecker()
+        {
+            EditorGUILayout.Space(4);
+            EditorGUILayout.BeginHorizontal(EditorStyles.helpBox);
+            EditorGUILayout.LabelField(
+                $"Manifest 누락 키: {_manifestMissing?.Count ?? 0}개",
+                EditorStyles.boldLabel);
+            GUILayout.FlexibleSpace();
+            if (GUILayout.Button("Refresh", EditorStyles.miniButton, GUILayout.Width(60)))
+                RefreshManifestCheck();
+            if (GUILayout.Button("Open Manifest", EditorStyles.miniButton, GUILayout.Width(90)))
+            {
+                var m = AssetDatabase.LoadAssetAtPath<AssetManifest>(MANIFEST_PATH);
+                if (m != null) Selection.activeObject = m;
+            }
+            EditorGUILayout.EndHorizontal();
+
+            if (_manifestMissing != null && _manifestMissing.Count > 0)
+            {
+                _manifestScroll = EditorGUILayout.BeginScrollView(
+                    _manifestScroll, GUI.skin.box, GUILayout.Height(90));
+                foreach (var key in _manifestMissing)
+                    EditorGUILayout.LabelField(key, EditorStyles.miniLabel);
+                EditorGUILayout.EndScrollView();
+            }
+            else
+            {
+                EditorGUILayout.LabelField(
+                    "모든 키 등록 완료 ✓", EditorStyles.centeredGreyMiniLabel);
+            }
+        }
+
+        // ================================================================
+        //  내부 액션
+        // ================================================================
 
         void DoReload()
         {
@@ -291,10 +503,9 @@ namespace MonsterKitchen.Editor
             if (_parsed.Headers != null && _sortCol < _parsed.Headers.Length)
             {
                 string key = _parsed.Headers[_sortCol];
-                if (_sortAsc)
-                    rows = rows.OrderBy(r => r.TryGetValue(key, out var kv) ? kv : "");
-                else
-                    rows = rows.OrderByDescending(r => r.TryGetValue(key, out var kv) ? kv : "");
+                rows = _sortAsc
+                    ? rows.OrderBy(r => r.TryGetValue(key, out var v) ? v : "")
+                    : rows.OrderByDescending(r => r.TryGetValue(key, out var v) ? v : "");
             }
 
             _filtered = rows.ToList();
@@ -304,7 +515,8 @@ namespace MonsterKitchen.Editor
         void DoSave()
         {
             if (_parsed == null) return;
-            CsvReadWriter.Write(GetCsvPath(_tableIdx), _parsed.Headers, _parsed.TypeHints, _parsed.Rows, _parsed.RawLines);
+            CsvReadWriter.Write(GetCsvPath(_tableIdx),
+                _parsed.Headers, _parsed.TypeHints, _parsed.Rows, _parsed.RawLines);
             AssetDatabase.Refresh();
             _dirty = false;
             Debug.Log("[DataManager] Saved: " + TABLE_FILES[_tableIdx]);
@@ -314,15 +526,18 @@ namespace MonsterKitchen.Editor
         {
             if (_parsed == null) DoReload();
             if (_parsed == null) return;
-            string folder = SO_ROOT + "/" + TABLE_FOLDERS[_tableIdx];
+            TableData td = GetOrCreateTableData();
             switch (_tableIdx)
             {
-                case 0: ScriptableObjectSync.Sync<MonsterData>   (_parsed, folder); break;
-                case 1: ScriptableObjectSync.Sync<IngredientData>(_parsed, folder); break;
-                case 2: ScriptableObjectSync.Sync<RecipeData>    (_parsed, folder); break;
-                case 3: ScriptableObjectSync.Sync<FoodData>      (_parsed, folder); break;
-                case 4: ScriptableObjectSync.Sync<DropTableData> (_parsed, folder); break;
+                case 0: ScriptableObjectSync.Sync<MonsterData>           (_parsed, td.Monsters,           td, MonsterMapper);            break;
+                case 1: ScriptableObjectSync.Sync<IngredientData>        (_parsed, td.Ingredients,        td, IngredientMapper);         break;
+                case 2: ScriptableObjectSync.Sync<RecipeData>            (_parsed, td.Recipes,            td, RecipeMapper);             break;
+                case 3: ScriptableObjectSync.Sync<FoodData>              (_parsed, td.Foods,              td, FoodMapper);               break;
+                case 4: ScriptableObjectSync.Sync<DropTableData>         (_parsed, td.DropTables,         td, DropTableMapper);          break;
+                case 5: ScriptableObjectSync.Sync<DungeonSpawnTableData> (_parsed, td.DungeonSpawnTables, td, DungeonSpawnTableMapper);  break;
             }
+            AssetDatabase.SaveAssets();
+            if (_showManifest) RefreshManifestCheck();
         }
 
         void DoAddRow()
@@ -354,21 +569,28 @@ namespace MonsterKitchen.Editor
             _dirty = false;
         }
 
-        // ============================================================
-        //  Utils
-        // ============================================================
+        void RefreshManifestCheck()
+        {
+            _manifestMissing = GetMissingManifestKeys();
+            Repaint();
+        }
+
+        // ================================================================
+        //  유틸
+        // ================================================================
 
         string GetCsvPath(int idx)
         {
-            string dataPath = Application.dataPath;
-            string root     = dataPath.Substring(0, dataPath.Length - "Assets".Length);
+            string root = Application.dataPath[..^"Assets".Length];
             return Path.Combine(root, CSV_ROOT, TABLE_FILES[idx]);
         }
 
         void CreateDefaultCsv(string path, int idx)
         {
-            Directory.CreateDirectory(Path.GetDirectoryName(path));
-            File.WriteAllText(path, string.Join(",", DEFAULT_HEADERS[idx]) + "\n", System.Text.Encoding.UTF8);
+            Directory.CreateDirectory(Path.GetDirectoryName(path) ?? "");
+            File.WriteAllText(path,
+                string.Join(",", DEFAULT_HEADERS[idx]) + "\n",
+                System.Text.Encoding.UTF8);
         }
     }
 }

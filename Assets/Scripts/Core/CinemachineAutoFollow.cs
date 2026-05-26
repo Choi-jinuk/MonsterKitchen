@@ -25,9 +25,18 @@ namespace MonsterKitchen.Core
 
         void FindAndAssign()
         {
-            var player = GameObject.FindGameObjectWithTag("Player");
-            if (player != null && _vcam != null)
-                _vcam.Follow = player.transform;
+            // PlayerManager 를 우선 사용 (Find 없이 직접 참조)
+            var playerTf = PlayerManager.Instance?.Player?.transform;
+
+            // PlayerManager 없으면 태그 조회 (최초 씬 로드 등 엣지케이스)
+            if (playerTf == null)
+            {
+                var go = GameObject.FindGameObjectWithTag("Player");
+                playerTf = go != null ? go.transform : null;
+            }
+
+            if (playerTf != null && _vcam != null)
+                _vcam.Follow = playerTf;
         }
     }
 }

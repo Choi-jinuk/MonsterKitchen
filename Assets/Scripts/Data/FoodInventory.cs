@@ -13,27 +13,25 @@ namespace MonsterKitchen.Data
     {
         public static FoodInventory Instance { get; private set; }
 
-        readonly Dictionary<string, int>              _foods  = new();
-        readonly Dictionary<string, Queue<FoodGrade>> _grades = new();
+        readonly Dictionary<uint, int>              _foods  = new();
+        readonly Dictionary<uint, Queue<FoodGrade>> _grades = new();
 
-        public event Action<string, int> OnFoodChanged;  // (foodId, newQty)
+        public event Action<uint, int> OnFoodChanged;  // (foodId, newQty)
 
         public void Init() => Instance = this;
 
         // ── 추가 ─────────────────────────────────────────────────────
 
         /// <summary>등급 없이 추가 (Normal 등급으로 처리).</summary>
-        public void Add(string foodId, int qty = 1)
+        public void Add(uint foodId, int qty = 1)
         {
             for (int i = 0; i < qty; i++)
                 AddWithGrade(foodId, FoodGrade.Normal);
         }
 
         /// <summary>등급을 지정해 1개 추가.</summary>
-        public void AddWithGrade(string foodId, FoodGrade grade)
+        public void AddWithGrade(uint foodId, FoodGrade grade)
         {
-            if (string.IsNullOrEmpty(foodId)) return;
-
             _foods.TryGetValue(foodId, out int cur);
             _foods[foodId] = cur + 1;
 
@@ -45,19 +43,19 @@ namespace MonsterKitchen.Data
             q.Enqueue(grade);
 
             OnFoodChanged?.Invoke(foodId, _foods[foodId]);
-            Debug.Log($"[FoodInventory] +1 {foodId} [{grade}]  (total: {_foods[foodId]})");
+            Debug.Log($"[FoodInventory] +1 id:{foodId} [{grade}]  (total: {_foods[foodId]})");
         }
 
         // ── 소비 ─────────────────────────────────────────────────────
 
-        public FoodGrade TakeGrade(string foodId)
+        public FoodGrade TakeGrade(uint foodId)
         {
             if (_grades.TryGetValue(foodId, out var q) && q.Count > 0)
                 return q.Dequeue();
             return FoodGrade.Normal;
         }
 
-        public bool Remove(string foodId, int qty = 1)
+        public bool Remove(uint foodId, int qty = 1)
         {
             if (!_foods.TryGetValue(foodId, out int cur) || cur < qty) return false;
             _foods[foodId] = cur - qty;
@@ -72,9 +70,9 @@ namespace MonsterKitchen.Data
 
         // ── 조회 ─────────────────────────────────────────────────────
 
-        public int GetCount(string foodId)
+        public int GetCount(uint foodId)
             => _foods.TryGetValue(foodId, out int v) ? v : 0;
 
-        public IReadOnlyDictionary<string, int> All => _foods;
+        public IReadOnlyDictionary<uint, int> All => _foods;
     }
 }

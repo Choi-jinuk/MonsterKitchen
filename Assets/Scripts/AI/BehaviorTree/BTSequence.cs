@@ -5,30 +5,33 @@ namespace MonsterKitchen.AI.BehaviorTree
     /// 자식을 순서대로 실행하며, 하나라도 Failure 면 즉시 Failure.
     /// 모두 Success 면 Success.
     /// </summary>
+    [BTNode("Composite/Sequence")]
     public class BTSequence : BTComposite
     {
-        int _current;
+        class State { public int current; }
 
-        public override BTStatus Tick()
+        protected override BTStatus Execute(BTContext ctx)
         {
-            while (_current < Children.Count)
+            var state = ctx.GetOrCreateState<State>(this);
+
+            while (state.current < Children.Count)
             {
-                var status = Children[_current].Tick();
+                var status = Children[state.current].Tick(ctx);
 
-                if (status == BTStatus.Running)  return BTStatus.Running;
-                if (status == BTStatus.Failure)  { _current = 0; return BTStatus.Failure; }
+                if (status == BTStatus.Running) return BTStatus.Running;
+                if (status == BTStatus.Failure) { state.current = 0; return BTStatus.Failure; }
 
-                _current++;
+                state.current++;
             }
 
-            _current = 0;
+            state.current = 0;
             return BTStatus.Success;
         }
 
-        public override void Abort()
+        public override void Abort(BTContext ctx)
         {
-            _current = 0;
-            base.Abort();
+            ctx.GetOrCreateState<State>(this).current = 0;
+            base.Abort(ctx);
         }
     }
 }

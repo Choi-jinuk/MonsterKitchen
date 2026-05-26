@@ -1,33 +1,41 @@
-using UnityEngine;
+using System;
 using System.Collections.Generic;
+using MonsterKitchen.Core;
+using UnityEngine;
 
 namespace MonsterKitchen.Data
 {
-    [System.Serializable]
+    [Serializable]
     public struct DropEntry
     {
-        public IngredientData ingredient;
+        [Tooltip("재료 ID (TableData.Ingredients 키)")]
+        public uint ingredientId;
         [Range(0f, 1f)] public float dropChance;
         public int minQuantity;
         public int maxQuantity;
     }
 
-    [CreateAssetMenu(menuName = "MonsterKitchen/Data/DropTableData", fileName = "DRP_")]
-    public class DropTableData : ScriptableObject
+    [Serializable]
+    public class DropTableData
     {
-        public string     id;   // DRP_001
+        public uint       id;
         public DropEntry[] entries;
 
-        /// <summary>랜덤 드롭 결과 반환. 드롭 없으면 빈 배열.</summary>
-        public (IngredientData ingredient, int quantity)[] Roll()
+        /// <summary>
+        /// 랜덤 드롭 결과 반환. (ingredientId, quantity) 튜플 배열.
+        /// 드롭 없으면 빈 배열.
+        /// </summary>
+        public (uint ingredientId, int quantity)[] Roll()
         {
-            var results = new List<(IngredientData, int)>();
+            if (entries == null) return Array.Empty<(uint, int)>();
+            var results = new List<(uint, int)>();
             foreach (var e in entries)
             {
-                if (Random.value <= e.dropChance)
+                if (e.ingredientId == 0) continue;
+                if (RandomUtil.Chance(e.dropChance))
                 {
-                    int qty = Random.Range(e.minQuantity, e.maxQuantity + 1);
-                    results.Add((e.ingredient, qty));
+                    int qty = RandomUtil.Range(e.minQuantity, e.maxQuantity + 1);
+                    results.Add((e.ingredientId, qty));
                 }
             }
             return results.ToArray();

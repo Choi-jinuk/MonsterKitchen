@@ -8,13 +8,12 @@ namespace MonsterKitchen.Enemy
     // ====================================================================
     //  MonsterRespawnManager — 사망 몬스터 리스폰 매니저 (씬 단위 싱글톤)
     //
-    //  DungeonSceneController 가 new MonsterRespawnManager(this) 로 생성하고
-    //  Init() 를 호출한다. 코루틴은 runner(DungeonSceneController) 로 실행.
-    //
     //  ▶ 흐름
-    //    1. SpawnManager.SpawnSingle() → Track(instance, prefab, data, pos)
-    //    2. MonsterAI.EnterDie()       → NotifyDeath(instance)
-    //    3. _respawnDelay 초 대기 후 SpawnManager.SpawnSingle() 로 재소환
+    //    1. SpawnManager.SpawnSingle() → Track(instance, data, pos)
+    //    2. MonsterBase.OnDied() → NotifyDeath(instance)
+    //    3. RespawnDelay 초 후 SpawnManager.SpawnSingle(data, pos) 로 재소환
+    //
+    //  ▶ 프리팹은 MonsterData.prefabAddress 키로 AssetLoadManager 에서 로드하므로 별도 보관 불필요.
     // ====================================================================
 
     public class MonsterRespawnManager
@@ -26,12 +25,11 @@ namespace MonsterKitchen.Enemy
 
         struct RespawnEntry
         {
-            public MonsterAI   prefab;
             public MonsterData data;
             public Vector3     spawnPos;
         }
 
-        readonly Dictionary<MonsterAI, RespawnEntry> _tracked = new();
+        readonly Dictionary<MonsterBase, RespawnEntry> _tracked = new();
 
         public MonsterRespawnManager(MonoBehaviour runner) => _runner = runner;
 
@@ -39,17 +37,12 @@ namespace MonsterKitchen.Enemy
 
         // ── Public API ─────────────────────────────────────────────────
 
-        public void Track(MonsterAI instance, MonsterAI prefab, MonsterData data, Vector3 spawnPos)
+        public void Track(MonsterBase instance, MonsterData data, Vector3 spawnPos)
         {
-            _tracked[instance] = new RespawnEntry
-            {
-                prefab   = prefab,
-                data     = data,
-                spawnPos = spawnPos
-            };
+            _tracked[instance] = new RespawnEntry { data = data, spawnPos = spawnPos };
         }
 
-        public void NotifyDeath(MonsterAI instance)
+        public void NotifyDeath(MonsterBase instance)
         {
             if (!_tracked.TryGetValue(instance, out var entry)) return;
             _tracked.Remove(instance);
@@ -62,14 +55,14 @@ namespace MonsterKitchen.Enemy
         {
             yield return new WaitForSeconds(RespawnDelay);
 
-            if (SpawnManager.Instance == null) yield break;
-            if (entry.prefab == null)          yield break;
+            if (SpawnManager.Instance == null)                        yield break;
+            if (string.IsNullOrEmpty(entry.data?.prefabAddress))      yield break;
 
-            var newMonster = SpawnManager.Instance.SpawnSingle(entry.prefab, entry.data, entry.spawnPos);
-            Debug.Log($"[MonsterRespawnManager] '{entry.data?.displayName ?? "?"}' 리스폰 완료 @ {entry.spawnPos}");
+            var newMonster = SpawnManager.Instance.SpawnSingle(entry.data, entry.spawnPos);
+            Debug.Log($"[MonsterRespawnManager] '{entry.data.displayName}' 리스폰 완료 @ {entry.spawnPos}");
 
             if (newMonster != null)
-                Track(newMonster, entry.prefab, entry.data, entry.spawnPos);
+                Track(newMonster, entry.data, entry.spawnPos);
         }
     }
 }

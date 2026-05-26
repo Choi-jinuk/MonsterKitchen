@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using MonsterKitchen.Data;
-using UnityEngine;
 
 namespace MonsterKitchen.Cooking
 {
@@ -12,17 +11,17 @@ namespace MonsterKitchen.Cooking
     {
         /// <summary>
         /// 슬롯에 담긴 재료 ID 목록이 정확히 일치하는 레시피를 반환. 없으면 null.
-        /// 순서 무관. 빈 슬롯(null/empty)은 무시한다.
+        /// 순서 무관. 빈 슬롯(0)은 무시한다.
         /// </summary>
-        public static RecipeData FindSlotMatch(IEnumerable<RecipeData> recipes, List<string> slotIngredientIds)
+        public static RecipeData FindSlotMatch(IEnumerable<RecipeData> recipes, List<uint> slotIngredientIds)
         {
             if (recipes == null || slotIngredientIds == null) return null;
 
-            // 슬롯의 유효 재료를 id → count 딕셔너리로 변환
-            var slotCounts = new Dictionary<string, int>();
+            // 슬롯의 유효 재료를 id → count 딕셔너리로 변환 (0은 빈 슬롯)
+            var slotCounts = new Dictionary<uint, int>();
             foreach (var id in slotIngredientIds)
             {
-                if (string.IsNullOrEmpty(id)) continue;
+                if (id == 0u) continue;
                 slotCounts.TryGetValue(id, out int c);
                 slotCounts[id] = c + 1;
             }
@@ -32,13 +31,13 @@ namespace MonsterKitchen.Cooking
                 if (recipe == null) continue;
                 if (!recipe.isUnlockedByDefault) continue;
 
-                // 레시피 재료를 id → quantity 딕셔너리로 변환
-                var reqCounts = new Dictionary<string, int>();
+                // 레시피 재료를 ingredientId → quantity 딕셔너리로 변환
+                var reqCounts = new Dictionary<uint, int>();
                 foreach (var req in recipe.ingredients)
                 {
-                    if (req.ingredient == null) continue;
-                    reqCounts.TryGetValue(req.ingredient.id, out int c);
-                    reqCounts[req.ingredient.id] = c + req.quantity;
+                    if (req.ingredientId == 0u) continue;
+                    reqCounts.TryGetValue(req.ingredientId, out int c);
+                    reqCounts[req.ingredientId] = c + req.quantity;
                 }
 
                 if (slotCounts.Count != reqCounts.Count) continue;
@@ -60,7 +59,7 @@ namespace MonsterKitchen.Cooking
             foreach (var recipe in allRecipes)
             {
                 if (recipe == null) continue;
-                if (!recipe.isUnlockedByDefault) continue;  // 잠긴 레시피 건너뜀 (MVP)
+                if (!recipe.isUnlockedByDefault) continue;
                 if (CanCook(recipe, inventory))
                     result.Add(recipe);
             }
@@ -72,8 +71,8 @@ namespace MonsterKitchen.Cooking
         {
             foreach (var req in recipe.ingredients)
             {
-                if (req.ingredient == null) continue;
-                if (!inventory.Has(req.ingredient.id, req.quantity))
+                if (req.ingredientId == 0u) continue;
+                if (!inventory.Has(req.ingredientId, req.quantity))
                     return false;
             }
             return true;
@@ -86,8 +85,8 @@ namespace MonsterKitchen.Cooking
 
             foreach (var req in recipe.ingredients)
             {
-                if (req.ingredient == null) continue;
-                inventory.Remove(req.ingredient.id, req.quantity);
+                if (req.ingredientId == 0u) continue;
+                inventory.Remove(req.ingredientId, req.quantity);
             }
             return true;
         }

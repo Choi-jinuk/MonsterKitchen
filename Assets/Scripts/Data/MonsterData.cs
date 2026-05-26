@@ -1,31 +1,37 @@
+using System;
 using UnityEngine;
 
 namespace MonsterKitchen.Data
 {
-    [CreateAssetMenu(menuName = "MonsterKitchen/Data/MonsterData", fileName = "MON_")]
-    public class MonsterData : ScriptableObject
+    [Serializable]
+    public class MonsterData
     {
         [Header("Identity")]
-        public string id;           // MON_001
+        public uint   id;
         public string displayName;
         [TextArea] public string description;
 
         [Header("Combat")]
-        public int   hp;
-        public int   attack;
-        public int   defense;
+        public int           hp;
+        public int           attack;
+        public int           defense;
         public AttributeType attribute;
         public RarityType    rarity;
 
         [Header("Skills (최대 3개)")]
         [Tooltip("전투 스킬 목록. 인덱스 0 = 최우선. missileSpeed > 0 이면 원거리.")]
-        public SkillData[] skills = new SkillData[0];
+        public SkillData[] skills = Array.Empty<SkillData>();
 
         [Header("Drop")]
-        public DropTableData dropTable;
+        [Tooltip("드롭 테이블 ID (TableData.DropTables 키)")]
+        public uint dropTableId;
 
-        [Header("Visuals")]
-        public Sprite sprite;
+        [Header("Assets — AssetManifest 등록 키")]
+        [Tooltip("프리팹 주소. 형식: prefab/monster/{id}")]
+        public string prefabAddress;
+
+        [Tooltip("스프라이트 주소. 형식: sprite/monster/{id}")]
+        public string spriteAddress;
 
         [Header("CC 면역")]
         [Tooltip("true 이면 넉백이 걸리지 않는다.")]

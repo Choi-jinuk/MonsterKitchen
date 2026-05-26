@@ -1,59 +1,68 @@
+using MonsterKitchen.Enemy;
 using UnityEngine;
 
 namespace MonsterKitchen.AI.BehaviorTree.Monster
 {
     /// <summary>
     /// 플레이어를 향해 이동하는 액션.
-    /// DetectRange 밖이면 Failure (→ Selector 가 Patrol 로 전환).
-    /// PreferredDistance 이내에 도달하면 Success (→ 다음 틱에 Attack 브랜치 실행).
+    /// DetectRange 밖이면 Failure. PreferredDistance 이내면 Success.
     /// </summary>
+    [BTNode("Monster/Action/MoveToPlayer")]
     public class BTAction_MoveToPlayer : BTNode
     {
-        readonly MonsterBTAgent _agent;
+        static readonly int HashMoveX = Animator.StringToHash("MoveX");
+        static readonly int HashMoveY = Animator.StringToHash("MoveY");
+        static readonly int HashSpeed = Animator.StringToHash("Speed");
 
-        static readonly int HashMoveX  = Animator.StringToHash("MoveX");
-        static readonly int HashMoveY  = Animator.StringToHash("MoveY");
-        static readonly int HashSpeed  = Animator.StringToHash("Speed");
-
-        public BTAction_MoveToPlayer(MonsterBTAgent agent)
+        class State
         {
-            _agent = agent;
+            public BTMonsterController ctrl;
+            public Animator            anim;
         }
 
-        public override BTStatus Tick()
+        protected override BTStatus Execute(BTContext ctx)
         {
-            var player = _agent.PlayerTransform;
-            if (player == null) return BTStatus.Failure;
+            var state = ctx.GetOrCreateState<State>(this);
+            if (state.ctrl == null) state.ctrl = ctx.Owner.GetComponent<BTMonsterController>();
+            if (state.anim == null) state.anim = ctx.Owner.GetComponent<Animator>();
 
-            float dist     = Vector2.Distance(_agent.transform.position, player.position);
-            float detect   = _agent.DetectRange;
-            float prefDist = _agent.PreferredDistance;
+            if (!ctx.Blackboard.TryGet<Transform>("Player", out var player) || player == null)
+                return BTStatus.Failure;
 
-            // 감지 범위 1.5배 밖으로 나가면 추적 중단 → Patrol 로 전환
+            float detect    = ctx.Blackboard.Get<float>("DetectRange");
+            float prefDist  = ctx.Blackboard.Get<float>("PreferredDistance");
+            float moveSpeed = ctx.Blackboard.Get<float>("MoveSpeed");
+
+            float dist = Vector2.Distance(ctx.Owner.transform.position, player.position);
+
             if (dist > detect * 1.5f) return BTStatus.Failure;
+            if (dist <= prefDist)     return BTStatus.Success;
 
-            // 선호 거리 이내 → 공격 브랜치가 처리하도록 Success 반환
-            if (dist <= prefDist) return BTStatus.Success;
+            Vector2 dir      = ((Vector2)player.position - (Vector2)ctx.Owner.transform.position).normalized;
+            Vector2 sepDir   = state.ctrl != null ? state.ctrl.ApplySeparation(dir) : dir;
+            Vector2 velocity = sepDir * moveSpeed;
 
-            // 플레이어 방향으로 이동
-            Vector2 dir      = ((Vector2)player.position - (Vector2)_agent.transform.position).normalized;
-            Vector2 sepDir   = _agent.Controller.ApplySeparation(dir);
-            Vector2 velocity = sepDir * _agent.MoveSpeed;
+            if (state.ctrl != null) state.ctrl.Rb.linearVelocity = velocity;
 
-            _agent.Controller.Rb.linearVelocity = velocity;
-
-            var anim = _agent.Anim;
-            anim.SetFloat(HashMoveX, velocity.x);
-            anim.SetFloat(HashMoveY, velocity.y);
-            anim.SetFloat(HashSpeed, velocity.magnitude);
+            if (state.anim != null)
+            {
+                state.anim.SetFloat(HashMoveX, velocity.x);
+                state.anim.SetFloat(HashMoveY, velocity.y);
+                state.anim.SetFloat(HashSpeed,  velocity.magnitude);
+            }
 
             return BTStatus.Running;
         }
 
-        public override void Abort()
+        public override void Abort(BTContext ctx)
         {
-            if (_agent.Controller?.Rb != null)
-                _agent.Controller.Rb.linearVelocity = Vector2.zero;
+            var state = ctx.GetOrCreateState<State>(this);
+            if (state.ctrl?.Rb != null)
+                state.ctrl.Rb.linearVelocity = Vector2.zero;
         }
+
+#if UNITY_EDITOR
+        public override string DebugLabel => "→ MoveToPlayer";
+#endif
     }
 }

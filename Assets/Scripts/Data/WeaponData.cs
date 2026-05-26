@@ -1,34 +1,25 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
 namespace MonsterKitchen.Data
 {
     // ====================================================================
-    //  WeaponData — 무기 정의 ScriptableObject
-    //
-    //  ▶ 역할 분리
-    //    PlayerSpawnData : 캐릭터 고유 수치 (기본 HP, 이동 속도 등)
-    //    WeaponData      : 무기 고유 수치 (스탯 기여 + 평타 체인)
+    //  WeaponData — 무기 정의
     //
     //  ▶ abils
     //    장착 시 플레이어 기본 스탯에 더해지는 수치 목록.
-    //    무기라도 방어력 스탯을 가질 수 있다.
-    //    예) [(Attack, +15), (Defense, +3), (Speed, +0.2)]
     //
     //  ▶ normalAttackGroup
     //    이 무기의 평타 체인. 장착 시 자동으로 평타로 사용된다.
-    //    플레이어가 별도로 선택할 수 없다.
-    //
-    //  메뉴: Create → MonsterKitchen → Data → WeaponData
-    //  파일명 규칙: WPN_001, WPN_002 …
     // ====================================================================
 
-    [CreateAssetMenu(menuName = "MonsterKitchen/Data/WeaponData", fileName = "WPN_")]
-    public class WeaponData : ScriptableObject
+    [Serializable]
+    public class WeaponData
     {
         [Header("Identity")]
-        [Tooltip("무기 고유 ID. 예: WPN_001")]
-        public string weaponId;
+        [Tooltip("무기 고유 ID")]
+        public uint   weaponId;
 
         [Tooltip("표시 이름. 예: 낡은 검")]
         public string weaponName;
@@ -37,36 +28,27 @@ namespace MonsterKitchen.Data
         public WeaponType weaponType;
 
         [Header("Stats (AbilEntry)")]
-        [Tooltip("이 무기 장착 시 플레이어 스탯에 더해지는 수치 목록.\n" +
-                 "공격력뿐 아니라 방어력·속도 등 어떤 AbilType 이든 가능하다.")]
-        public List<AbilEntry> abils = new List<AbilEntry>();
+        [Tooltip("이 무기 장착 시 플레이어 스탯에 더해지는 수치 목록.")]
+        public List<AbilEntry> abils = new();
 
         [Header("Durability")]
-        [Tooltip("최대 내구도. 0이면 파괴되지 않는 영구 무기.\n" +
-                 "런타임 현재 내구도는 PlayerStats.WeaponDurability 에서 관리된다.")]
+        [Tooltip("최대 내구도. 0이면 파괴되지 않는 영구 무기.")]
         [Min(0)]
         public int maxDurability = 0;
 
-        [Tooltip("내구도 소모 방식.\n" +
-                 "PerHit  = 공격 1회당 1 소모\n" +
-                 "PerKill = 처치 1회당 1 소모\n" +
-                 "None    = 자동 소모 없음 (수동 이벤트로만 소모)")]
+        [Tooltip("내구도 소모 방식.")]
         public DurabilityDecayMode decayMode = DurabilityDecayMode.None;
 
         [Header("Normal Attack")]
-        [Tooltip("이 무기의 평타 체인 SkillGroupData.\n" +
-                 "무기 장착 시 자동으로 평타로 사용된다.")]
+        [Tooltip("이 무기의 평타 체인 SkillGroupData.")]
         public SkillGroupData normalAttackGroup;
 
-        [Header("Visual (WeaponSocket)")]
-        [Tooltip("WeaponSocket SpriteRenderer 에 런타임 교체되는 무기 스프라이트.\n" +
-                 "에셋 준비 전까지 null 허용 — 소켓에 스프라이트 없이 동작.")]
-        public Sprite weaponSprite;
+        [Header("Assets — AssetManifest 등록 키")]
+        [Tooltip("무기 스프라이트 주소. 형식: sprite/weapon/{id}")]
+        public string weaponSpriteAddress;
 
-        [Tooltip("무기 전용 AnimatorController.\n" +
-                 "활 시위 당기기·마법봉 캐스팅 등 무기별 애니메이션이 있는 경우만 설정.\n" +
-                 "null 이면 WeaponSocket Animator 비활성 — 스프라이트만 표시.")]
-        public RuntimeAnimatorController weaponAnimController;
+        [Tooltip("무기 AnimatorController 주소. 형식: anim/weapon/{id}")]
+        public string weaponAnimAddress;
     }
 
     // ----------------------------------------------------------------
@@ -74,8 +56,8 @@ namespace MonsterKitchen.Data
     // ----------------------------------------------------------------
     public enum DurabilityDecayMode
     {
-        None    = 0,   // 자동 소모 없음
-        PerHit  = 1,   // 공격 1회당 1 소모
-        PerKill = 2,   // 처치 1회당 1 소모
+        None    = 0,
+        PerHit  = 1,
+        PerKill = 2,
     }
 }

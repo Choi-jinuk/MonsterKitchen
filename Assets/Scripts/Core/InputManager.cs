@@ -113,5 +113,9 @@ namespace MonsterKitchen.Core
 
         public void EnablePlayerInput()  => _input.Player.Enable();
         public void DisablePlayerInput() => _input.Player.Disable();
+
+        // 바인딩 정보를 외부에서 읽을 수 있도록 액션 참조를 노출한다.
+        // Init() 이후에만 호출할 것 (Instance != null 보장 이후).
+        public InputAction InteractAction => _input.Player.Interact;
     }
 }

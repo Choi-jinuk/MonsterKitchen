@@ -15,12 +15,11 @@ GameObject:
   - component: {fileID: 7741407923018731781}
   - component: {fileID: 1923279832191608470}
   - component: {fileID: 5909746548544042320}
-  - component: {fileID: 2793604527597822556}
   - component: {fileID: 8396982730606618849}
   - component: {fileID: 7276641244880455630}
-  - component: {fileID: 2434634080673381886}
-  - component: {fileID: 3926549378676827654}
   - component: {fileID: 4338519199941895464}
+  - component: {fileID: 4745114982048035818}
+  - component: {fileID: 734749195336839959}
   m_Layer: 8
   m_Name: Slime
   m_TagString: Untagged
@@ -212,35 +211,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f5edeb57d4fe0fe4f90b2909d6c897dc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MonsterKitchen.Combat.DropResolver
-  dropTable: {fileID: 11400000, guid: 4c55ba8131dbf0344aeeb807035663ff, type: 2}
   itemDropPrefab: {fileID: 1000000, guid: cdf59768d50eaf8439865fac28371dce, type: 3}
---- !u!114 &2793604527597822556
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5250572445987000973}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 733c9a7a2f8a4af41a35cd3a6fa6dad5, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::MonsterKitchen.Enemy.MonsterAI
-  monsterData: {fileID: 11400000, guid: 8530c29c65750d845a65fec88786766a, type: 2}
-  moveSpeed: 2.5
-  _detectRangeBonus: 1.5
-  patrolRadius: 3
-  patrolWait: 1.5
-  _movement: {fileID: 2434634080673381886}
-  _projectilePrefab: {fileID: 0}
-  _playerLayer:
-    serializedVersion: 2
-    m_Bits: 0
-  separationRadius: 0.9
-  separationWeight: 2
-  monsterLayer:
-    serializedVersion: 2
-    m_Bits: 256
 --- !u!114 &8396982730606618849
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -274,34 +245,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MonsterKitchen.UI.DamagePopupTrigger
   critThreshold: 15
---- !u!114 &2434634080673381886
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5250572445987000973}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5520701b7953be44eb72ec8d813fc82b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::MonsterKitchen.Enemy.SlimeMovement
-  dashWindupDuration: 0.55
-  dashSpeed: 7
-  dashDuration: 0.35
-  dashCooldown: 0.6
---- !u!114 &3926549378676827654
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5250572445987000973}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3041bed932474364c931719017c6e7c9, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::MonsterKitchen.Combat.CrowdControlComponent
 --- !u!114 &4338519199941895464
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -314,5 +257,41 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 696771671f68e7149a2afcc1787446b1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MonsterKitchen.Core.PerspectivePlaneSync
-  _tiltAngleDeg: 5
   _isStatic: 0
+--- !u!114 &4745114982048035818
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5250572445987000973}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e887800a53111004aaa952669059e47a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MonsterKitchen.AI.BehaviorTree.BTRunner
+  _asset: {fileID: 11400000, guid: 83770707d836a2849a8924867c84900f, type: 2}
+--- !u!114 &734749195336839959
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5250572445987000973}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 750a1e0c30b20104d93e020b5171296e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MonsterKitchen.Enemy.BTMonsterController
+  monsterData: {fileID: 0}
+  moveSpeed: 2.5
+  detectRangeBonus: 1.5
+  separationRadius: 0.9
+  separationWeight: 2
+  monsterLayer:
+    serializedVersion: 2
+    m_Bits: 256
+  _projectilePrefab: {fileID: 0}
+  _playerLayer:
+    serializedVersion: 2
+    m_Bits: 0

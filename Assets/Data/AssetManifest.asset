@@ -23,61 +23,11 @@ MonoBehaviour:
     asset: {fileID: 5015245969387161486, guid: 957783e1d5b08964688de7935deee5b6, type: 3}
   - key: data/player_spawn
     asset: {fileID: 11400000, guid: 5ff57c893a9f41b4aa173dce868c7d2a, type: 2}
-  - key: data/dungeon_spawn
-    asset: {fileID: 11400000, guid: b314c614e876d0942bea8d2e7eb62aec, type: 2}
-  - key: data/monster/MON_001
-    asset: {fileID: 11400000, guid: 8530c29c65750d845a65fec88786766a, type: 2}
-  - key: data/monster/MON_002
-    asset: {fileID: 11400000, guid: 05333153c770c454d8626909bc99e247, type: 2}
-  - key: data/monster/MON_003
-    asset: {fileID: 11400000, guid: 5bff29a26fe82884a976d970b8bc555b, type: 2}
-  - key: data/monster/MON_004
-    asset: {fileID: 11400000, guid: 88b18a1f7c9ac23469f147bab44950a6, type: 2}
-  - key: data/monster/MON_005
-    asset: {fileID: 11400000, guid: 92344c7e703bbd3428d1ee5ac8eb5818, type: 2}
-  - key: data/ingredient/ING_001
-    asset: {fileID: 11400000, guid: 168691daa8b98434ca9030b6dbc4c104, type: 2}
-  - key: data/ingredient/ING_002
-    asset: {fileID: 11400000, guid: 3c236abd6f1f5bf4f9f240599c6bfc70, type: 2}
-  - key: data/ingredient/ING_003
-    asset: {fileID: 11400000, guid: f1a01573b7975254d9791158d38ee2ab, type: 2}
-  - key: data/ingredient/ING_004
-    asset: {fileID: 11400000, guid: 88b7e0d7faed6814cbb98c190b3b2875, type: 2}
-  - key: data/ingredient/ING_005
-    asset: {fileID: 11400000, guid: f23ddbb688a9d6547aad6b8c1f124145, type: 2}
-  - key: data/ingredient/ING_006
-    asset: {fileID: 11400000, guid: 33cf9153684643040b51d47bd8dd8a8c, type: 2}
-  - key: data/ingredient/ING_007
-    asset: {fileID: 11400000, guid: 16dbfe909a580a4468d468c0a221bf3f, type: 2}
-  - key: data/ingredient/ING_008
-    asset: {fileID: 11400000, guid: da5c4e12bbd7fde4fb4490c37170e76e, type: 2}
-  - key: data/recipe/RCP_001
-    asset: {fileID: 11400000, guid: 964b07a2f49a80043b6ca61613db20ab, type: 2}
-  - key: data/recipe/RCP_002
-    asset: {fileID: 11400000, guid: 6f18818de1fd43e48b65a27a00bd90a9, type: 2}
-  - key: data/recipe/RCP_003
-    asset: {fileID: 11400000, guid: fb3736ff60a72854883eae302449254e, type: 2}
-  - key: data/recipe/RCP_004
-    asset: {fileID: 11400000, guid: 8da7f7a4247604f4690f645f3d52fb60, type: 2}
-  - key: data/recipe/RCP_005
-    asset: {fileID: 11400000, guid: 674daf4728e509a4f97d4d1b6ab67c16, type: 2}
-  - key: data/food/FOOD_001
-    asset: {fileID: 11400000, guid: 68f4f209ae1a65448be06e1c2934b84a, type: 2}
-  - key: data/food/FOOD_002
-    asset: {fileID: 11400000, guid: 5347f983fe0745545b017e3a9eaeb8f6, type: 2}
-  - key: data/food/FOOD_003
-    asset: {fileID: 11400000, guid: b4eba1df6b432934eb3f0b8072499a87, type: 2}
-  - key: data/food/FOOD_004
-    asset: {fileID: 11400000, guid: 7ae72dc7290a60142a82829cd13ca357, type: 2}
-  - key: data/food/FOOD_005
-    asset: {fileID: 11400000, guid: fc36c12a1a60dce4cb60a1376471e7c8, type: 2}
-  - key: data/droptable/DRP_001
-    asset: {fileID: 11400000, guid: 4c55ba8131dbf0344aeeb807035663ff, type: 2}
-  - key: data/droptable/DRP_002
-    asset: {fileID: 11400000, guid: 7efa7ec3f0e048c42863ed8d3368480b, type: 2}
-  - key: data/droptable/DRP_003
-    asset: {fileID: 11400000, guid: b81e1fe38b4523c4a867fdb94f57a2ad, type: 2}
-  - key: data/droptable/DRP_004
-    asset: {fileID: 11400000, guid: 69af5c0a2ffd19347bbfff0225c0424f, type: 2}
-  - key: data/droptable/DRP_005
-    asset: {fileID: 11400000, guid: bb37e17d4bc9bd94989cc200dcf629a4, type: 2}
+  - key: prefab/monster/1001
+    asset: {fileID: 5250572445987000973, guid: ca6144aec3d7ada4bbc99f8c5cb080d9, type: 3}
+  - key: prefab/monster/1002
+    asset: {fileID: 5250572445987000973, guid: ca6144aec3d7ada4bbc99f8c5cb080d9, type: 3}
+  - key: sprite/monster/1001
+    asset: {fileID: -7282886668606283007, guid: 4f4247ec0a7c4b648b37352cf74ceb1a, type: 3}
+  - key: sprite/monster/1002
+    asset: {fileID: -7282886668606283007, guid: 4f4247ec0a7c4b648b37352cf74ceb1a, type: 3}
