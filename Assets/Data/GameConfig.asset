@@ -12,4 +12,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5bd6bb21eef8aaa4a8b302bbc65ead27, type: 3}
   m_Name: GameConfig
   m_EditorClassIdentifier: Assembly-CSharp::MonsterKitchen.Data.GameConfig
-  tiltAngleDeg: 45
+  TiltAngleDeg: -20

@@ -5,7 +5,8 @@ using MonsterKitchen.Data;
 namespace MonsterKitchen.Cooking
 {
     /// <summary>
-    /// 현재 인벤토리 기준으로 조리 가능한 레시피를 찾는다.
+    /// 현재 인벤토리 기준으로 조리 가능한 레시피를 찾는 읽기 전용 유틸리티.
+    /// 실제 재료 소모·음식 추가는 NetworkManager.RequestCook() 이 담당한다.
     /// </summary>
     public static class RecipeMatcher
     {
@@ -17,7 +18,6 @@ namespace MonsterKitchen.Cooking
         {
             if (recipes == null || slotIngredientIds == null) return null;
 
-            // 슬롯의 유효 재료를 id → count 딕셔너리로 변환 (0은 빈 슬롯)
             var slotCounts = new Dictionary<uint, int>();
             foreach (var id in slotIngredientIds)
             {
@@ -29,15 +29,14 @@ namespace MonsterKitchen.Cooking
             foreach (var recipe in recipes)
             {
                 if (recipe == null) continue;
-                if (!recipe.isUnlockedByDefault) continue;
+                if (!recipe.IsUnlockedByDefault) continue;
 
-                // 레시피 재료를 ingredientId → quantity 딕셔너리로 변환
                 var reqCounts = new Dictionary<uint, int>();
-                foreach (var req in recipe.ingredients)
+                foreach (var req in recipe.Ingredients)
                 {
-                    if (req.ingredientId == 0u) continue;
-                    reqCounts.TryGetValue(req.ingredientId, out int c);
-                    reqCounts[req.ingredientId] = c + req.quantity;
+                    if (req.IngredientId == 0u) continue;
+                    reqCounts.TryGetValue(req.IngredientId, out int c);
+                    reqCounts[req.IngredientId] = c + req.Quantity;
                 }
 
                 if (slotCounts.Count != reqCounts.Count) continue;
@@ -48,10 +47,9 @@ namespace MonsterKitchen.Cooking
             return null;
         }
 
-        /// <summary>
-        /// 인벤토리의 재료로 만들 수 있는 레시피 목록 반환.
-        /// </summary>
-        public static List<RecipeData> FindMatchable(RecipeData[] allRecipes, Inventory inventory)
+        /// <summary>PlayerInventoryData 의 재료로 만들 수 있는 레시피 목록 반환 (UI 미리보기용).</summary>
+        public static List<RecipeData> FindMatchable(IEnumerable<RecipeData> allRecipes,
+                                                     PlayerInventoryData inventory)
         {
             var result = new List<RecipeData>();
             if (allRecipes == null || inventory == null) return result;
@@ -59,34 +57,22 @@ namespace MonsterKitchen.Cooking
             foreach (var recipe in allRecipes)
             {
                 if (recipe == null) continue;
-                if (!recipe.isUnlockedByDefault) continue;
+                if (!recipe.IsUnlockedByDefault) continue;
                 if (CanCook(recipe, inventory))
                     result.Add(recipe);
             }
             return result;
         }
 
-        /// <summary>레시피 1개가 현재 인벤토리로 조리 가능한지 확인.</summary>
-        public static bool CanCook(RecipeData recipe, Inventory inventory)
+        /// <summary>레시피 1개가 현재 인벤토리로 조리 가능한지 확인 (UI 미리보기용).</summary>
+        public static bool CanCook(RecipeData recipe, PlayerInventoryData inventory)
         {
-            foreach (var req in recipe.ingredients)
+            if (recipe == null || inventory == null) return false;
+            foreach (var req in recipe.Ingredients)
             {
-                if (req.ingredientId == 0u) continue;
-                if (!inventory.Has(req.ingredientId, req.quantity))
+                if (req.IngredientId == 0u) continue;
+                if (!inventory.HasIngredient(req.IngredientId, req.Quantity))
                     return false;
-            }
-            return true;
-        }
-
-        /// <summary>레시피 재료를 인벤토리에서 소모.</summary>
-        public static bool ConsumeIngredients(RecipeData recipe, Inventory inventory)
-        {
-            if (!CanCook(recipe, inventory)) return false;
-
-            foreach (var req in recipe.ingredients)
-            {
-                if (req.ingredientId == 0u) continue;
-                inventory.Remove(req.ingredientId, req.quantity);
             }
             return true;
         }

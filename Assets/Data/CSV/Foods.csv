@@ -3,7 +3,7 @@
 ; buffAttribute: None/Fire/Water/Wind/Earth/Magic/Poison
 ; spriteAddress → DataManagerWindow Sync 시 자동 생성
 #TYPE,string,uint,string,string,int,int,AttributeType,float,int
-_key,id,displayName,description,basePrice,hpRestore,buffAttribute,buffMultiplier,buffDurationDays
+_key,Id,DisplayName,Description,BasePrice,HpRestore,BuffAttribute,BuffMultiplier,BuffDurationDays
 FOOD_001,3001,슬라임 젤리 디저트,달콤한 슬라임 젤리를 굳혀 만든 디저트. 회복 효과가 있다.,50,20,None,1.0,0
 FOOD_002,3002,매콤 슬라임 볶음,불꽃 슬라임 코어를 볶아낸 매콤한 요리. 공격력이 오른다.,80,10,Fire,1.15,1
 FOOD_003,3003,고블린 뼈 육수,고블린 뼈를 우려낸 깊은 육수. 체력 회복에 탁월하다.,70,40,None,1.0,0

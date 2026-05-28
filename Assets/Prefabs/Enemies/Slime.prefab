@@ -17,9 +17,9 @@ GameObject:
   - component: {fileID: 5909746548544042320}
   - component: {fileID: 8396982730606618849}
   - component: {fileID: 7276641244880455630}
-  - component: {fileID: 4338519199941895464}
   - component: {fileID: 4745114982048035818}
   - component: {fileID: 734749195336839959}
+  - component: {fileID: 4940764961351813988}
   m_Layer: 8
   m_Name: Slime
   m_TagString: Untagged
@@ -36,7 +36,7 @@ Transform:
   m_GameObject: {fileID: 5250572445987000973}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 3, y: 2, z: 0.17431147}
+  m_LocalPosition: {x: 3, y: 2, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -198,7 +198,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e1e2aad468967d540a266b84de68285b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MonsterKitchen.Combat.Health
-  maxHp: 100
+  m_DefaultHp: 100
 --- !u!114 &5909746548544042320
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -211,7 +211,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f5edeb57d4fe0fe4f90b2909d6c897dc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MonsterKitchen.Combat.DropResolver
-  itemDropPrefab: {fileID: 1000000, guid: cdf59768d50eaf8439865fac28371dce, type: 3}
+  m_ItemDropPrefab: {fileID: 1000000, guid: cdf59768d50eaf8439865fac28371dce, type: 3}
 --- !u!114 &8396982730606618849
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -224,14 +224,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3692d7971147dfb4d8b2bd944cec3aa9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MonsterKitchen.Enemy.EnemyHpBar
-  barOffset: {x: 0, y: 0.65, z: 0}
-  barWidth: 0.7
-  barHeight: 0.08
-  colHigh: {r: 0.15, g: 0.85, b: 0.15, a: 1}
-  colMid: {r: 0.95, g: 0.8, b: 0.05, a: 1}
-  colLow: {r: 0.9, g: 0.15, b: 0.1, a: 1}
-  colBg: {r: 0.08, g: 0.08, b: 0.08, a: 0.9}
-  colBorder: {r: 0, g: 0, b: 0, a: 1}
+  m_BarOffset: {x: 0, y: 0.65, z: 0}
+  m_BarWidth: 0.7
+  m_BarHeight: 0.08
+  m_ColHigh: {r: 0.15, g: 0.85, b: 0.15, a: 1}
+  m_ColMid: {r: 0.95, g: 0.8, b: 0.05, a: 1}
+  m_ColLow: {r: 0.9, g: 0.15, b: 0.1, a: 1}
+  m_ColBg: {r: 0.08, g: 0.08, b: 0.08, a: 0.9}
+  m_ColBorder: {r: 0, g: 0, b: 0, a: 1}
 --- !u!114 &7276641244880455630
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -245,19 +245,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MonsterKitchen.UI.DamagePopupTrigger
   critThreshold: 15
---- !u!114 &4338519199941895464
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5250572445987000973}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 696771671f68e7149a2afcc1787446b1, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::MonsterKitchen.Core.PerspectivePlaneSync
-  _isStatic: 0
 --- !u!114 &4745114982048035818
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -270,7 +257,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e887800a53111004aaa952669059e47a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MonsterKitchen.AI.BehaviorTree.BTRunner
-  _asset: {fileID: 11400000, guid: 83770707d836a2849a8924867c84900f, type: 2}
+  m_Asset: {fileID: 11400000, guid: 83770707d836a2849a8924867c84900f, type: 2}
 --- !u!114 &734749195336839959
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -283,15 +270,43 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 750a1e0c30b20104d93e020b5171296e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MonsterKitchen.Enemy.BTMonsterController
-  monsterData: {fileID: 0}
-  moveSpeed: 2.5
-  detectRangeBonus: 1.5
-  separationRadius: 0.9
-  separationWeight: 2
-  monsterLayer:
+  m_MonsterData:
+    Id: 0
+    DisplayName:
+    Description:
+    Hp: 0
+    Attack: 0
+    Defense: 0
+    MoveSpeed: 0
+    Attribute: 0
+    Rarity: 0
+    SkillGroupIds: []
+    SkillGroups: []
+    DropTableId: 0
+    PrefabAddress:
+    SpriteAddress:
+    BtAssetAddress:
+    ImmuneToKnockback: 0
+    ImmuneToStun: 0
+    ImmuneToPullIn: 0
+  m_DetectRangeBonus: 1.5
+  m_SeparationRadius: 0.9
+  m_SeparationWeight: 2
+  m_MonsterLayer:
     serializedVersion: 2
     m_Bits: 256
-  _projectilePrefab: {fileID: 0}
-  _playerLayer:
+  m_PlayerLayer:
     serializedVersion: 2
     m_Bits: 0
+--- !u!114 &4940764961351813988
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5250572445987000973}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f7eb69a9cf605254c82e51cd1e7be5a7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MonsterKitchen.Core.PerspectiveEntityTilt

@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 2446177979915498804}
   - component: {fileID: 2509651903553498199}
   - component: {fileID: 4105252894353530047}
-  - component: {fileID: 361221868471769357}
+  - component: {fileID: 1320838501232489895}
   m_Layer: 0
   m_Name: Customer
   m_TagString: Untagged
@@ -197,11 +197,8 @@ MonoBehaviour:
   moveSpeed: 2.5
   patience: 20
   eatDuration: 3
-  possibleOrderIds:
-  - 3001
-  - 3002
-  - 3003
---- !u!114 &361221868471769357
+  possibleOrderIds: b90b0000ba0b0000bb0b0000
+--- !u!114 &1320838501232489895
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -210,11 +207,9 @@ MonoBehaviour:
   m_GameObject: {fileID: 5015245969387161486}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 696771671f68e7149a2afcc1787446b1, type: 3}
+  m_Script: {fileID: 11500000, guid: f7eb69a9cf605254c82e51cd1e7be5a7, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::MonsterKitchen.Core.PerspectivePlaneSync
-  _tiltAngleDeg: 5
-  _isStatic: 0
+  m_EditorClassIdentifier: Assembly-CSharp::MonsterKitchen.Core.PerspectiveEntityTilt
 --- !u!1 &6825581654880481808
 GameObject:
   m_ObjectHideFlags: 0

@@ -4,7 +4,7 @@
 ; resultFoodId: uint (FOOD uint)
 ; isUnlockedByDefault: true/false
 #TYPE,string,uint,string,string,string,uint,int,int,bool
-_key,id,displayName,description,ingredients,resultFoodId,cookTimeSeconds,unlockDay,isUnlockedByDefault
+_key,Id,DisplayName,Description,Ingredients,ResultFoodId,CookTimeSeconds,UnlockDay,IsUnlockedByDefault
 RCP_001,4001,슬라임 젤리 디저트 레시피,슬라임 젤리 2개를 틀에 굳혀 완성하는 기본 디저트.,2001:2,3001,10,0,true
 RCP_002,4002,매콤 슬라임 볶음 레시피,불꽃 슬라임 코어 1개와 슬라임 젤리 1개를 볶는다.,2002:1|2001:1,3002,15,0,true
 RCP_003,4003,고블린 뼈 육수 레시피,고블린 뼈 3개를 오래 끓여 육수를 낸다.,2003:3,3003,20,1,false

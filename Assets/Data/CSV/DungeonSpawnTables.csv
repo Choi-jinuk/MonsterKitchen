@@ -2,6 +2,6 @@
 ; id: uint (DST_001=6001 ~)
 ; monsters: "monsterId:count:spawnRadius|..." 형식
 #TYPE,string,uint,string
-_key,id,monsters
+_key,Id,Monsters
 DST_001,6001,1001:3:0.5|1002:2:0.5
 DST_002,6002,1001:2:0.5|1002:3:0.5

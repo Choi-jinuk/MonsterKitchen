@@ -8,12 +8,12 @@ namespace MonsterKitchen.Cooking
     /// </summary>
     public class KitchenExit : MonoBehaviour
     {
-        [SerializeField] string targetScene = "ManagementScene";
+        [SerializeField] string m_TargetScene = "ManagementScene";
 
         void OnTriggerEnter2D(Collider2D other)
         {
             if (!other.CompareTag("Player")) return;
-            SceneLoader.Instance?.LoadScene(targetScene);
+            SceneLoader.Instance?.LoadScene(m_TargetScene);
         }
     }
 }

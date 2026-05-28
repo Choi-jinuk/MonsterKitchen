@@ -8,7 +8,7 @@ namespace MonsterKitchen.Combat
     /// </summary>
     public class Health : MonoBehaviour
     {
-        [SerializeField] int maxHp = 100;
+        [SerializeField] int m_DefaultHp = 100;
 
         public int   MaxHp        { get; private set; }
         public int   CurrentHp   { get; private set; }
@@ -22,8 +22,8 @@ namespace MonsterKitchen.Combat
 
         void Awake()
         {
-            MaxHp     = maxHp;
-            CurrentHp = maxHp;
+            MaxHp     = m_DefaultHp;
+            CurrentHp = m_DefaultHp;
         }
 
         public void SetMaxHp(int value)

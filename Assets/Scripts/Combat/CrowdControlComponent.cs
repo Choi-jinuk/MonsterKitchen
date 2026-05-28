@@ -34,22 +34,22 @@ namespace MonsterKitchen.Combat
         // ── 프로퍼티 ──────────────────────────────────────────────────────
 
         /// <summary>현재 CC 가 진행 중이면 true.</summary>
-        public bool IsUnderControl => _currentCC != CCType.None;
+        public bool IsUnderControl => m_CurrentCC != CCType.None;
 
         /// <summary>현재 걸려 있는 CC 종류. 없으면 CCType.None.</summary>
-        public CCType CurrentCC => _currentCC;
+        public CCType CurrentCC => m_CurrentCC;
 
         // ── 런타임 상태 ────────────────────────────────────────────────────
 
-        CCType    _currentCC  = CCType.None;
-        Coroutine _ccRoutine;
-        Rigidbody2D _rb;
+        CCType      m_CurrentCC  = CCType.None;
+        Coroutine   m_CcRoutine;
+        Rigidbody2D m_Rb;
 
         // ── 초기화 ────────────────────────────────────────────────────────
 
         void Awake()
         {
-            _rb = GetComponent<Rigidbody2D>();
+            m_Rb = GetComponent<Rigidbody2D>();
         }
 
         void OnDisable()
@@ -104,12 +104,12 @@ namespace MonsterKitchen.Combat
         /// <summary>현재 CC 를 즉시 해제한다.</summary>
         public void ForceRelease()
         {
-            if (_ccRoutine != null)
+            if (m_CcRoutine != null)
             {
-                StopCoroutine(_ccRoutine);
-                _ccRoutine = null;
+                StopCoroutine(m_CcRoutine);
+                m_CcRoutine = null;
             }
-            _currentCC = CCType.None;
+            m_CurrentCC = CCType.None;
         }
 
         // ================================================================
@@ -125,24 +125,24 @@ namespace MonsterKitchen.Combat
             {
                 // 경과 비율에 따라 선형 감속 (끝에서 속도 = 0)
                 float t   = elapsed / duration;
-                _rb.linearVelocity = Vector2.Lerp(initialVel, Vector2.zero, t);
+                m_Rb.linearVelocity = Vector2.Lerp(initialVel, Vector2.zero, t);
 
                 elapsed += Time.fixedDeltaTime;
                 yield return new WaitForFixedUpdate();
             }
 
-            _rb.linearVelocity = Vector2.zero;
+            m_Rb.linearVelocity = Vector2.zero;
             EndCC();
         }
 
         IEnumerator StunRoutine(float duration)
         {
-            _rb.linearVelocity = Vector2.zero;
+            m_Rb.linearVelocity = Vector2.zero;
 
             float elapsed = 0f;
             while (elapsed < duration)
             {
-                _rb.linearVelocity = Vector2.zero;
+                m_Rb.linearVelocity = Vector2.zero;
                 elapsed += Time.fixedDeltaTime;
                 yield return new WaitForFixedUpdate();
             }
@@ -160,13 +160,13 @@ namespace MonsterKitchen.Combat
                 if (toTarget.sqrMagnitude < 0.04f)   // 목표 근처 도달 시 조기 종료
                     break;
 
-                _rb.linearVelocity = toTarget.normalized * force;
+                m_Rb.linearVelocity = toTarget.normalized * force;
 
                 elapsed += Time.fixedDeltaTime;
                 yield return new WaitForFixedUpdate();
             }
 
-            _rb.linearVelocity = Vector2.zero;
+            m_Rb.linearVelocity = Vector2.zero;
             EndCC();
         }
 
@@ -176,14 +176,14 @@ namespace MonsterKitchen.Combat
 
         void StartCC(CCType type, IEnumerator routine)
         {
-            _currentCC = type;
-            _ccRoutine = StartCoroutine(routine);
+            m_CurrentCC = type;
+            m_CcRoutine = StartCoroutine(routine);
         }
 
         void EndCC()
         {
-            _ccRoutine = null;
-            _currentCC = CCType.None;
+            m_CcRoutine = null;
+            m_CurrentCC = CCType.None;
         }
 
         /// <summary>MonsterData 의 면역 플래그를 확인한다. MonsterBase 없으면 항상 false.</summary>
@@ -195,9 +195,9 @@ namespace MonsterKitchen.Combat
             var data = mb.Data;
             return type switch
             {
-                CCType.Knockback => data.immuneToKnockback,
-                CCType.Stun      => data.immuneToStun,
-                CCType.PullIn    => data.immuneToPullIn,
+                CCType.Knockback => data.ImmuneToKnockback,
+                CCType.Stun      => data.ImmuneToStun,
+                CCType.PullIn    => data.ImmuneToPullIn,
                 _                => false,
             };
         }

@@ -7,6 +7,7 @@ namespace MonsterKitchen.Restaurant
     /// <summary>
     /// 플레이어가 대기 중인 손님에게 음식을 서빙한다.
     /// Interact 키를 누르면 근처 Waiting 손님에게 서빙.
+    /// 음식 소모 요청은 NetworkManager.RequestServeFood() 를 통해 서버에 전달된다.
     /// </summary>
     public class ServingSystem : MonoBehaviour
     {
@@ -36,21 +37,23 @@ namespace MonsterKitchen.Restaurant
             int hitCount = Physics2D.OverlapCircle(origin, serveRadius, serveFilter, _overlapBuffer);
             for (int i = 0; i < hitCount; i++)
             {
-                var col = _overlapBuffer[i];
+                var col      = _overlapBuffer[i];
                 var customer = col.GetComponent<CustomerAI>();
                 if (customer == null || !customer.IsWaiting) continue;
 
                 FoodData food = customer.OrderedFood;
                 if (food == null) continue;
 
-                if (FoodInventory.Instance == null || FoodInventory.Instance.GetCount(food.id) <= 0)
+                NetworkManager.Instance?.RequestServeFood(food.Id, (success, grade, _) =>
                 {
-                    Debug.Log($"[Serving] {food.displayName} 재고 없음.");
-                    return;
-                }
-
-                customer.Serve(food, FoodInventory.Instance.TakeGrade(food.id));
-                Debug.Log($"[Serving] {food.displayName} 서빙 완료.");
+                    if (!success)
+                    {
+                        Debug.Log($"[Serving] {food.DisplayName} 재고 없음.");
+                        return;
+                    }
+                    customer.Serve(food, grade);
+                    Debug.Log($"[Serving] {food.DisplayName} 서빙 완료.");
+                });
                 return;
             }
 

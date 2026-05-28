@@ -2,7 +2,7 @@
 ; id: uint (DRP_001=5001 ~ DRP_005=5005)
 ; entries: "uint재료ID:dropChance:min:max|..." 형식 (dropChance: 0.0~1.0)
 #TYPE,string,uint,string
-_key,id,entries
+_key,Id,Entries
 DRP_001,5001,2001:0.8:1:2|2003:0.1:1:1
 DRP_002,5002,2002:0.75:1:1|2001:0.3:1:1
 DRP_003,5003,2003:0.6:1:2|2004:0.5:1:1

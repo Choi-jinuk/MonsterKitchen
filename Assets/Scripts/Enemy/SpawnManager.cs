@@ -18,16 +18,16 @@ namespace MonsterKitchen.Enemy
     {
         public static SpawnManager Instance { get; private set; }
 
-        const string MonsterLayerName = "Enemy";
-        const string PlayerLayerName  = "Player";
+        const string MONSTER_LAYER_NAME = "Enemy";
+        const string PLAYER_LAYER_NAME  = "Player";
 
-        readonly DungeonSpawnTableData _spawnTable;
-        readonly Transform[]           _spawnPoints;
+        readonly DungeonSpawnTableData m_SpawnTable;
+        readonly Transform[]           m_SpawnPoints;
 
         public SpawnManager(DungeonSpawnTableData spawnTable, Transform[] spawnPoints)
         {
-            _spawnTable  = spawnTable;
-            _spawnPoints = spawnPoints;
+            m_SpawnTable  = spawnTable;
+            m_SpawnPoints = spawnPoints;
         }
 
         /// <summary>PlayerManager 에서 Player 를 가져온다.</summary>
@@ -45,7 +45,7 @@ namespace MonsterKitchen.Enemy
         /// <summary>테이블 전체를 스폰 포인트에 분배해 스폰한다.</summary>
         public void SpawnAll()
         {
-            if (_spawnTable == null)
+            if (m_SpawnTable == null)
             {
                 Debug.LogWarning("[SpawnManager] DungeonSpawnTableData 가 연결되지 않았습니다.");
                 return;
@@ -54,18 +54,18 @@ namespace MonsterKitchen.Enemy
             Transform playerTf = Player != null ? Player.transform : FindPlayerTransform();
 
             int pointIndex = 0;
-            foreach (var entry in _spawnTable.monsters)
+            foreach (var entry in m_SpawnTable.Monsters)
             {
-                var data = DataRegistry.Instance?.GetMonster(entry.monsterId);
-                if (data == null || string.IsNullOrEmpty(data.prefabAddress))
+                var data = DataRegistry.Instance?.GetMonster(entry.MonsterId);
+                if (data == null || string.IsNullOrEmpty(data.PrefabAddress))
                 {
-                    Debug.LogWarning($"[SpawnManager] monsterId={entry.monsterId} 의 MonsterData 또는 prefabAddress 가 없습니다. 건너뜁니다.");
+                    Debug.LogWarning($"[SpawnManager] monsterId={entry.MonsterId} 의 MonsterData 또는 prefabAddress 가 없습니다. 건너뜁니다.");
                     continue;
                 }
 
-                for (int i = 0; i < entry.count; i++)
+                for (int i = 0; i < entry.Count; i++)
                 {
-                    Vector3 spawnPos = PickSpawnPoint(ref pointIndex, entry.spawnRadius);
+                    Vector3 spawnPos = PickSpawnPoint(ref pointIndex, entry.SpawnRadius);
                     SpawnSingle(data, playerTf, spawnPos);
                 }
             }
@@ -82,12 +82,12 @@ namespace MonsterKitchen.Enemy
 
         MonsterBase SpawnSingle(MonsterData data, Transform playerTf, Vector3 position)
         {
-            if (data == null || string.IsNullOrEmpty(data.prefabAddress)) return null;
+            if (data == null || string.IsNullOrEmpty(data.PrefabAddress)) return null;
 
-            var prefab = AssetLoadManager.Instance?.Load<MonsterBase>(data.prefabAddress);
+            var prefab = AssetLoadManager.Instance?.Load<MonsterBase>(data.PrefabAddress);
             if (prefab == null)
             {
-                Debug.LogWarning($"[SpawnManager] prefabAddress='{data.prefabAddress}' 프리팹 로드 실패.");
+                Debug.LogWarning($"[SpawnManager] prefabAddress='{data.PrefabAddress}' 프리팹 로드 실패.");
                 return null;
             }
 
@@ -104,9 +104,9 @@ namespace MonsterKitchen.Enemy
         {
             Vector3 center;
 
-            if (_spawnPoints != null && _spawnPoints.Length > 0)
+            if (m_SpawnPoints != null && m_SpawnPoints.Length > 0)
             {
-                var pt = _spawnPoints[pointIndex % _spawnPoints.Length];
+                var pt = m_SpawnPoints[pointIndex % m_SpawnPoints.Length];
                 pointIndex++;
                 center = pt != null ? pt.position : Vector3.zero;
             }
@@ -120,8 +120,8 @@ namespace MonsterKitchen.Enemy
 
         void SetupLayerCollisions()
         {
-            int enemyLayer  = LayerMask.NameToLayer(MonsterLayerName);
-            int playerLayer = LayerMask.NameToLayer(PlayerLayerName);
+            int enemyLayer  = LayerMask.NameToLayer(MONSTER_LAYER_NAME);
+            int playerLayer = LayerMask.NameToLayer(PLAYER_LAYER_NAME);
 
             if (enemyLayer >= 0)
             {
@@ -130,11 +130,11 @@ namespace MonsterKitchen.Enemy
                 if (playerLayer >= 0)
                     Physics2D.IgnoreLayerCollision(playerLayer, enemyLayer, true);
                 else
-                    Debug.LogWarning($"[SpawnManager] 레이어 '{PlayerLayerName}' 를 찾을 수 없습니다.");
+                    Debug.LogWarning($"[SpawnManager] 레이어 '{PLAYER_LAYER_NAME}' 를 찾을 수 없습니다.");
             }
             else
             {
-                Debug.LogWarning($"[SpawnManager] 레이어 '{MonsterLayerName}' 를 찾을 수 없습니다.");
+                Debug.LogWarning($"[SpawnManager] 레이어 '{MONSTER_LAYER_NAME}' 를 찾을 수 없습니다.");
             }
         }
 

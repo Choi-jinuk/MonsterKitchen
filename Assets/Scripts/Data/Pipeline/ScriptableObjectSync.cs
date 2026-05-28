@@ -43,9 +43,9 @@ namespace MonsterKitchen.Data.Pipeline
 
             foreach (var row in parseResult.Rows)
             {
-                if (!row.TryGetValue("id", out string idStr) || !uint.TryParse(idStr, out uint id))
+                if (!row.TryGetValue("Id", out string idStr) || !uint.TryParse(idStr, out uint id))
                 {
-                    Debug.LogWarning($"[SOSync] Row에 유효한 uint 'id' 가 없습니다 (값: '{(row.TryGetValue("id", out var v) ? v : "없음")}') — 건너뜁니다.");
+                    Debug.LogWarning($"[SOSync] Row에 유효한 uint 'Id' 가 없습니다 (값: '{(row.TryGetValue("Id", out var v) ? v : "없음")}') — 건너뜁니다.");
                     continue;
                 }
 

@@ -1,0 +1,14 @@
+; 플레이어 캐릭터 데이터
+; id: uint (PLR_001 = 9001)
+; prefabAddress: 프리팹 AssetManifest 키 (빈칸이면 prefab/player/{id} 자동 생성)
+;   → AssetManifest 에 "prefab/player/9001" 키로 PlayerController 프리팹을 등록해야 함
+; btAssetAddress: BehaviorTree 에셋 AssetManifest 키 (빈칸이면 Inspector 폴백 또는 BT 미사용)
+;   → AssetManifest 에 "bt/player/9001" 키로 BTAsset SO 를 등록해야 함
+; defaultWeaponId: 시작 무기 uint ID (0이면 무기 없이 시작)
+; skillGroupId1/2: 슬롯 1·2 SkillGroupData.skillGroupId 문자열 (빈칸이면 없음)
+; ultimateSkillGroupId: 궁극기 SkillGroupData.skillGroupId 문자열
+; maxUltimateGauge: 궁극기 게이지 최대치
+; gaugeOnHit/Kill: 피격/처치 시 게이지 증가량
+#TYPE,string,uint,string,string,string,int,int,float,int,AttributeType,uint,string,string,string,float,float,float
+_key,Id,DisplayName,PrefabAddress,BtAssetAddress,BaseMaxHp,BaseAttack,BaseMoveSpeed,BaseDefense,AttackAttribute,DefaultWeaponId,SkillGroupId1,SkillGroupId2,UltimateSkillGroupId,MaxUltimateGauge,GaugeOnHit,GaugeOnKill
+PLR_001,9001,기본 플레이어,,bt/player/9001,100,10,5.0,0,None,7001,SGD_010,,SGD_020,100,15,25

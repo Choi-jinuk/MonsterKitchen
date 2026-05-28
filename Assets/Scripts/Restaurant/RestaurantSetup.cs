@@ -22,9 +22,9 @@ namespace MonsterKitchen.Restaurant
                 return;
             }
 
-            var customerPrefab = AssetLoadManager.Instance?.Load<CustomerAI>(AssetKeys.PrefabCustomer);
+            var customerPrefab = AssetLoadManager.Instance?.Load<CustomerAI>(AssetKeys.PREFAB_CUSTOMER);
             if (customerPrefab == null)
-                Debug.LogError("[RestaurantSetup] Customer 프리팹을 AssetManifest에서 찾을 수 없습니다. 키: " + AssetKeys.PrefabCustomer);
+                Debug.LogError("[RestaurantSetup] Customer 프리팹을 AssetManifest에서 찾을 수 없습니다. 키: " + AssetKeys.PREFAB_CUSTOMER);
 
             DayManager.Instance.SetRestaurantConfig(guestSpawnPoint, customerPrefab, tables);
             Debug.Log("[RestaurantSetup] DayManager 레퍼런스 주입 완료.");

@@ -1,0 +1,29 @@
+; 스킬 스텝 데이터 — 콤보 체인의 단일 타격 수치
+; id: uint (SKL_xxx = 11xxx)
+; missileSpeed: 0이면 즉발(근거리), >0이면 투사체 속도
+; ccForce: 양수=넉백, 음수=풀인, 0=없음
+; projectilePrefabAddress: 투사체 프리팹 AssetManifest 키 (빈칸이면 prefab/projectile/{skillId} 자동 생성)
+; animTriggerOverride: 빈칸이면 'Attack' 기본 트리거 사용
+#TYPE,string,uint,string,string,float,float,float,float,float,int,float,float,float,float,float,string,string
+_key,Id,SkillId,SkillName,Cooltime,ComboWindow,DamageMultiplier,SearchRange,AttackRange,MaxTargets,MissileSpeed,MissileMaxRange,CcForce,CcDuration,StunDuration,AnimTriggerOverride,ProjectilePrefabAddress
+; ─── 무기 평타 스텝 ── 검(Sword) ─────────────────────────────────────────────────────
+SKL_SW1,11001,SKL_SW1,검 1타,0.4,1.0,1.0,2.5,0.8,3,0,8,0,0.25,0,Attack,
+SKL_SW2,11002,SKL_SW2,검 2타,0.35,1.0,1.2,2.5,1.0,3,0,8,3,0.2,0,Attack,
+SKL_SW3,11003,SKL_SW3,검 3타(마무리),0.5,1.5,1.8,2.5,1.2,5,0,8,5,0.3,0,Attack,
+; ─── 무기 평타 스텝 ── 도끼(Axe) ─────────────────────────────────────────────────────
+SKL_AX1,11011,SKL_AX1,도끼 1타,0.7,1.2,1.6,2.2,1.0,5,0,8,6,0.3,0,Attack,
+SKL_AX2,11012,SKL_AX2,도끼 2타(마무리),0.9,1.5,2.2,2.2,1.3,5,0,8,8,0.4,0.2,Attack,
+; ─── 무기 평타 스텝 ── 쌍검(DualSword) ──────────────────────────────────────────────
+SKL_DS1,11021,SKL_DS1,쌍검 1타,0.25,0.8,0.8,2.3,0.7,2,0,8,0,0.15,0,Attack,
+SKL_DS2,11022,SKL_DS2,쌍검 2타,0.25,0.8,0.8,2.3,0.7,2,0,8,0,0.15,0,Attack,
+SKL_DS3,11023,SKL_DS3,쌍검 3타,0.25,0.8,1.0,2.3,0.8,2,0,8,2,0.2,0,Attack,
+SKL_DS4,11024,SKL_DS4,쌍검 4타(마무리),0.5,1.5,1.5,2.3,1.0,3,0,8,4,0.25,0,Attack,
+; ─── 플레이어 액티브 스킬 스텝 ──────────────────────────────────────────────────────
+SKL_S01,11101,SKL_S01,회전 베기,0.6,0,1.5,3.0,1.5,10,0,8,4,0.2,0,Attack,
+SKL_U01,11201,SKL_U01,궁극기 대베기,0.8,0,3.0,3.5,2.0,10,0,8,8,0.5,0.3,Ultimate,
+; ─── 몬스터 스킬 스텝 ───────────────────────────────────────────────────────────────
+SKL_M01,11301,SKL_M01,슬라임 덮치기,1.2,0,1.0,1.5,0.7,3,0,8,3,0.2,0,Attack,
+SKL_M02,11302,SKL_M02,고블린 몽둥이,1.0,0,1.2,2.0,0.9,1,0,8,4,0.25,0,Attack,
+SKL_M03,11303,SKL_M03,포자 투사,2.0,0,0.8,5.0,0.5,3,4.0,8.0,0,0.25,0.5,Attack,
+SKL_M04,11304,SKL_M04,웜 물기,1.5,0,1.5,2.0,1.0,1,0,8,6,0.3,0,Attack,
+SKL_M05,11305,SKL_M05,웜 돌진,3.0,0,2.0,6.0,1.2,3,0,8,8,0.4,0.3,Rush,

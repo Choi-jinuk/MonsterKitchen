@@ -5,35 +5,48 @@ using UnityEngine;
 
 namespace MonsterKitchen.AI.BehaviorTree.Monster
 {
-    /// <summary>
-    /// 플레이어 공격 액션.
-    /// MonsterData.skills[] 를 우선순위 순으로 탐색해 조건을 만족하는 첫 스킬을 발동한다.
-    /// </summary>
+    // ====================================================================
+    //  BTAction_Attack — 플레이어 공격 액션
+    //
+    //  ▶ 개선 사항
+    //    · OnEnter: 컴포넌트 및 스킬 타이머 배열을 1회 초기화
+    //    · ctx.DeltaTime 사용 (이전: Time.deltaTime)
+    //    · OnExit: 속도 리셋 보장
+    //
+    //  MonsterData.skillGroups[] 를 우선순위 순으로 탐색해 조건을 만족하는 첫 스킬 발동.
+    //  각 그룹의 GetStep(0) (첫 번째 SkillData)을 대표 공격으로 사용.
+    // ====================================================================
+
     [BTNode("Monster/Action/Attack")]
     public class BTAction_Attack : BTNode
     {
-        static readonly int HashAttack = Animator.StringToHash("Attack");
+        static readonly int s_HashAttack = Animator.StringToHash("Attack");
 
         class State
         {
-            public BTMonsterController ctrl;
-            public Animator            anim;
-            public float[]             skillTimers;
+            public BTMonsterController Ctrl;
+            public Animator            Anim;
+            public float[]             SkillTimers;
+        }
+
+        // ── 라이프사이클 ─────────────────────────────────────────────────
+
+        protected override void OnEnter(BTContext ctx)
+        {
+            var s = ctx.GetOrCreateState<State>(this);
+            if (s.Ctrl != null) return; // 이미 초기화됨
+
+            s.Ctrl = ctx.Owner.GetComponent<BTMonsterController>();
+            s.Anim = ctx.Owner.GetComponent<Animator>();
+
+            var initGroups = s.Ctrl?.Data?.SkillGroups;
+            int count      = initGroups != null ? Mathf.Min(initGroups.Length, 3) : 0;
+            s.SkillTimers  = new float[count];
         }
 
         protected override BTStatus Execute(BTContext ctx)
         {
-            var state = ctx.GetOrCreateState<State>(this);
-
-            if (state.ctrl == null)
-            {
-                state.ctrl = ctx.Owner.GetComponent<BTMonsterController>();
-                state.anim = ctx.Owner.GetComponent<Animator>();
-
-                var initSkills = state.ctrl?.Data?.skills;
-                int count      = initSkills != null ? Mathf.Min(initSkills.Length, 3) : 0;
-                state.skillTimers = new float[count];
-            }
+            var s = ctx.GetOrCreateState<State>(this);
 
             if (!ctx.Blackboard.TryGet<Transform>("Player", out var player) || player == null)
                 return BTStatus.Failure;
@@ -44,61 +57,73 @@ namespace MonsterKitchen.AI.BehaviorTree.Monster
 
             if (dist > prefDist) return BTStatus.Failure;
 
-            if (state.ctrl != null)
+            // 너무 붙으면 살짝 밀어내며 공격 유지
+            if (s.Ctrl != null)
             {
                 float moveSpeed = ctx.Blackboard.Get<float>("MoveSpeed");
-                state.ctrl.Rb.linearVelocity = dist < prefDist * 0.5f
-                    ? state.ctrl.ApplySeparation(-toPlayer) * (moveSpeed * 0.5f)
+                s.Ctrl.Rb.linearVelocity = dist < prefDist * 0.5f
+                    ? s.Ctrl.ApplySeparation(-toPlayer) * (moveSpeed * 0.5f)
                     : Vector2.zero;
             }
 
-            TickSkillTimers(state);
-
-            var data      = state.ctrl?.Data;
-            var skillList = data?.skills;
-            if (skillList == null) return BTStatus.Running;
-
-            int limit = Mathf.Min(skillList.Length, state.skillTimers?.Length ?? 0, 3);
-            for (int i = 0; i < limit; i++)
-            {
-                var skill = skillList[i];
-                if (skill == null)            continue;
-                if (state.skillTimers[i] > 0f) continue;
-                if (dist > skill.searchRange)  continue;
-
-                ExecuteSkill(state, i, skill, toPlayer, data, dist, player);
-                break;
-            }
+            TickSkillTimers(s, ctx.DeltaTime);
+            TryFireSkill(s, toPlayer, dist, player);
 
             return BTStatus.Running;
         }
 
-        void ExecuteSkill(State state, int index, SkillData skill, Vector2 toPlayer,
-                          MonsterData data, float dist, Transform player)
+        protected override void OnExit(BTContext ctx)
         {
-            state.skillTimers[index] = skill.cooltime;
+            var s = ctx.GetOrCreateState<State>(this);
+            if (s.Ctrl?.Rb != null) s.Ctrl.Rb.linearVelocity = Vector2.zero;
+        }
 
-            int triggerHash = string.IsNullOrEmpty(skill.animTriggerOverride)
-                ? HashAttack
-                : Animator.StringToHash(skill.animTriggerOverride);
-            state.anim?.SetTrigger(triggerHash);
+        // ── 스킬 처리 ────────────────────────────────────────────────────
 
-            int           baseDmg = data != null ? data.attack : 5;
-            int           damage  = Mathf.Max(1, Mathf.RoundToInt(baseDmg * skill.damageMultiplier));
-            AttributeType attr    = data != null ? data.attribute : AttributeType.None;
+        void TryFireSkill(State s, Vector2 toPlayer, float dist, Transform player)
+        {
+            var data   = s.Ctrl?.Data;
+            var groups = data?.SkillGroups;
+            if (groups == null || s.SkillTimers == null) return;
+
+            int limit = Mathf.Min(groups.Length, s.SkillTimers.Length, 3);
+            for (int i = 0; i < limit; i++)
+            {
+                var skill = groups[i]?.GetStep(0);
+                if (skill == null)               continue;
+                if (s.SkillTimers[i] > 0f)       continue;
+                if (dist > skill.SearchRange)    continue;
+
+                FireSkill(s, i, skill, toPlayer, data, dist, player);
+                break;
+            }
+        }
+
+        void FireSkill(State s, int index, SkillData skill, Vector2 toPlayer,
+                       MonsterData data, float dist, Transform player)
+        {
+            s.SkillTimers[index] = skill.Cooltime;
+
+            int triggerHash = string.IsNullOrEmpty(skill.AnimTriggerOverride)
+                ? s_HashAttack
+                : Animator.StringToHash(skill.AnimTriggerOverride);
+            s.Anim?.SetTrigger(triggerHash);
+
+            int           baseDmg = data != null ? data.Attack : 5;
+            int           damage  = Mathf.Max(1, Mathf.RoundToInt(baseDmg * skill.DamageMultiplier));
+            AttributeType attr    = data != null ? data.Attribute : AttributeType.None;
 
             if (skill.IsProjectile)
-                state.ctrl?.FireProjectile(skill, damage, attr, toPlayer);
-            else if (dist <= skill.attackRange)
+                s.Ctrl?.FireProjectile(skill, damage, attr, toPlayer);
+            else if (dist <= skill.AttackRange)
                 player.GetComponent<Health>()?.TakeDamage(damage, attr);
         }
 
-        static void TickSkillTimers(State state)
+        static void TickSkillTimers(State s, float dt)
         {
-            if (state.skillTimers == null) return;
-            float dt = Time.deltaTime;
-            for (int i = 0; i < state.skillTimers.Length; i++)
-                if (state.skillTimers[i] > 0f) state.skillTimers[i] -= dt;
+            if (s.SkillTimers == null) return;
+            for (int i = 0; i < s.SkillTimers.Length; i++)
+                if (s.SkillTimers[i] > 0f) s.SkillTimers[i] -= dt;
         }
 
 #if UNITY_EDITOR

@@ -9,40 +9,40 @@ namespace MonsterKitchen.Combat
     /// </summary>
     public class ItemDrop : MonoBehaviour
     {
-        [SerializeField] SpriteRenderer spriteRenderer;
-        [SerializeField] float pickupRadius = 0.35f;
+        [SerializeField] SpriteRenderer m_SpriteRenderer;
+        [SerializeField] float m_PickupRadius = 0.35f;
 
-        uint _ingredientId;
-        int  _qty;
-        bool _pickedUp;
+        uint m_IngredientId;
+        int  m_Qty;
+        bool m_PickedUp;
 
         public void Init(uint ingredientId, int qty)
         {
-            _ingredientId = ingredientId;
-            _qty          = qty;
+            m_IngredientId = ingredientId;
+            m_Qty          = qty;
 
-            if (spriteRenderer != null)
+            if (m_SpriteRenderer != null)
             {
                 var data   = DataRegistry.Instance?.GetIngredient(ingredientId);
-                var sprite = AssetLoadManager.Instance?.Load<Sprite>(data?.spriteAddress);
-                if (sprite != null) spriteRenderer.sprite = sprite;
+                var sprite = AssetLoadManager.Instance?.Load<Sprite>(data?.SpriteAddress);
+                if (sprite != null) m_SpriteRenderer.sprite = sprite;
             }
         }
 
         void OnTriggerEnter2D(Collider2D other)
         {
-            if (_pickedUp) return;
+            if (m_PickedUp) return;
             if (!other.CompareTag("Player")) return;
 
-            _pickedUp = true;
-            Inventory.Instance?.Add(_ingredientId, _qty);
+            m_PickedUp = true;
+            NetworkManager.Instance?.RequestAddIngredient(m_IngredientId, m_Qty);
             Destroy(gameObject);
         }
 
         void OnDrawGizmosSelected()
         {
             Gizmos.color = Color.yellow;
-            Gizmos.DrawWireSphere(transform.position, pickupRadius);
+            Gizmos.DrawWireSphere(transform.position, m_PickupRadius);
         }
     }
 }

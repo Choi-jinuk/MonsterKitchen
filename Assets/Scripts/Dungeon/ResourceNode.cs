@@ -34,14 +34,14 @@ namespace MonsterKitchen.Dungeon
     public class ResourceNode : MonoBehaviour
     {
         [Header("Data")]
-        [SerializeField] ResourceNodeData data;
+        [SerializeField] ResourceNodeData m_Data;
 
         // ── 런타임 상태 ─────────────────────────────────────────────────
-        int  _currentHp;
-        bool _depleted;
+        int  m_CurrentHp;
+        bool m_Depleted;
 
         // 스프라이트가 없을 때 공유하는 플레이스홀더 (1×1 흰 텍스처)
-        static Sprite s_placeholder;
+        static Sprite s_Placeholder;
 
         // ================================================================
         //  Mono
@@ -58,29 +58,29 @@ namespace MonsterKitchen.Dungeon
                 gameObject.layer = layer;
 
             // 스프라이트 / 틴트 자동 적용
-            if (data != null)
+            if (m_Data != null)
             {
                 var sr = GetComponent<SpriteRenderer>();
                 if (sr != null)
                 {
-                    var loadedSprite = !string.IsNullOrEmpty(data.nodeSpriteAddress)
-                        ? AssetLoadManager.Instance?.Load<Sprite>(data.nodeSpriteAddress)
+                    var loadedSprite = !string.IsNullOrEmpty(m_Data.NodeSpriteAddress)
+                        ? AssetLoadManager.Instance?.Load<Sprite>(m_Data.NodeSpriteAddress)
                         : null;
                     sr.sprite = loadedSprite != null ? loadedSprite : GetPlaceholder();
-                    sr.color  = data.nodeTint;
+                    sr.color  = m_Data.NodeTint;
                 }
             }
         }
 
         void OnEnable()
         {
-            if (data == null)
+            if (m_Data == null)
             {
                 Debug.LogWarning($"[ResourceNode] {name}: ResourceNodeData 가 연결되지 않았습니다.");
                 return;
             }
-            _currentHp = data.maxHp;
-            _depleted  = false;
+            m_CurrentHp = m_Data.MaxHp;
+            m_Depleted  = false;
 
             // 콜라이더 활성화
             var col = GetComponent<Collider2D>();
@@ -98,15 +98,15 @@ namespace MonsterKitchen.Dungeon
         /// </summary>
         public void TakeHarvestDamage(int damage, Player.PlayerStats harvester = null)
         {
-            if (_depleted || data == null) return;
+            if (m_Depleted || m_Data == null) return;
 
             // 채집 도구 speedMultiplier (호환 노드일 때만 적용)
             float speedMult = GetSpeedMultiplier(harvester);
             int   effective = Mathf.Max(1, Mathf.RoundToInt(damage * speedMult));
 
-            _currentHp -= effective;
+            m_CurrentHp -= effective;
 
-            if (_currentHp <= 0)
+            if (m_CurrentHp <= 0)
                 Harvest(harvester);
         }
 
@@ -116,10 +116,10 @@ namespace MonsterKitchen.Dungeon
 
         void Harvest(Player.PlayerStats harvester)
         {
-            if (_depleted) return;
-            _depleted = true;
+            if (m_Depleted) return;
+            m_Depleted = true;
 
-            if (data.dropIngredientId == 0u)
+            if (m_Data.DropIngredientId == 0u)
             {
                 Debug.LogWarning($"[ResourceNode] {name}: dropIngredientId 가 설정되지 않았습니다.");
             }
@@ -127,26 +127,22 @@ namespace MonsterKitchen.Dungeon
             {
                 // 채집 도구 gatherMultiplier 적용
                 float gatherMult = GetGatherMultiplier(harvester);
-                int baseCount = RandomUtil.Range(data.dropMin, data.dropMax + 1);
+                int baseCount = RandomUtil.Range(m_Data.DropMin, m_Data.DropMax + 1);
                 int count     = Mathf.Max(1, Mathf.RoundToInt(baseCount * gatherMult));
 
-                var inventory = Inventory.Instance;
-                if (inventory != null)
-                {
-                    inventory.Add(data.dropIngredientId, count);
-                }
+                NetworkManager.Instance?.RequestAddIngredient(m_Data.DropIngredientId, count);
 
-                var ingredientData = DataRegistry.Instance?.GetIngredient(data.dropIngredientId);
-                string ingName = ingredientData != null ? ingredientData.displayName : data.dropIngredientId.ToString();
-                Debug.Log($"[ResourceNode] '{data.displayName}' 채집 완료 → {ingName} ×{count}");
+                var ingredientData = DataRegistry.Instance?.GetIngredient(m_Data.DropIngredientId);
+                string ingName = ingredientData != null ? ingredientData.DisplayName : m_Data.DropIngredientId.ToString();
+                Debug.Log($"[ResourceNode] '{m_Data.DisplayName}' 채집 완료 → {ingName} ×{count}");
             }
 
             // 채집 도구 내구도 소모
             ConsumeToolDurability(harvester);
 
             // 리스폰 처리
-            if (data.respawnSeconds > 0f)
-                StartCoroutine(RespawnRoutine(data.respawnSeconds));
+            if (m_Data.RespawnSeconds > 0f)
+                StartCoroutine(RespawnRoutine(m_Data.RespawnSeconds));
             else
                 gameObject.SetActive(false); // 영구 소멸
         }
@@ -167,8 +163,8 @@ namespace MonsterKitchen.Dungeon
             yield return new WaitForSeconds(delay);
 
             // 리스폰
-            _currentHp = data.maxHp;
-            _depleted  = false;
+            m_CurrentHp = m_Data.MaxHp;
+            m_Depleted  = false;
             if (col != null) col.enabled = true;
             if (sr  != null) sr.enabled  = true;
         }
@@ -180,25 +176,25 @@ namespace MonsterKitchen.Dungeon
         bool IsCompatibleTool(Player.PlayerStats harvester, out GatheringToolData tool)
         {
             tool = null;
-            if (harvester == null || data == null) return false;
+            if (harvester == null || m_Data == null) return false;
 
             tool = harvester.GatheringTool;
             if (tool == null) return false;
 
-            foreach (var t in tool.compatibleNodeTypes)
-                if (t == data.nodeType) return true;
+            foreach (var t in tool.CompatibleNodeTypes)
+                if (t == m_Data.NodeType) return true;
 
             return false;
         }
 
         float GetSpeedMultiplier(Player.PlayerStats harvester)
         {
-            return IsCompatibleTool(harvester, out var tool) ? tool.speedMultiplier : 1f;
+            return IsCompatibleTool(harvester, out var tool) ? tool.SpeedMultiplier : 1f;
         }
 
         float GetGatherMultiplier(Player.PlayerStats harvester)
         {
-            return IsCompatibleTool(harvester, out var tool) ? tool.gatherMultiplier : 1f;
+            return IsCompatibleTool(harvester, out var tool) ? tool.GatherMultiplier : 1f;
         }
 
         void ConsumeToolDurability(Player.PlayerStats harvester)
@@ -211,9 +207,9 @@ namespace MonsterKitchen.Dungeon
         //  프로퍼티
         // ================================================================
 
-        public ResourceNodeData Data      => data;
-        public int              CurrentHp => _currentHp;
-        public bool             Depleted  => _depleted;
+        public ResourceNodeData Data      => m_Data;
+        public int              CurrentHp => m_CurrentHp;
+        public bool             Depleted  => m_Depleted;
 
         // ================================================================
         //  플레이스홀더 스프라이트 (스프라이트 미설정 시 사용)
@@ -221,7 +217,7 @@ namespace MonsterKitchen.Dungeon
 
         static Sprite GetPlaceholder()
         {
-            if (s_placeholder != null) return s_placeholder;
+            if (s_Placeholder != null) return s_Placeholder;
 
             var tex = new Texture2D(32, 32, TextureFormat.RGBA32, false)
             {
@@ -233,8 +229,8 @@ namespace MonsterKitchen.Dungeon
             tex.SetPixels(pixels);
             tex.Apply();
 
-            s_placeholder = Sprite.Create(tex, new Rect(0, 0, 32, 32), new Vector2(0.5f, 0.5f), 32f);
-            return s_placeholder;
+            s_Placeholder = Sprite.Create(tex, new Rect(0, 0, 32, 32), new Vector2(0.5f, 0.5f), 32f);
+            return s_Placeholder;
         }
     }
 }

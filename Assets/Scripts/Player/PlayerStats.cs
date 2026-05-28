@@ -25,7 +25,7 @@ namespace MonsterKitchen.Player
 
     public class PlayerStats : MonoBehaviour
     {
-        // ── 기본 스탯 (PlayerSpawnData 에서 초기화) ───────────────────
+        // ── 기본 스탯 (PlayerData 에서 초기화) ───────────────────────
         public int   BaseMaxHp      { get; private set; }
         public int   BaseAttack     { get; private set; }
         public float BaseMoveSpeed  { get; private set; }
@@ -48,31 +48,31 @@ namespace MonsterKitchen.Player
         public SkillGroupData UltimateSlot   { get; private set; }
 
         /// <summary>현재 무기의 평타 체인. 무기 미장착 시 null.</summary>
-        public SkillGroupData NormalAttackGroup => EquippedWeapon?.normalAttackGroup;
+        public SkillGroupData NormalAttackGroup => EquippedWeapon?.NormalAttackGroup;
 
         // ── 채집 도구 슬롯 ────────────────────────────────────────────
-        [SerializeField] GatheringToolData _gatheringTool;
+        [SerializeField] GatheringToolData m_GatheringTool;
 
         // ── 내구도 (런타임) ───────────────────────────────────────────
-        int _weaponDurability;
-        int _gatheringToolDurability;
+        int m_WeaponDurability;
+        int m_GatheringToolDurability;
 
-        public GatheringToolData GatheringTool           => _gatheringTool;
-        public int               WeaponDurability        => _weaponDurability;
-        public int               GatheringToolDurability => _gatheringToolDurability;
+        public GatheringToolData GatheringTool           => m_GatheringTool;
+        public int               WeaponDurability        => m_WeaponDurability;
+        public int               GatheringToolDurability => m_GatheringToolDurability;
 
         // ── 스킬 쿨타임 ───────────────────────────────────────────────
         public float Skill1CoolRemaining { get; private set; }
         public float Skill2CoolRemaining { get; private set; }
-        float _skill1CoolTotal;
-        float _skill2CoolTotal;
+        float m_Skill1CoolTotal;
+        float m_Skill2CoolTotal;
 
         // ── 궁극기 게이지 ─────────────────────────────────────────────
         public float UltimateGauge    { get; private set; }
         public float MaxUltimateGauge { get; private set; }
-        float _gaugeOnHit;
-        float _gaugeOnKill;
-        bool  _ultimateReady;
+        float m_GaugeOnHit;
+        float m_GaugeOnKill;
+        bool  m_UltimateReady;
 
         // ── 이벤트 ────────────────────────────────────────────────────
         /// <summary>무기 장착/해제 시. null 이면 해제.</summary>
@@ -90,7 +90,7 @@ namespace MonsterKitchen.Player
         /// <summary>궁극기 게이지가 MAX 에 처음 도달했을 때.</summary>
         public event Action                      OnUltimateReady;
 
-        [SerializeField] Health _health;
+        [SerializeField] Health m_Health;
 
         // ================================================================
         //  Mono
@@ -98,19 +98,19 @@ namespace MonsterKitchen.Player
 
         void OnEnable()
         {
-            if (_health != null)
+            if (m_Health != null)
             {
-                _health.OnDamaged += HandlePlayerDamaged;
-                _health.OnDeath   += HandlePlayerDied;
+                m_Health.OnDamaged += HandlePlayerDamaged;
+                m_Health.OnDeath   += HandlePlayerDied;
             }
         }
 
         void OnDisable()
         {
-            if (_health != null)
+            if (m_Health != null)
             {
-                _health.OnDamaged -= HandlePlayerDamaged;
-                _health.OnDeath   -= HandlePlayerDied;
+                m_Health.OnDamaged -= HandlePlayerDamaged;
+                m_Health.OnDeath   -= HandlePlayerDied;
             }
         }
 
@@ -123,28 +123,50 @@ namespace MonsterKitchen.Player
         //  Init
         // ================================================================
 
-        public void Init(PlayerSpawnData data)
+        public void Init(PlayerCharData data)
         {
             if (data == null) return;
 
-            BaseMaxHp      = data.baseMaxHp;
-            BaseAttack     = data.baseAttack;
-            BaseMoveSpeed  = data.baseMoveSpeed;
-            BaseDefense    = data.baseDefense;
-            AttackAttribute = data.attackAttribute;
+            BaseMaxHp       = data.BaseMaxHp;
+            BaseAttack      = data.BaseAttack;
+            BaseMoveSpeed   = data.BaseMoveSpeed;
+            BaseDefense     = data.BaseDefense;
+            AttackAttribute = data.AttackAttribute;
 
-            MaxUltimateGauge = data.maxUltimateGauge;
-            _gaugeOnHit      = data.gaugeOnHit;
-            _gaugeOnKill     = data.gaugeOnKill;
+            MaxUltimateGauge = data.MaxUltimateGauge;
+            m_GaugeOnHit     = data.GaugeOnHit;
+            m_GaugeOnKill    = data.GaugeOnKill;
             UltimateGauge    = 0f;
 
             RecalculateStats();
 
-            // 기본 장착
-            if (data.defaultWeapon != null)   EquipWeapon(data.defaultWeapon);
-            if (data.defaultSkill1 != null)   EquipSkill(1, data.defaultSkill1);
-            if (data.defaultSkill2 != null)   EquipSkill(2, data.defaultSkill2);
-            if (data.defaultUltimate != null) EquipSkill(3, data.defaultUltimate);
+            // 기본 장착 — 무기·스킬 모두 DataRegistry 를 통해 ID/문자열로 조회
+            if (data.DefaultWeaponId != 0)
+            {
+                var weapon = DataRegistry.Instance?.GetWeapon(data.DefaultWeaponId);
+                if (weapon != null) EquipWeapon(weapon);
+                else Debug.LogWarning($"[PlayerStats] defaultWeaponId={data.DefaultWeaponId} 를 TableData 에서 찾지 못했습니다.");
+            }
+
+            var dr = DataRegistry.Instance;
+            if (!string.IsNullOrEmpty(data.SkillGroupId1))
+            {
+                var sg = dr?.FindSkillGroupByStringId(data.SkillGroupId1);
+                if (sg != null) EquipSkill(1, sg);
+                else Debug.LogWarning($"[PlayerStats] skillGroupId1='{data.SkillGroupId1}' 를 SkillGroups 에서 찾지 못했습니다.");
+            }
+            if (!string.IsNullOrEmpty(data.SkillGroupId2))
+            {
+                var sg = dr?.FindSkillGroupByStringId(data.SkillGroupId2);
+                if (sg != null) EquipSkill(2, sg);
+                else Debug.LogWarning($"[PlayerStats] skillGroupId2='{data.SkillGroupId2}' 를 SkillGroups 에서 찾지 못했습니다.");
+            }
+            if (!string.IsNullOrEmpty(data.UltimateSkillGroupId))
+            {
+                var sg = dr?.FindSkillGroupByStringId(data.UltimateSkillGroupId);
+                if (sg != null) EquipSkill(3, sg);
+                else Debug.LogWarning($"[PlayerStats] ultimateSkillGroupId='{data.UltimateSkillGroupId}' 를 SkillGroups 에서 찾지 못했습니다.");
+            }
         }
 
         // ================================================================
@@ -155,7 +177,7 @@ namespace MonsterKitchen.Player
         public void EquipWeapon(WeaponData weapon)
         {
             EquippedWeapon    = weapon;
-            _weaponDurability = weapon != null ? weapon.maxDurability : 0;
+            m_WeaponDurability = weapon != null ? weapon.MaxDurability : 0;
             RecalculateStats();
             OnWeaponChanged?.Invoke(weapon);
         }
@@ -163,8 +185,8 @@ namespace MonsterKitchen.Player
         /// <summary>채집 도구를 장착한다. null 을 넣으면 해제.</summary>
         public void EquipGatheringTool(GatheringToolData tool)
         {
-            _gatheringTool           = tool;
-            _gatheringToolDurability = tool != null ? tool.maxDurability : 0;
+            m_GatheringTool           = tool;
+            m_GatheringToolDurability = tool != null ? tool.MaxDurability : 0;
         }
 
         /// <summary>
@@ -178,10 +200,10 @@ namespace MonsterKitchen.Player
             // 호환 체크 (해제 시 생략)
             if (skill != null && EquippedWeapon != null)
             {
-                if (!skill.IsCompatibleWith(EquippedWeapon.weaponType))
+                if (!skill.IsCompatibleWith(EquippedWeapon.WeaponType))
                 {
-                    Debug.LogWarning($"[PlayerStats] 슬롯{slot}: '{skill.skillName}' 은 " +
-                                     $"{EquippedWeapon.weaponType} 무기와 호환되지 않아 장착 거부.");
+                    Debug.LogWarning($"[PlayerStats] 슬롯{slot}: '{skill.SkillName}' 은 " +
+                                     $"{EquippedWeapon.WeaponType} 무기와 호환되지 않아 장착 거부.");
                     return false;
                 }
             }
@@ -217,7 +239,7 @@ namespace MonsterKitchen.Player
             float remaining = slot == 1 ? Skill1CoolRemaining : Skill2CoolRemaining;
             if (remaining > 0f) return false;
 
-            StartSkillCooldown(slot, skill.skillCooltime);
+            StartSkillCooldown(slot, skill.SkillCooltime);
             return true;
         }
 
@@ -228,10 +250,10 @@ namespace MonsterKitchen.Player
         public bool TryUseUltimate(out SkillGroupData skill)
         {
             skill = UltimateSlot;
-            if (skill == null || !_ultimateReady) return false;
+            if (skill == null || !m_UltimateReady) return false;
 
             UltimateGauge = 0f;
-            _ultimateReady = false;
+            m_UltimateReady = false;
             OnUltimateGaugeChanged?.Invoke(UltimateGauge, MaxUltimateGauge);
             return true;
         }
@@ -241,21 +263,21 @@ namespace MonsterKitchen.Player
         // ================================================================
 
         /// <summary>처치 시 PlayerController 에서 호출.</summary>
-        public void AddUltimateGaugeOnKill() => AddGauge(_gaugeOnKill);
+        public void AddUltimateGaugeOnKill() => AddGauge(m_GaugeOnKill);
 
-        void HandlePlayerDamaged(int amount, AttributeType _) => AddGauge(_gaugeOnHit);
+        void HandlePlayerDamaged(int amount, AttributeType _) => AddGauge(m_GaugeOnHit);
         void HandlePlayerDied(AttributeType _) { }
 
         void AddGauge(float amount)
         {
-            if (_ultimateReady) return;   // 이미 MAX
+            if (m_UltimateReady) return;   // 이미 MAX
 
             UltimateGauge = Mathf.Min(UltimateGauge + amount, MaxUltimateGauge);
             OnUltimateGaugeChanged?.Invoke(UltimateGauge, MaxUltimateGauge);
 
-            if (!_ultimateReady && UltimateGauge >= MaxUltimateGauge)
+            if (!m_UltimateReady && UltimateGauge >= MaxUltimateGauge)
             {
-                _ultimateReady = true;
+                m_UltimateReady = true;
                 OnUltimateReady?.Invoke();
                 Debug.Log("[PlayerStats] 궁극기 게이지 MAX — 궁극기 사용 가능");
             }
@@ -268,30 +290,30 @@ namespace MonsterKitchen.Player
         /// <summary>공격 1회 시 PlayerController 에서 호출. PerHit 무기만 소모.</summary>
         public void ConsumeWeaponDurabilityOnHit()
         {
-            if (EquippedWeapon == null || EquippedWeapon.maxDurability == 0) return;
-            if (EquippedWeapon.decayMode != DurabilityDecayMode.PerHit) return;
-            _weaponDurability = Mathf.Max(0, _weaponDurability - 1);
-            if (_weaponDurability == 0)
-                Debug.Log($"[PlayerStats] 무기 '{EquippedWeapon.weaponName}' 내구도 소진");
+            if (EquippedWeapon == null || EquippedWeapon.MaxDurability == 0) return;
+            if (EquippedWeapon.DecayMode != DurabilityDecayMode.PerHit) return;
+            m_WeaponDurability = Mathf.Max(0, m_WeaponDurability - 1);
+            if (m_WeaponDurability == 0)
+                Debug.Log($"[PlayerStats] 무기 '{EquippedWeapon.WeaponName}' 내구도 소진");
         }
 
         /// <summary>처치 시 PlayerController 에서 호출. PerKill 무기만 소모.</summary>
         public void ConsumeWeaponDurabilityOnKill()
         {
-            if (EquippedWeapon == null || EquippedWeapon.maxDurability == 0) return;
-            if (EquippedWeapon.decayMode != DurabilityDecayMode.PerKill) return;
-            _weaponDurability = Mathf.Max(0, _weaponDurability - 1);
-            if (_weaponDurability == 0)
-                Debug.Log($"[PlayerStats] 무기 '{EquippedWeapon.weaponName}' 내구도 소진");
+            if (EquippedWeapon == null || EquippedWeapon.MaxDurability == 0) return;
+            if (EquippedWeapon.DecayMode != DurabilityDecayMode.PerKill) return;
+            m_WeaponDurability = Mathf.Max(0, m_WeaponDurability - 1);
+            if (m_WeaponDurability == 0)
+                Debug.Log($"[PlayerStats] 무기 '{EquippedWeapon.WeaponName}' 내구도 소진");
         }
 
         /// <summary>채집 성공 시 ResourceNode 에서 호출.</summary>
         public void ConsumeGatheringToolDurability()
         {
-            if (_gatheringTool == null || _gatheringTool.maxDurability == 0) return;
-            _gatheringToolDurability = Mathf.Max(0, _gatheringToolDurability - 1);
-            if (_gatheringToolDurability == 0)
-                Debug.Log($"[PlayerStats] 채집 도구 '{_gatheringTool.toolName}' 내구도 소진");
+            if (m_GatheringTool == null || m_GatheringTool.MaxDurability == 0) return;
+            m_GatheringToolDurability = Mathf.Max(0, m_GatheringToolDurability - 1);
+            if (m_GatheringToolDurability == 0)
+                Debug.Log($"[PlayerStats] 채집 도구 '{m_GatheringTool.ToolName}' 내구도 소진");
         }
 
         // ================================================================
@@ -313,24 +335,24 @@ namespace MonsterKitchen.Player
             // 무기 abils 합산
             if (EquippedWeapon != null)
             {
-                foreach (var abil in EquippedWeapon.abils)
+                foreach (var abil in EquippedWeapon.Abils)
                 {
-                    switch (abil.abilType)
+                    switch (abil.AbilType)
                     {
-                        case AbilType.Attack:      FinalAttack      += Mathf.RoundToInt(abil.value); break;
-                        case AbilType.Defense:     FinalDefense     += Mathf.RoundToInt(abil.value); break;
-                        case AbilType.MaxHp:       FinalMaxHp       += Mathf.RoundToInt(abil.value); break;
-                        case AbilType.Speed:       FinalMoveSpeed   += abil.value; break;
-                        case AbilType.AttackSpeed: FinalAttackSpeed += abil.value; break;
-                        case AbilType.CritRate:    FinalCritRate    += abil.value; break;
-                        case AbilType.CritDamage:  FinalCritDamage  += abil.value; break;
+                        case AbilType.Attack:      FinalAttack      += Mathf.RoundToInt(abil.Value); break;
+                        case AbilType.Defense:     FinalDefense     += Mathf.RoundToInt(abil.Value); break;
+                        case AbilType.MaxHp:       FinalMaxHp       += Mathf.RoundToInt(abil.Value); break;
+                        case AbilType.Speed:       FinalMoveSpeed   += abil.Value; break;
+                        case AbilType.AttackSpeed: FinalAttackSpeed += abil.Value; break;
+                        case AbilType.CritRate:    FinalCritRate    += abil.Value; break;
+                        case AbilType.CritDamage:  FinalCritDamage  += abil.Value; break;
                     }
                 }
             }
 
             // Health 컴포넌트 MaxHp 동기화
-            if (_health != null)
-                _health.SetMaxHp(FinalMaxHp);
+            if (m_Health != null)
+                m_Health.SetMaxHp(FinalMaxHp);
         }
 
         // ================================================================
@@ -342,26 +364,26 @@ namespace MonsterKitchen.Player
             if (Skill1CoolRemaining > 0f)
             {
                 Skill1CoolRemaining = Mathf.Max(0f, Skill1CoolRemaining - Time.deltaTime);
-                OnCooldownChanged?.Invoke(1, Skill1CoolRemaining, _skill1CoolTotal);
+                OnCooldownChanged?.Invoke(1, Skill1CoolRemaining, m_Skill1CoolTotal);
             }
             if (Skill2CoolRemaining > 0f)
             {
                 Skill2CoolRemaining = Mathf.Max(0f, Skill2CoolRemaining - Time.deltaTime);
-                OnCooldownChanged?.Invoke(2, Skill2CoolRemaining, _skill2CoolTotal);
+                OnCooldownChanged?.Invoke(2, Skill2CoolRemaining, m_Skill2CoolTotal);
             }
         }
 
         void StartSkillCooldown(int slot, float duration)
         {
-            if (slot == 1) { Skill1CoolRemaining = duration; _skill1CoolTotal = duration; }
-            else           { Skill2CoolRemaining = duration; _skill2CoolTotal = duration; }
+            if (slot == 1) { Skill1CoolRemaining = duration; m_Skill1CoolTotal = duration; }
+            else           { Skill2CoolRemaining = duration; m_Skill2CoolTotal = duration; }
             OnCooldownChanged?.Invoke(slot, duration, duration);
         }
 
 #if UNITY_EDITOR
         void Reset()
         {
-            _health = GetComponent<Health>();
+            m_Health = GetComponent<Health>();
         }
 #endif
     }

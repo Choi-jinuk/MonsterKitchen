@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using MonsterKitchen;
 using MonsterKitchen.Core;
 using MonsterKitchen.Data;
 using MonsterKitchen.Data.Pipeline;
@@ -20,23 +21,44 @@ namespace MonsterKitchen.Editor
         const int    DETAIL_H = 180;
 
         // ── 테이블 메타 ─────────────────────────────────────────────
-        static readonly string[] TABLE_LABELS = { "Monsters", "Ingredients", "Recipes", "Foods", "Drop Tables", "Dungeon Spawn Tables" };
-        static readonly string[] TABLE_FILES  = { "Monsters.csv", "Ingredients.csv", "Recipes.csv", "Foods.csv", "DropTables.csv", "DungeonSpawnTables.csv" };
+        // 주의: 동기화 순서가 중요하다.
+        //   SkillSteps(6) → SkillGroups(7) → Weapons(8) → Gathering Tools(9) → Players(10)
+        //   Weapons 의 normalAttackGroup 은 SkillGroups 가 먼저 동기화되어야 해결된다.
+        //   Monsters 의 skillGroups 는 SyncAllSO 의 ResolveAllReferences() 에서 해결된다.
+        static readonly string[] TABLE_LABELS = {
+            "Monsters", "Ingredients", "Recipes", "Foods", "Drop Tables", "Dungeon Spawn Tables",
+            "Skill Steps", "Skill Groups", "Weapons", "Gathering Tools", "Players"
+        };
+        static readonly string[] TABLE_FILES  = {
+            "Monsters.csv", "Ingredients.csv", "Recipes.csv", "Foods.csv",
+            "DropTables.csv", "DungeonSpawnTables.csv",
+            "SkillSteps.csv", "SkillGroups.csv", "Weapons.csv", "GatheringTools.csv", "Players.csv"
+        };
 
         static readonly string[][] DEFAULT_HEADERS =
         {
-            // Monsters
-            new[] { "_key","id","displayName","description","hp","attack","defense","attribute","rarity","dropTableId","immuneToKnockback","immuneToStun","immuneToPullIn" },
-            // Ingredients
-            new[] { "_key","id","displayName","description","attribute","rarity","defaultState","sourceMonsterIds" },
-            // Recipes
-            new[] { "_key","id","displayName","description","ingredients","resultFoodId","cookTimeSeconds","unlockDay","isUnlockedByDefault" },
-            // Foods
-            new[] { "_key","id","displayName","description","basePrice","hpRestore","buffAttribute","buffMultiplier","buffDurationDays" },
-            // Drop Tables
-            new[] { "_key","id","entries" },
-            // Dungeon Spawn Tables
-            new[] { "_key","id","monsters" },
+            // 0: Monsters
+            new[] { "_key","Id","DisplayName","Description","Hp","Attack","Defense","MoveSpeed","Attribute","Rarity","DropTableId","SkillGroupIds","ImmuneToKnockback","ImmuneToStun","ImmuneToPullIn","PrefabAddress","SpriteAddress","BtAssetAddress" },
+            // 1: Ingredients
+            new[] { "_key","Id","DisplayName","Description","Attribute","Rarity","DefaultState","SourceMonsterIds" },
+            // 2: Recipes
+            new[] { "_key","Id","DisplayName","Description","Ingredients","ResultFoodId","CookTimeSeconds","UnlockDay","IsUnlockedByDefault" },
+            // 3: Foods
+            new[] { "_key","Id","DisplayName","Description","BasePrice","HpRestore","BuffAttribute","BuffMultiplier","BuffDurationDays" },
+            // 4: Drop Tables
+            new[] { "_key","Id","Entries" },
+            // 5: Dungeon Spawn Tables
+            new[] { "_key","Id","Monsters" },
+            // 6: Skill Steps
+            new[] { "_key","Id","SkillId","SkillName","Cooltime","ComboWindow","DamageMultiplier","SearchRange","AttackRange","MaxTargets","MissileSpeed","MissileMaxRange","CcForce","CcDuration","StunDuration","AnimTriggerOverride","ProjectilePrefabAddress" },
+            // 7: Skill Groups
+            new[] { "_key","Id","SkillGroupId","SkillName","Description","SkillIconAddress","SkillCooltime","AllowedWeaponTypes","StepIds" },
+            // 8: Weapons
+            new[] { "_key","Id","WeaponName","WeaponType","Abils","MaxDurability","DecayMode","NormalAttackGroupId","WeaponSpriteAddress","WeaponAnimAddress" },
+            // 9: Gathering Tools
+            new[] { "_key","Id","ToolName","ToolType","MaxDurability","GatherMultiplier","SpeedMultiplier","CompatibleNodeTypes" },
+            // 10: Players
+            new[] { "_key","Id","DisplayName","PrefabAddress","BaseMaxHp","BaseAttack","BaseMoveSpeed","BaseDefense","AttackAttribute","DefaultWeaponId","SkillGroupId1","SkillGroupId2","UltimateSkillGroupId","MaxUltimateGauge","GaugeOnHit","GaugeOnKill" },
         };
 
         // ── 창 상태 ──────────────────────────────────────────────────
@@ -81,6 +103,10 @@ namespace MonsterKitchen.Editor
                         (float)i / TABLE_FILES.Length);
                     total += SyncTableAtIndex(i);
                 }
+
+                // 크로스 테이블 참조 해결
+                EditorUtility.DisplayProgressBar("Syncing All SO", "참조 해결 중...", 1f);
+                ResolveAllReferences();
             }
             finally { EditorUtility.ClearProgressBar(); }
 
@@ -88,6 +114,59 @@ namespace MonsterKitchen.Editor
             AssetDatabase.Refresh();
             Debug.Log($"[DataManager] Sync All 완료 — 총 {total}개 항목");
             EditorUtility.DisplayDialog("Sync All SO", $"전체 동기화 완료\n총 {total}개 항목", "OK");
+        }
+
+        /// <summary>
+        /// 모든 테이블 동기화 후 크로스 테이블 참조를 해결한다.
+        /// MonsterData.skillGroups ← skillGroupIds 로 SkillGroups 조회.
+        /// WeaponData.normalAttackGroup ← normalAttackGroupId 로 SkillGroups 조회.
+        /// </summary>
+        static void ResolveAllReferences()
+        {
+            TableData td = GetOrCreateTableData();
+
+            // SkillGroupData 역방향 캐시 (skillGroupId 문자열 → 인스턴스)
+            var sgByStringId = new System.Collections.Generic.Dictionary<string, SkillGroupData>();
+            foreach (var sg in td.SkillGroups.All)
+                if (!string.IsNullOrEmpty(sg.SkillGroupId))
+                    sgByStringId[sg.SkillGroupId] = sg;
+
+            // Monsters: skillGroupIds → skillGroups
+            foreach (var monster in td.Monsters.All)
+            {
+                if (monster.SkillGroupIds == null || monster.SkillGroupIds.Length == 0)
+                {
+                    monster.SkillGroups = System.Array.Empty<SkillGroupData>();
+                    continue;
+                }
+                var list = new System.Collections.Generic.List<SkillGroupData>();
+                foreach (var sgId in monster.SkillGroupIds)
+                {
+                    if (string.IsNullOrWhiteSpace(sgId)) continue;
+                    if (sgByStringId.TryGetValue(sgId.Trim(), out var sg))
+                        list.Add(sg);
+                    else
+                        Debug.LogWarning($"[DataManager] Monster({monster.Id}) skillGroupId '{sgId}' 를 SkillGroups 에서 찾을 수 없습니다.");
+                }
+                monster.SkillGroups = list.ToArray();
+            }
+
+            // Weapons: normalAttackGroupId → normalAttackGroup
+            foreach (var weapon in td.Weapons.All)
+            {
+                if (string.IsNullOrEmpty(weapon.NormalAttackGroupId))
+                {
+                    weapon.NormalAttackGroup = null;
+                    continue;
+                }
+                if (sgByStringId.TryGetValue(weapon.NormalAttackGroupId.Trim(), out var sg))
+                    weapon.NormalAttackGroup = sg;
+                else
+                    Debug.LogWarning($"[DataManager] Weapon({weapon.Id}) normalAttackGroupId '{weapon.NormalAttackGroupId}' 를 SkillGroups 에서 찾을 수 없습니다.");
+            }
+
+            EditorUtility.SetDirty(td);
+            Debug.Log($"[DataManager] 참조 해결 완료 — Monster {td.Monsters.Count}개, Weapon {td.Weapons.Count}개");
         }
 
         [MenuItem("MonsterKitchen/Check Manifest")]
@@ -138,45 +217,67 @@ namespace MonsterKitchen.Editor
             TableData td = GetOrCreateTableData();
             return idx switch
             {
-                0 => ScriptableObjectSync.Sync<MonsterData>           (parsed, td.Monsters,           td, MonsterMapper),
+                0 => ScriptableObjectSync.Sync<MonsterData>           (parsed, td.Monsters,           td, (d, row) => MonsterMapper(d, row)),
                 1 => ScriptableObjectSync.Sync<IngredientData>        (parsed, td.Ingredients,        td, IngredientMapper),
                 2 => ScriptableObjectSync.Sync<RecipeData>            (parsed, td.Recipes,            td, RecipeMapper),
                 3 => ScriptableObjectSync.Sync<FoodData>              (parsed, td.Foods,              td, FoodMapper),
                 4 => ScriptableObjectSync.Sync<DropTableData>         (parsed, td.DropTables,         td, DropTableMapper),
                 5 => ScriptableObjectSync.Sync<DungeonSpawnTableData> (parsed, td.DungeonSpawnTables, td, DungeonSpawnTableMapper),
+                6 => ScriptableObjectSync.Sync<SkillData>             (parsed, td.SkillSteps,         td, SkillStepMapper),
+                7 => ScriptableObjectSync.Sync<SkillGroupData>        (parsed, td.SkillGroups,        td, (d, row) => SkillGroupMapper(d, row, td)),
+                8 => ScriptableObjectSync.Sync<WeaponData>            (parsed, td.Weapons,            td, (d, row) => WeaponMapper(d, row, td)),
+                9 => ScriptableObjectSync.Sync<GatheringToolData>     (parsed, td.GatheringTools,     td, GatheringToolMapper),
+               10 => ScriptableObjectSync.Sync<PlayerCharData>         (parsed, td.Players,            td, PlayerMapper),
                 _ => 0,
             };
         }
 
         // ── 테이블별 fieldMapper ─────────────────────────────────────
 
-        /// <summary>MonsterData: prefabAddress / spriteAddress 자동 생성 (빈 경우만)</summary>
-        static void MonsterMapper(MonsterData d, Dictionary<string, string> _)
+        /// <summary>MonsterData: prefabAddress / spriteAddress / btAssetAddress 자동 생성 + skillGroupIds 파싱</summary>
+        static void MonsterMapper(MonsterData d, Dictionary<string, string> row)
         {
-            if (string.IsNullOrEmpty(d.prefabAddress))
-                d.prefabAddress = AssetKeys.MonsterPrefab(d.id);
-            if (string.IsNullOrEmpty(d.spriteAddress))
-                d.spriteAddress = AssetKeys.MonsterSprite(d.id);
+            // CSV 값이 비어있을 때만 id 기반으로 자동 생성 (CSV에 명시된 값 우선)
+            if (string.IsNullOrEmpty(d.PrefabAddress))
+                d.PrefabAddress  = AssetKeys.MonsterPrefab(d.Id);
+            if (string.IsNullOrEmpty(d.SpriteAddress))
+                d.SpriteAddress  = AssetKeys.MonsterSprite(d.Id);
+            if (string.IsNullOrEmpty(d.BtAssetAddress))
+                d.BtAssetAddress = AssetKeys.MonsterBT(d.Id);
+
+            // skillGroupIds 파싱 ("SGD_004|SGD_005" → string[])
+            if (row.TryGetValue("SkillGroupIds", out string sgidsRaw) && !string.IsNullOrWhiteSpace(sgidsRaw))
+            {
+                var parts = sgidsRaw.Split('|');
+                var list = new System.Collections.Generic.List<string>();
+                foreach (var p in parts)
+                {
+                    var trimmed = p.Trim();
+                    if (!string.IsNullOrEmpty(trimmed)) list.Add(trimmed);
+                }
+                d.SkillGroupIds = list.ToArray();
+            }
+            // skillGroups 는 ResolveAllReferences() 에서 해결됨
         }
 
         /// <summary>IngredientData: spriteAddress 자동 생성</summary>
         static void IngredientMapper(IngredientData d, Dictionary<string, string> _)
         {
-            if (string.IsNullOrEmpty(d.spriteAddress))
-                d.spriteAddress = AssetKeys.IngredientSprite(d.id);
+            // CSV에 주소 컬럼이 없으므로 항상 id 기반으로 재생성
+            d.SpriteAddress = AssetKeys.IngredientSprite(d.Id);
         }
 
         /// <summary>FoodData: spriteAddress 자동 생성</summary>
         static void FoodMapper(FoodData d, Dictionary<string, string> _)
         {
-            if (string.IsNullOrEmpty(d.spriteAddress))
-                d.spriteAddress = AssetKeys.FoodSprite(d.id);
+            // CSV에 주소 컬럼이 없으므로 항상 id 기반으로 재생성
+            d.SpriteAddress = AssetKeys.FoodSprite(d.Id);
         }
 
         /// <summary>RecipeData: ingredients 배열 파싱 ("2001:2|2002:1" 형식)</summary>
         static void RecipeMapper(RecipeData d, Dictionary<string, string> row)
         {
-            if (!row.TryGetValue("ingredients", out string raw) || string.IsNullOrWhiteSpace(raw))
+            if (!row.TryGetValue("Ingredients", out string raw) || string.IsNullOrWhiteSpace(raw))
                 return;
 
             var list = new List<RecipeIngredient>();
@@ -187,16 +288,139 @@ namespace MonsterKitchen.Editor
                     && uint.TryParse(segs[0].Trim(), out uint ingId)
                     && int.TryParse(segs[1].Trim(), out int qty))
                 {
-                    list.Add(new RecipeIngredient { ingredientId = ingId, quantity = qty });
+                    list.Add(new RecipeIngredient { IngredientId = ingId, Quantity = qty });
                 }
             }
-            d.ingredients = list.ToArray();
+            d.Ingredients = list.ToArray();
+        }
+
+        /// <summary>SkillData: projectilePrefabAddress 자동 생성</summary>
+        static void SkillStepMapper(SkillData d, Dictionary<string, string> row)
+        {
+            if (string.IsNullOrEmpty(d.ProjectilePrefabAddress) && !string.IsNullOrEmpty(d.SkillId))
+                d.ProjectilePrefabAddress = AssetKeys.ProjectilePrefab(d.SkillId);
+        }
+
+        /// <summary>SkillGroupData: stepIds 파싱 → skillChain 재구성, skillIconAddress 자동 생성, allowedWeaponTypes 파싱</summary>
+        static void SkillGroupMapper(SkillGroupData d, Dictionary<string, string> row, TableData td)
+        {
+            // skillIconAddress 자동 생성
+            if (string.IsNullOrEmpty(d.SkillIconAddress) && !string.IsNullOrEmpty(d.SkillGroupId))
+                d.SkillIconAddress = AssetKeys.SkillIcon(d.SkillGroupId);
+
+            // allowedWeaponTypes 파싱 ("Sword|DualSword" 형식)
+            if (row.TryGetValue("AllowedWeaponTypes", out string wtRaw) && !string.IsNullOrWhiteSpace(wtRaw))
+            {
+                var list = new List<WeaponType>();
+                foreach (var part in wtRaw.Split('|'))
+                    if (System.Enum.TryParse<WeaponType>(part.Trim(), true, out var wt))
+                        list.Add(wt);
+                d.AllowedWeaponTypes = list;
+            }
+
+            // stepIds 파싱 ("11001|11002|11003" 형식) → d.stepIds
+            if (row.TryGetValue("StepIds", out string stepsRaw) && !string.IsNullOrWhiteSpace(stepsRaw))
+            {
+                var parts = stepsRaw.Split('|');
+                var ids = new System.Collections.Generic.List<string>();
+                foreach (var p in parts)
+                {
+                    var trimmed = p.Trim();
+                    if (!string.IsNullOrEmpty(trimmed)) ids.Add(trimmed);
+                }
+                d.StepIds = ids.ToArray();
+            }
+
+            // skillChain 재구성: stepIds → SkillSteps 테이블 조회
+            d.SkillChain = new List<SkillData>();
+            if (d.StepIds != null)
+            {
+                foreach (var stepIdStr in d.StepIds)
+                {
+                    if (uint.TryParse(stepIdStr, out uint stepId))
+                    {
+                        var step = td.SkillSteps.Get(stepId);
+                        if (step != null)
+                            d.SkillChain.Add(step);
+                        else
+                            Debug.LogWarning($"[DataManager] SkillGroup({d.SkillGroupId}) stepId {stepId} 를 SkillSteps 에서 찾을 수 없습니다.");
+                    }
+                }
+            }
+        }
+
+        /// <summary>WeaponData: abils 배열 파싱, address 자동 생성, normalAttackGroup 해결</summary>
+        static void WeaponMapper(WeaponData d, Dictionary<string, string> row, TableData td)
+        {
+            // abils 파싱
+            if (row.TryGetValue("Abils", out string abilsRaw) && !string.IsNullOrWhiteSpace(abilsRaw))
+            {
+                var list = new List<AbilEntry>();
+                foreach (var part in abilsRaw.Split('|'))
+                {
+                    var segs = part.Trim().Split(':');
+                    if (segs.Length >= 2
+                        && System.Enum.TryParse<AbilType>(segs[0].Trim(), true, out var abilType)
+                        && float.TryParse(segs[1].Trim(),
+                            System.Globalization.NumberStyles.Float,
+                            System.Globalization.CultureInfo.InvariantCulture,
+                            out float val))
+                    {
+                        list.Add(new AbilEntry(abilType, val));
+                    }
+                }
+                d.Abils = list;
+            }
+
+            // address 자동 생성 (빈 경우만)
+            if (string.IsNullOrEmpty(d.WeaponSpriteAddress))
+                d.WeaponSpriteAddress = AssetKeys.WeaponSprite(d.Id);
+            if (string.IsNullOrEmpty(d.WeaponAnimAddress))
+                d.WeaponAnimAddress = AssetKeys.WeaponAnim(d.Id);
+
+            // normalAttackGroup 해결 (SkillGroups 테이블에서 문자열 ID로 조회)
+            if (!string.IsNullOrEmpty(d.NormalAttackGroupId))
+            {
+                d.NormalAttackGroup = null;
+                foreach (var sg in td.SkillGroups.All)
+                {
+                    if (sg.SkillGroupId == d.NormalAttackGroupId)
+                    {
+                        d.NormalAttackGroup = sg;
+                        break;
+                    }
+                }
+                if (d.NormalAttackGroup == null)
+                    Debug.LogWarning($"[DataManager] Weapon({d.Id}) normalAttackGroupId '{d.NormalAttackGroupId}' 를 SkillGroups 에서 찾을 수 없습니다. (SkillGroups 를 먼저 동기화하세요.)");
+            }
+        }
+
+        /// <summary>PlayerCharData: prefabAddress 자동 생성</summary>
+        static void PlayerMapper(PlayerCharData d, Dictionary<string, string> row)
+        {
+            if (string.IsNullOrEmpty(d.PrefabAddress))
+                d.PrefabAddress = AssetKeys.PlayerCharPrefab(d.Id);
+        }
+
+        /// <summary>GatheringToolData: compatibleNodeTypes 배열 파싱 ("Tree|Rock|Ore" 형식)</summary>
+        static void GatheringToolMapper(GatheringToolData d, Dictionary<string, string> row)
+        {
+            if (!row.TryGetValue("CompatibleNodeTypes", out string raw) || string.IsNullOrWhiteSpace(raw))
+                return;
+
+            var list = new List<ResourceNodeType>();
+            foreach (var part in raw.Split('|'))
+            {
+                if (System.Enum.TryParse<ResourceNodeType>(part.Trim(), true, out var nodeType))
+                    list.Add(nodeType);
+            }
+            d.CompatibleNodeTypes = list.ToArray();
         }
 
         /// <summary>DungeonSpawnTableData: monsters 배열 파싱 ("1001:2:0.5|..." 형식)</summary>
         static void DungeonSpawnTableMapper(DungeonSpawnTableData d, Dictionary<string, string> row)
         {
-            if (!row.TryGetValue("monsters", out string raw) || string.IsNullOrWhiteSpace(raw))
+            if (!row.TryGetValue("Monsters", out string raw) || string.IsNullOrWhiteSpace(raw))
                 return;
 
             var list = new List<MonsterSpawnEntry>();
@@ -212,16 +436,16 @@ namespace MonsterKitchen.Editor
                             System.Globalization.NumberStyles.Float,
                             System.Globalization.CultureInfo.InvariantCulture,
                             out float r) ? r : 0.5f;
-                    list.Add(new MonsterSpawnEntry { monsterId = monId, count = count, spawnRadius = radius });
+                    list.Add(new MonsterSpawnEntry { MonsterId = monId, Count = count, SpawnRadius = radius });
                 }
             }
-            d.monsters = list;
+            d.Monsters = list;
         }
 
         /// <summary>DropTableData: entries 배열 파싱 ("2001:0.8:1:2|..." 형식)</summary>
         static void DropTableMapper(DropTableData d, Dictionary<string, string> row)
         {
-            if (!row.TryGetValue("entries", out string raw) || string.IsNullOrWhiteSpace(raw))
+            if (!row.TryGetValue("Entries", out string raw) || string.IsNullOrWhiteSpace(raw))
                 return;
 
             var list = new List<DropEntry>();
@@ -239,14 +463,14 @@ namespace MonsterKitchen.Editor
                 {
                     list.Add(new DropEntry
                     {
-                        ingredientId = ingId,
-                        dropChance   = Mathf.Clamp01(chance),
-                        minQuantity  = minQ,
-                        maxQuantity  = maxQ,
+                        IngredientId = ingId,
+                        DropChance   = Mathf.Clamp01(chance),
+                        MinQuantity  = minQ,
+                        MaxQuantity  = maxQ,
                     });
                 }
             }
-            d.entries = list.ToArray();
+            d.Entries = list.ToArray();
         }
 
         // ================================================================
@@ -270,13 +494,19 @@ namespace MonsterKitchen.Editor
 
             foreach (var d in td.Monsters.All)
             {
-                if (!string.IsNullOrEmpty(d.prefabAddress))  Check(d.prefabAddress,  d.displayName);
-                if (!string.IsNullOrEmpty(d.spriteAddress))  Check(d.spriteAddress,  d.displayName);
+                if (!string.IsNullOrEmpty(d.PrefabAddress))  Check(d.PrefabAddress,  d.DisplayName);
+                if (!string.IsNullOrEmpty(d.SpriteAddress))  Check(d.SpriteAddress,  d.DisplayName);
+                if (!string.IsNullOrEmpty(d.BtAssetAddress)) Check(d.BtAssetAddress, d.DisplayName + " BT");
             }
             foreach (var d in td.Ingredients.All)
-                if (!string.IsNullOrEmpty(d.spriteAddress))  Check(d.spriteAddress,  d.displayName);
+                if (!string.IsNullOrEmpty(d.SpriteAddress))  Check(d.SpriteAddress,  d.DisplayName);
             foreach (var d in td.Foods.All)
-                if (!string.IsNullOrEmpty(d.spriteAddress))  Check(d.spriteAddress,  d.displayName);
+                if (!string.IsNullOrEmpty(d.SpriteAddress))  Check(d.SpriteAddress,  d.DisplayName);
+            foreach (var d in td.Players.All)
+                if (!string.IsNullOrEmpty(d.PrefabAddress))  Check(d.PrefabAddress,  d.DisplayName);
+            foreach (var d in td.SkillSteps.All)
+                if (!string.IsNullOrEmpty(d.ProjectilePrefabAddress) && d.MissileSpeed > 0f)
+                    Check(d.ProjectilePrefabAddress, d.SkillName + " Projectile");
 
             return missing;
         }
@@ -529,12 +759,17 @@ namespace MonsterKitchen.Editor
             TableData td = GetOrCreateTableData();
             switch (_tableIdx)
             {
-                case 0: ScriptableObjectSync.Sync<MonsterData>           (_parsed, td.Monsters,           td, MonsterMapper);            break;
-                case 1: ScriptableObjectSync.Sync<IngredientData>        (_parsed, td.Ingredients,        td, IngredientMapper);         break;
-                case 2: ScriptableObjectSync.Sync<RecipeData>            (_parsed, td.Recipes,            td, RecipeMapper);             break;
-                case 3: ScriptableObjectSync.Sync<FoodData>              (_parsed, td.Foods,              td, FoodMapper);               break;
-                case 4: ScriptableObjectSync.Sync<DropTableData>         (_parsed, td.DropTables,         td, DropTableMapper);          break;
-                case 5: ScriptableObjectSync.Sync<DungeonSpawnTableData> (_parsed, td.DungeonSpawnTables, td, DungeonSpawnTableMapper);  break;
+                case 0:  ScriptableObjectSync.Sync<MonsterData>           (_parsed, td.Monsters,           td, (d, row) => MonsterMapper(d, row));          break;
+                case 1:  ScriptableObjectSync.Sync<IngredientData>        (_parsed, td.Ingredients,        td, IngredientMapper);                            break;
+                case 2:  ScriptableObjectSync.Sync<RecipeData>            (_parsed, td.Recipes,            td, RecipeMapper);                                break;
+                case 3:  ScriptableObjectSync.Sync<FoodData>              (_parsed, td.Foods,              td, FoodMapper);                                  break;
+                case 4:  ScriptableObjectSync.Sync<DropTableData>         (_parsed, td.DropTables,         td, DropTableMapper);                             break;
+                case 5:  ScriptableObjectSync.Sync<DungeonSpawnTableData> (_parsed, td.DungeonSpawnTables, td, DungeonSpawnTableMapper);                     break;
+                case 6:  ScriptableObjectSync.Sync<SkillData>             (_parsed, td.SkillSteps,         td, SkillStepMapper);                             break;
+                case 7:  ScriptableObjectSync.Sync<SkillGroupData>        (_parsed, td.SkillGroups,        td, (d, row) => SkillGroupMapper(d, row, td));    break;
+                case 8:  ScriptableObjectSync.Sync<WeaponData>            (_parsed, td.Weapons,            td, (d, row) => WeaponMapper(d, row, td));        break;
+                case 9:  ScriptableObjectSync.Sync<GatheringToolData>     (_parsed, td.GatheringTools,     td, GatheringToolMapper);                         break;
+                case 10: ScriptableObjectSync.Sync<PlayerCharData>         (_parsed, td.Players,            td, PlayerMapper);                                break;
             }
             AssetDatabase.SaveAssets();
             if (_showManifest) RefreshManifestCheck();

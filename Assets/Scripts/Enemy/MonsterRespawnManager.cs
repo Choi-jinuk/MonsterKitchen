@@ -20,8 +20,8 @@ namespace MonsterKitchen.Enemy
     {
         public static MonsterRespawnManager Instance { get; private set; }
 
-        readonly MonoBehaviour _runner;
-        const float RespawnDelay = 30f;
+        readonly MonoBehaviour m_Runner;
+        const float RESPAWN_DELAY = 30f;
 
         struct RespawnEntry
         {
@@ -29,9 +29,9 @@ namespace MonsterKitchen.Enemy
             public Vector3     spawnPos;
         }
 
-        readonly Dictionary<MonsterBase, RespawnEntry> _tracked = new();
+        readonly Dictionary<MonsterBase, RespawnEntry> m_Tracked = new();
 
-        public MonsterRespawnManager(MonoBehaviour runner) => _runner = runner;
+        public MonsterRespawnManager(MonoBehaviour runner) => m_Runner = runner;
 
         public void Init() => Instance = this;
 
@@ -39,27 +39,27 @@ namespace MonsterKitchen.Enemy
 
         public void Track(MonsterBase instance, MonsterData data, Vector3 spawnPos)
         {
-            _tracked[instance] = new RespawnEntry { data = data, spawnPos = spawnPos };
+            m_Tracked[instance] = new RespawnEntry { data = data, spawnPos = spawnPos };
         }
 
         public void NotifyDeath(MonsterBase instance)
         {
-            if (!_tracked.TryGetValue(instance, out var entry)) return;
-            _tracked.Remove(instance);
-            _runner.StartCoroutine(RespawnCoroutine(entry));
+            if (!m_Tracked.TryGetValue(instance, out var entry)) return;
+            m_Tracked.Remove(instance);
+            m_Runner.StartCoroutine(RespawnCoroutine(entry));
         }
 
         // ── Helpers ────────────────────────────────────────────────────
 
         IEnumerator RespawnCoroutine(RespawnEntry entry)
         {
-            yield return new WaitForSeconds(RespawnDelay);
+            yield return new WaitForSeconds(RESPAWN_DELAY);
 
             if (SpawnManager.Instance == null)                        yield break;
-            if (string.IsNullOrEmpty(entry.data?.prefabAddress))      yield break;
+            if (string.IsNullOrEmpty(entry.data?.PrefabAddress))      yield break;
 
             var newMonster = SpawnManager.Instance.SpawnSingle(entry.data, entry.spawnPos);
-            Debug.Log($"[MonsterRespawnManager] '{entry.data.displayName}' 리스폰 완료 @ {entry.spawnPos}");
+            Debug.Log($"[MonsterRespawnManager] '{entry.data.DisplayName}' 리스폰 완료 @ {entry.spawnPos}");
 
             if (newMonster != null)
                 Track(newMonster, entry.data, entry.spawnPos);

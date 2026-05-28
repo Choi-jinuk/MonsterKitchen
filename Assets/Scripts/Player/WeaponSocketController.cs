@@ -9,14 +9,14 @@ namespace MonsterKitchen.Player
     //
     //  ▶ 역할
     //    - 무기 교체 시 SpriteRenderer.sprite + AnimatorController 런타임 교체
-    //    - _facingDir 기반 360도 방향 회전 (world space Z 축)
+    //    - m_FacingDir 기반 360도 방향 회전 (world space Z 축)
     //    - 왼쪽 반구 진입 시 flipY 처리 (스프라이트 뒤집힘 방지)
     //    - 활 등 애니메이션 있는 무기의 트리거 발동 (TriggerWeaponAnim)
     //
     //  ▶ 배치
     //    Player.prefab 의 자식 GameObject "WeaponSocket" 에 추가.
     //    2D Animation 리깅 완료 후 이 GO를 손 본(Hand_R)에 연결한다.
-    //    PlayerController 에서 [SerializeField] WeaponSocketController _weaponSocket 로 참조.
+    //    PlayerController 에서 [SerializeField] WeaponSocketController m_WeaponSocket 로 참조.
     //
     //  ▶ 스킨 교체 연동
     //    캐릭터 본체 스킨은 SpriteLibraryAsset 교체로 처리한다.
@@ -31,19 +31,19 @@ namespace MonsterKitchen.Player
 
     public class WeaponSocketController : MonoBehaviour
     {
-        [SerializeField] SpriteRenderer _sr;
-        [SerializeField] Animator       _anim;
+        [SerializeField] SpriteRenderer m_Sr;
+        [SerializeField] Animator       m_Anim;
 
-        /// <summary>PlayerController 의 _sprites flipX 루프 제외 판별에 사용.</summary>
-        public SpriteRenderer SR => _sr;
+        /// <summary>PlayerController 의 sprites flipX 루프 제외 판별에 사용.</summary>
+        public SpriteRenderer SR => m_Sr;
 
         void Awake()
         {
-            if (_sr   == null) _sr   = GetComponent<SpriteRenderer>();
-            if (_anim == null) _anim = GetComponent<Animator>();
+            if (m_Sr   == null) m_Sr   = GetComponent<SpriteRenderer>();
+            if (m_Anim == null) m_Anim = GetComponent<Animator>();
 
             // 초기 상태: 무기 없음
-            if (_anim != null) _anim.enabled = false;
+            if (m_Anim != null) m_Anim.enabled = false;
         }
 
         // ================================================================
@@ -56,21 +56,21 @@ namespace MonsterKitchen.Player
         /// </summary>
         public void SetWeapon(WeaponData weapon)
         {
-            if (_sr != null)
+            if (m_Sr != null)
             {
                 Sprite sprite = null;
-                if (weapon != null && !string.IsNullOrEmpty(weapon.weaponSpriteAddress))
-                    sprite = AssetLoadManager.Instance?.Load<Sprite>(weapon.weaponSpriteAddress);
-                _sr.sprite = sprite;
+                if (weapon != null && !string.IsNullOrEmpty(weapon.WeaponSpriteAddress))
+                    sprite = AssetLoadManager.Instance?.Load<Sprite>(weapon.WeaponSpriteAddress);
+                m_Sr.sprite = sprite;
             }
 
-            if (_anim != null)
+            if (m_Anim != null)
             {
                 RuntimeAnimatorController animCtrl = null;
-                if (weapon != null && !string.IsNullOrEmpty(weapon.weaponAnimAddress))
-                    animCtrl = AssetLoadManager.Instance?.Load<RuntimeAnimatorController>(weapon.weaponAnimAddress);
-                _anim.runtimeAnimatorController = animCtrl;
-                _anim.enabled = animCtrl != null;
+                if (weapon != null && !string.IsNullOrEmpty(weapon.WeaponAnimAddress))
+                    animCtrl = AssetLoadManager.Instance?.Load<RuntimeAnimatorController>(weapon.WeaponAnimAddress);
+                m_Anim.runtimeAnimatorController = animCtrl;
+                m_Anim.enabled = animCtrl != null;
             }
         }
 
@@ -92,8 +92,8 @@ namespace MonsterKitchen.Player
             transform.rotation = Quaternion.Euler(0f, 0f, angle);
 
             // 왼쪽 반구에서 무기 스프라이트 수직 반전 (뒤집힌 무기 방지)
-            if (_sr != null)
-                _sr.flipY = dir.x < 0f;
+            if (m_Sr != null)
+                m_Sr.flipY = dir.x < 0f;
         }
 
         // ================================================================
@@ -107,15 +107,15 @@ namespace MonsterKitchen.Player
         /// </summary>
         public void TriggerWeaponAnim(int triggerHash)
         {
-            if (_anim == null || !_anim.enabled) return;
-            _anim.SetTrigger(triggerHash);
+            if (m_Anim == null || !m_Anim.enabled) return;
+            m_Anim.SetTrigger(triggerHash);
         }
 
         /// <summary>string 오버로드. 빈 문자열은 무시.</summary>
         public void TriggerWeaponAnim(string triggerName)
         {
-            if (_anim == null || !_anim.enabled || string.IsNullOrEmpty(triggerName)) return;
-            _anim.SetTrigger(triggerName);
+            if (m_Anim == null || !m_Anim.enabled || string.IsNullOrEmpty(triggerName)) return;
+            m_Anim.SetTrigger(triggerName);
         }
 
         // ================================================================
@@ -125,14 +125,14 @@ namespace MonsterKitchen.Player
         /// <summary>소켓 스프라이트 표시 여부 (사망·씬 전환 시 숨김 등).</summary>
         public void SetVisible(bool visible)
         {
-            if (_sr != null) _sr.enabled = visible;
+            if (m_Sr != null) m_Sr.enabled = visible;
         }
 
 #if UNITY_EDITOR
         void Reset()
         {
-            _sr   = GetComponent<SpriteRenderer>();
-            _anim = GetComponent<Animator>();
+            m_Sr   = GetComponent<SpriteRenderer>();
+            m_Anim = GetComponent<Animator>();
         }
 #endif
     }

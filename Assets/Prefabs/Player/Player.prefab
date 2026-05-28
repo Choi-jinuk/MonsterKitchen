@@ -127,8 +127,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f66d482e9e8f8274d8b7e71f06598410, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MonsterKitchen.Player.WeaponSocketController
-  _sr: {fileID: 144594593195065506}
-  _anim: {fileID: 4356218600442567906}
+  m_Sr: {fileID: 144594593195065506}
+  m_Anim: {fileID: 4356218600442567906}
 --- !u!1 &5357646181186029780
 GameObject:
   m_ObjectHideFlags: 0
@@ -146,7 +146,8 @@ GameObject:
   - component: {fileID: 3407890287249338242}
   - component: {fileID: 7642815718514138612}
   - component: {fileID: 2819938613271822592}
-  - component: {fileID: 2124865314071644196}
+  - component: {fileID: 5384739290964021022}
+  - component: {fileID: 1764014222359779831}
   m_Layer: 9
   m_Name: Player
   m_TagString: Player
@@ -162,7 +163,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5357646181186029780}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0.1736482, y: 0, z: 0, w: 0.9848078}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -327,7 +328,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e1e2aad468967d540a266b84de68285b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MonsterKitchen.Combat.Health
-  maxHp: 100
+  m_DefaultHp: 100
 --- !u!114 &3407890287249338242
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -340,28 +341,28 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a0ffdc47ff94b044b9a012c1344a2419, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MonsterKitchen.Player.PlayerController
-  enemyLayer:
+  m_EnemyLayer:
     serializedVersion: 2
     m_Bits: 256
-  fallbackSearchRange: 2.5
-  fallbackAttackRange: 0.8
-  fallbackCooltime: 0.4
-  moveAcceleration: 30
-  attackMovePenalty: 0.5
-  _autoChaseRange: 6
-  _autoStopRatio: 0.85
-  dashSpeed: 18
-  dashDuration: 0.18
-  dashCooldown: 0.9
-  _rb: {fileID: 5012647777772233750}
-  _anim: {fileID: 2801292792292950363}
-  _overlayAnim: {fileID: 6993454692301058521}
-  _weaponSocket: {fileID: 3204941261122664613}
-  _sprites:
+  m_FallbackSearchRange: 2.5
+  m_FallbackAttackRange: 0.8
+  m_FallbackCooltime: 0.4
+  m_AttackMovePenalty: 0.5
+  m_AutoChaseRange: 999
+  m_AutoStopRatio: 0.85
+  m_DashSpeed: 18
+  m_DashDuration: 0.18
+  m_DashCooldown: 0.9
+  m_BtAssetAddress: bt/player/9001
+  m_Rb: {fileID: 5012647777772233750}
+  m_Anim: {fileID: 2801292792292950363}
+  m_OverlayAnim: {fileID: 6993454692301058521}
+  m_WeaponSocket: {fileID: 3204941261122664613}
+  m_Sprites:
   - {fileID: 6408265715606919144}
   - {fileID: 4512744136848485950}
-  _health: {fileID: 5324923133298973795}
-  _stats: {fileID: 2819938613271822592}
+  m_Health: {fileID: 5324923133298973795}
+  m_Stats: {fileID: 2819938613271822592}
 --- !u!114 &7642815718514138612
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -374,7 +375,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b570c4a8252020a45ac4c1742fb417fa, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MonsterKitchen.UI.DamagePopupTrigger
-  critThreshold: 20
 --- !u!114 &2819938613271822592
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -387,9 +387,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 57860244b9110994f8b59c3b64b2fabb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MonsterKitchen.Player.PlayerStats
-  _gatheringTool: {fileID: 0}
-  _health: {fileID: 5324923133298973795}
---- !u!114 &2124865314071644196
+  m_GatheringTool:
+    Id: 0
+    ToolName: 
+    ToolType: 0
+    MaxDurability: 20
+    GatherMultiplier: 1.5
+    SpeedMultiplier: 1
+    CompatibleNodeTypes: 
+  m_Health: {fileID: 5324923133298973795}
+--- !u!114 &5384739290964021022
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -398,10 +405,22 @@ MonoBehaviour:
   m_GameObject: {fileID: 5357646181186029780}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 696771671f68e7149a2afcc1787446b1, type: 3}
+  m_Script: {fileID: 11500000, guid: f7eb69a9cf605254c82e51cd1e7be5a7, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::MonsterKitchen.Core.PerspectivePlaneSync
-  _isStatic: 0
+  m_EditorClassIdentifier: Assembly-CSharp::MonsterKitchen.Core.PerspectiveEntityTilt
+--- !u!114 &1764014222359779831
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5357646181186029780}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e887800a53111004aaa952669059e47a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MonsterKitchen.AI.BehaviorTree.BTRunner
+  m_Asset: {fileID: 0}
 --- !u!1 &6076282370209601616
 GameObject:
   m_ObjectHideFlags: 0

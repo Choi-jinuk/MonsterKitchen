@@ -7,61 +7,73 @@ using UnityEngine;
 
 namespace MonsterKitchen.Editor
 {
-    /// <summary>
-    /// BT Scene Debugger — 씬 내 BTRunner 를 자동 탐색해 라이브 상태를 시각화한다.
-    ///
-    /// ▶ 좌측: 씬의 BTRunner 목록 (상태 dot 표시)
-    /// ▶ 우측: 선택한 에이전트의 BT 그래프 (노드 상태 컬러 바 실시간 표시)
-    ///
-    /// 조작:
-    ///   - 드래그: 그래프 패닝
-    ///   - Scroll: 그래프 이동
-    ///   - 에이전트 클릭: 해당 GameObject 를 Hierarchy 에서 선택
-    /// </summary>
+    // ====================================================================
+    //  BT Scene Debugger — 씬 내 BTRunner 를 자동 탐색해 라이브 상태를 시각화한다.
+    //
+    //  ▶ 좌측: 씬의 BTRunner 목록 (상태 dot)
+    //  ▶ 우측: 선택한 에이전트의 BT 그래프 (노드 상태 컬러 바 실시간)
+    //
+    //  조작:
+    //    드래그 (LMB/MMB) : 패닝
+    //    Scroll            : 이동
+    //    Auto Layout       : 로컬 레이아웃 재계산 (에셋 EditorPosition 불변)
+    // ====================================================================
     public class BTSceneDebugger : EditorWindow
     {
-        // ── 레이아웃 ──────────────────────────────────────────────────────
-        const float LIST_W       = 200f;
-        const float NODE_W       = 200f;
-        const float HEADER_H     = 28f;
-        const float FIELD_H      = 17f;
-        const float STATUS_BAR_H = 5f;
-        const float PORT_R       = 5f;
-        const float REFRESH_INTERVAL = 0.2f;   // 5fps 갱신
+        // ── 레이아웃 상수 ──────────────────────────────────────────────
+        const float LIST_W           = 210f;
+        const float NODE_W           = 200f;
+        const float HEADER_H         = 28f;
+        const float FIELD_H          = 17f;
+        const float STATUS_BAR_H     = 5f;
+        const float REFRESH_INTERVAL = 0.2f;
+        const float AUTO_X_SP        = 224f;   // Auto Layout 수평 간격
+        const float AUTO_Y_SP        = 130f;   // Auto Layout 수직 간격
 
-        // ── 색상 ──────────────────────────────────────────────────────────
-        static readonly Color ColCanvas   = new Color(0.13f, 0.13f, 0.13f);
-        static readonly Color ColGrid     = new Color(0.19f, 0.19f, 0.19f);
-        static readonly Color ColBody     = new Color(0.22f, 0.22f, 0.22f);
-        static readonly Color ColWire     = new Color(0.65f, 0.65f, 0.65f);
-        static readonly Color ColSelected = new Color(1.00f, 0.70f, 0.10f);
-        static readonly Color ColRoot     = new Color(1.00f, 0.40f, 0.40f);
+        // ── 색상 ───────────────────────────────────────────────────────
+        static readonly Color s_ColCanvas    = new Color(0.13f, 0.13f, 0.13f);
+        static readonly Color s_ColGrid      = new Color(0.19f, 0.19f, 0.19f);
+        static readonly Color s_ColBody      = new Color(0.22f, 0.22f, 0.22f);
+        static readonly Color s_ColWire      = new Color(0.65f, 0.65f, 0.65f);
+        static readonly Color s_ColRoot      = new Color(1.00f, 0.40f, 0.40f);
 
-        static readonly Color ColSelector  = new Color(0.35f, 0.60f, 1.00f);
-        static readonly Color ColSequence  = new Color(0.35f, 0.85f, 0.45f);
-        static readonly Color ColCondition = new Color(1.00f, 0.85f, 0.25f);
-        static readonly Color ColAction    = new Color(0.55f, 0.90f, 0.95f);
-        static readonly Color ColDefault   = new Color(0.60f, 0.60f, 0.60f);
+        static readonly Color s_ColSelector  = new Color(0.35f, 0.60f, 1.00f);
+        static readonly Color s_ColSequence  = new Color(0.35f, 0.85f, 0.45f);
+        static readonly Color s_ColCondition = new Color(1.00f, 0.85f, 0.25f);
+        static readonly Color s_ColService   = new Color(0.80f, 0.55f, 1.00f);
+        static readonly Color s_ColDecorator = new Color(0.70f, 0.70f, 0.70f);
+        static readonly Color s_ColAction    = new Color(0.55f, 0.90f, 0.95f);
+        static readonly Color s_ColDefault   = new Color(0.60f, 0.60f, 0.60f);
+        static readonly Color s_ColParallel  = new Color(1.00f, 0.55f, 0.20f);
 
-        static readonly Color ColRunning = new Color(1.00f, 0.85f, 0.00f);
-        static readonly Color ColSuccess = new Color(0.20f, 0.90f, 0.30f);
-        static readonly Color ColFailure = new Color(0.90f, 0.20f, 0.20f);
-        static readonly Color ColUnknown = new Color(0.25f, 0.25f, 0.25f);
+        static readonly Color s_ColRunning   = new Color(1.00f, 0.85f, 0.00f);
+        static readonly Color s_ColSuccess   = new Color(0.20f, 0.90f, 0.30f);
+        static readonly Color s_ColFailure   = new Color(0.90f, 0.20f, 0.20f);
+        static readonly Color s_ColUnknown   = new Color(0.18f, 0.18f, 0.18f);
 
-        // ── 런타임 상태 ───────────────────────────────────────────────────
-        List<BTRunner> _runners    = new();
-        BTRunner       _selRunner;
-        List<BTNode>   _nodes      = new();
+        // ── 런타임 상태 ────────────────────────────────────────────────
+        List<BTRunner> m_Runners  = new();
+        BTRunner       m_SelRunner;
+        List<BTNode>   m_Nodes    = new();
 
-        Vector2 _listScroll;
-        Vector2 _graphOffset = new Vector2(40, 40);
-        bool    _panning;
-        Vector2 _panStart;
+        // ── 그래프 조작 ────────────────────────────────────────────────
+        Vector2 m_ListScroll;
+        Vector2 m_GraphOffset = new Vector2(40f, 40f);
+        bool    m_Panning;
+        Vector2 m_PanStart;
 
-        double _nextRefresh;
-        bool   _autoRefresh = true;
+        // ── 자동 갱신 ──────────────────────────────────────────────────
+        double m_NextRefresh;
+        bool   m_AutoRefresh = true;
 
-        // ── 메뉴 ──────────────────────────────────────────────────────────
+        // ── 로컬 레이아웃 (에셋 EditorPosition 불변, 뷰 전용) ─────────
+        readonly Dictionary<BTNode, Vector2> m_LocalLayout = new();
+        bool m_HasLocalLayout;
+
+        // ================================================================
+        //  열기
+        // ================================================================
+
         [MenuItem("MonsterKitchen/BT Scene Debugger")]
         public static void Open()
         {
@@ -69,7 +81,10 @@ namespace MonsterKitchen.Editor
             w.minSize = new Vector2(640, 400);
         }
 
-        // ── Unity 콜백 ────────────────────────────────────────────────────
+        // ================================================================
+        //  Mono — 이벤트
+        // ================================================================
+
         void OnEnable()
         {
             EditorApplication.playModeStateChanged += OnPlayModeChanged;
@@ -83,80 +98,84 @@ namespace MonsterKitchen.Editor
 
         void OnInspectorUpdate()
         {
-            if (!_autoRefresh) return;
-            if (EditorApplication.timeSinceStartup < _nextRefresh) return;
-            _nextRefresh = EditorApplication.timeSinceStartup + REFRESH_INTERVAL;
+            if (!m_AutoRefresh) return;
+            if (EditorApplication.timeSinceStartup < m_NextRefresh) return;
+            m_NextRefresh = EditorApplication.timeSinceStartup + REFRESH_INTERVAL;
             Scan();
             Repaint();
         }
 
         void OnPlayModeChanged(PlayModeStateChange change)
         {
-            if (change == PlayModeStateChange.EnteredPlayMode ||
-                change == PlayModeStateChange.EnteredEditMode)
+            if (change is PlayModeStateChange.EnteredPlayMode or PlayModeStateChange.EnteredEditMode)
             {
-                _selRunner = null;
-                _nodes.Clear();
+                m_SelRunner = null;
+                m_Nodes.Clear();
+                ClearLocalLayout();
                 Scan();
                 Repaint();
             }
         }
 
-        // ── GUI ───────────────────────────────────────────────────────────
+        // ================================================================
+        //  GUI
+        // ================================================================
+
         void OnGUI()
         {
             DrawToolbar();
-
             using (new EditorGUILayout.HorizontalScope())
             {
                 DrawList();
-
-                // 구분선
-                var div = EditorGUILayout.GetControlRect(false,
-                    GUILayout.Width(1), GUILayout.ExpandHeight(true));
+                var div = EditorGUILayout.GetControlRect(false, GUILayout.Width(1), GUILayout.ExpandHeight(true));
                 EditorGUI.DrawRect(div, new Color(0.08f, 0.08f, 0.08f));
-
                 DrawGraph();
             }
         }
 
-        // ── 툴바 ─────────────────────────────────────────────────────────
+        // ── 툴바 ─────────────────────────────────────────────────────
         void DrawToolbar()
         {
             using (new EditorGUILayout.HorizontalScope(EditorStyles.toolbar))
             {
+                // 플레이 상태 표시
                 string playLabel = Application.isPlaying ? "● Play" : "■ Edit";
-                var    playStyle = new GUIStyle(EditorStyles.toolbarButton);
+                var playStyle = new GUIStyle(EditorStyles.toolbarButton);
                 playStyle.normal.textColor = Application.isPlaying ? Color.green : Color.gray;
                 GUILayout.Label(playLabel, playStyle, GUILayout.Width(54));
+                GUILayout.Space(4);
 
-                GUILayout.Space(6);
+                if (GUILayout.Button("Scan", EditorStyles.toolbarButton, GUILayout.Width(50)))
+                { Scan(); Repaint(); }
 
-                if (GUILayout.Button("Scan Scene", EditorStyles.toolbarButton, GUILayout.Width(80)))
+                bool newAuto = GUILayout.Toggle(m_AutoRefresh, "Auto", EditorStyles.toolbarButton, GUILayout.Width(50));
+                if (newAuto != m_AutoRefresh) m_AutoRefresh = newAuto;
+
+                GUILayout.Space(4);
+
+                // Auto Layout — 선택된 런너가 있을 때만 활성화
+                bool canLayout = m_SelRunner != null && m_SelRunner.EditorAsset?.Root != null;
+                GUI.enabled = canLayout;
+                if (GUILayout.Button("Auto Layout", EditorStyles.toolbarButton, GUILayout.Width(84)))
+                    ApplyAutoLayout();
+                GUI.enabled = true;
+
+                if (m_HasLocalLayout)
                 {
-                    Scan();
-                    Repaint();
+                    if (GUILayout.Button("Reset Layout", EditorStyles.toolbarButton, GUILayout.Width(84)))
+                    { ClearLocalLayout(); Repaint(); }
                 }
 
-                bool newAuto = GUILayout.Toggle(_autoRefresh, "Auto Refresh",
-                    EditorStyles.toolbarButton, GUILayout.Width(88));
-                if (newAuto != _autoRefresh) _autoRefresh = newAuto;
-
-                GUILayout.Space(8);
-
-                // 에이전트 수 표시
-                var countStyle = new GUIStyle(EditorStyles.miniLabel)
-                    { normal = { textColor = new Color(0.6f, 0.6f, 0.6f) } };
-                GUILayout.Label($"{_runners.Count} runner(s) found", countStyle);
-
+                GUILayout.Space(6);
+                var cntStyle = new GUIStyle(EditorStyles.miniLabel) { normal = { textColor = new Color(0.55f, 0.55f, 0.55f) } };
+                GUILayout.Label($"{m_Runners.Count} runner(s)", cntStyle);
                 GUILayout.FlexibleSpace();
 
-                // 범례
-                DrawLegendItem(ColRunning, "Running");
-                GUILayout.Space(4);
-                DrawLegendItem(ColSuccess, "Success");
-                GUILayout.Space(4);
-                DrawLegendItem(ColFailure, "Failure");
+                DrawLegendItem(s_ColRunning, "Running");
+                GUILayout.Space(3);
+                DrawLegendItem(s_ColSuccess, "Success");
+                GUILayout.Space(3);
+                DrawLegendItem(s_ColFailure, "Failure");
                 GUILayout.Space(6);
             }
         }
@@ -164,76 +183,73 @@ namespace MonsterKitchen.Editor
         static void DrawLegendItem(Color col, string label)
         {
             var r = GUILayoutUtility.GetRect(10, 10, GUILayout.Width(10));
-            EditorGUI.DrawRect(new Rect(r.x, r.y + 1, 10, 10), col);
+            EditorGUI.DrawRect(new Rect(r.x, r.y + 2, 10, 10), col);
             GUILayout.Label(label, EditorStyles.miniLabel);
         }
 
-        // ── 에이전트 목록 ────────────────────────────────────────────────
+        // ── 좌측 목록 ────────────────────────────────────────────────
         void DrawList()
         {
             using (new EditorGUILayout.VerticalScope(GUILayout.Width(LIST_W)))
             {
-                EditorGUILayout.LabelField("Agents in Scene", EditorStyles.boldLabel);
-                _listScroll = EditorGUILayout.BeginScrollView(_listScroll,
-                    GUILayout.ExpandHeight(true));
+                EditorGUILayout.LabelField("Scene Agents", EditorStyles.boldLabel);
+                m_ListScroll = EditorGUILayout.BeginScrollView(m_ListScroll, GUILayout.ExpandHeight(true));
 
-                if (_runners.Count == 0)
+                if (m_Runners.Count == 0)
                 {
-                    EditorGUILayout.HelpBox(
-                        "씬에 BTRunner 가 없습니다.\n" +
-                        (Application.isPlaying ? "" : "Play Mode 에서 확인하세요."),
-                        MessageType.None);
+                    string msg = Application.isPlaying
+                        ? "씬에 BTRunner 없음."
+                        : "Play Mode 에서 확인하세요.";
+                    EditorGUILayout.HelpBox(msg, MessageType.None);
                 }
 
-                foreach (var runner in _runners)
+                foreach (var runner in m_Runners)
                 {
                     if (runner == null) continue;
-
-                    bool isSelected = runner == _selRunner;
-                    Color dotCol    = RunnerDotColor(runner);
+                    bool  isSelected = runner == m_SelRunner;
+                    Color dotCol     = RunnerDotColor(runner);
 
                     using (new EditorGUILayout.HorizontalScope())
                     {
-                        // 상태 dot
-                        var dotRect = GUILayoutUtility.GetRect(10, 10,
-                            GUILayout.Width(10), GUILayout.Height(18));
-                        EditorGUI.DrawRect(
-                            new Rect(dotRect.x, dotRect.y + 4, 10, 10), dotCol);
+                        var dotRect = GUILayoutUtility.GetRect(10, 10, GUILayout.Width(10), GUILayout.Height(18));
+                        EditorGUI.DrawRect(new Rect(dotRect.x, dotRect.y + 4, 10, 10), dotCol);
 
-                        // 이름 버튼
-                        GUIStyle style = isSelected
+                        var style = isSelected
                             ? new GUIStyle(GUI.skin.button)
-                                { fontStyle = FontStyle.Bold,
-                                  normal    = { textColor = new Color(1f, 0.85f, 0.3f) } }
+                              { fontStyle = FontStyle.Bold, normal = { textColor = new Color(1f, 0.85f, 0.3f) } }
                             : EditorStyles.miniButton;
 
                         if (GUILayout.Button(runner.name, style, GUILayout.ExpandWidth(true)))
                             SelectRunner(runner);
                     }
                 }
-
                 EditorGUILayout.EndScrollView();
 
-                // 선택된 에이전트 정보
-                if (_selRunner != null)
+                // 선택 정보 패널
+                if (m_SelRunner != null)
                 {
                     EditorGUILayout.Space(4);
                     DrawSeparator();
-
-                    string assetName = _selRunner.EditorAsset != null
-                        ? _selRunner.EditorAsset.name : "—";
-                    EditorGUILayout.LabelField("Asset:", assetName,
-                        EditorStyles.miniLabel);
-
-                    string status = _selRunner.EditorAborted  ? "Aborted"
-                                  : _selRunner.EditorRoot == null ? "No Tree"
+                    var asset  = m_SelRunner.EditorAsset;
+                    string status = m_SelRunner.EditorAborted ? "Aborted"
+                                  : m_SelRunner.EditorRoot == null ? "No Tree"
                                   : "Running";
-                    EditorGUILayout.LabelField("Status:", status,
-                        EditorStyles.miniLabel);
+                    EditorGUILayout.LabelField("Asset:",  asset  != null ? asset.name : "—", EditorStyles.miniLabel);
+                    EditorGUILayout.LabelField("Status:", status,                             EditorStyles.miniLabel);
+
+                    if (Application.isPlaying)
+                    {
+                        var ctx = m_SelRunner.EditorContext;
+                        if (ctx != null)
+                        {
+                            int runningCount = m_Nodes.Count(n => n != null && ctx.TryGetLastStatus(n, out var s) && s == BTStatus.Running);
+                            EditorGUILayout.LabelField("Running:", $"{runningCount} node(s)", EditorStyles.miniLabel);
+                        }
+                    }
 
                     EditorGUILayout.Space(2);
-                    if (GUILayout.Button("Hierarchy で Select", EditorStyles.miniButton))
-                        Selection.activeGameObject = _selRunner.gameObject;
+                    if (GUILayout.Button("Select in Hierarchy", EditorStyles.miniButton))
+                        Selection.activeGameObject = m_SelRunner.gameObject;
                 }
             }
         }
@@ -241,233 +257,272 @@ namespace MonsterKitchen.Editor
         Color RunnerDotColor(BTRunner r)
         {
             if (!Application.isPlaying) return new Color(0.4f, 0.4f, 0.4f);
-            if (r.EditorAborted)        return ColFailure;
+            if (r.EditorAborted)        return s_ColFailure;
             if (r.EditorRoot == null)   return new Color(0.9f, 0.7f, 0.1f);
-            return ColSuccess;
+            return s_ColSuccess;
         }
 
-        // ── 그래프 ───────────────────────────────────────────────────────
+        // ── 그래프 캔버스 ─────────────────────────────────────────────
         void DrawGraph()
         {
             Rect cr = GUILayoutUtility.GetRect(GUIContent.none, GUIStyle.none,
                 GUILayout.ExpandWidth(true), GUILayout.ExpandHeight(true));
-
-            EditorGUI.DrawRect(cr, ColCanvas);
+            EditorGUI.DrawRect(cr, s_ColCanvas);
             DrawGrid(cr);
-
             GUI.BeginClip(cr);
 
-            if (_selRunner != null && _nodes.Count > 0)
+            if (m_SelRunner == null)
+                DrawHint(cr, "좌측 목록에서 에이전트를 선택하세요.");
+            else if (m_Nodes.Count == 0)
+                DrawHint(cr, "BTAsset 이 없거나 노드가 없습니다.");
+            else
             {
                 DrawWires();
                 DrawNodes();
             }
-            else if (_selRunner == null)
-            {
-                DrawHint(cr, "좌측 목록에서 에이전트를 선택하세요.");
-            }
-            else
-            {
-                DrawHint(cr, "BTAsset 이 할당되지 않았거나 노드가 없습니다.");
-            }
 
             GUI.EndClip();
-
             HandleGraphInput(cr);
         }
 
         void DrawGrid(Rect r)
         {
             const float sp = 30f;
-            Handles.color = ColGrid;
-            float ox = _graphOffset.x % sp, oy = _graphOffset.y % sp;
-            int   cols = Mathf.CeilToInt(r.width  / sp) + 1;
-            int   rows = Mathf.CeilToInt(r.height / sp) + 1;
+            Handles.color = s_ColGrid;
+            float ox = m_GraphOffset.x % sp, oy = m_GraphOffset.y % sp;
+            int cols = Mathf.CeilToInt(r.width  / sp) + 1;
+            int rows = Mathf.CeilToInt(r.height / sp) + 1;
             for (int i = 0; i <= cols; i++)
                 Handles.DrawLine(new Vector3(ox + i * sp, 0), new Vector3(ox + i * sp, r.height));
             for (int i = 0; i <= rows; i++)
                 Handles.DrawLine(new Vector3(0, oy + i * sp), new Vector3(r.width, oy + i * sp));
         }
 
+        // ── 노드 그리기 ───────────────────────────────────────────────
         void DrawNodes()
         {
-            var asset = _selRunner?.EditorAsset;
-            var ctx   = _selRunner?.EditorContext;
+            var asset = m_SelRunner?.EditorAsset;
+            var ctx   = m_SelRunner?.EditorContext;
 
-            foreach (var node in _nodes)
+            foreach (var node in m_Nodes)
             {
                 if (node == null) continue;
-
                 Rect  nr     = NodeRect(node);
-                bool  isRoot = asset != null && asset.root == node;
+                bool  isRoot = asset != null && asset.Root == node;
                 Color bg     = NodeHeaderColor(node);
 
-                // 루트 테두리
-                if (isRoot) EditorGUI.DrawRect(Expand(nr, 3), ColRoot);
-
-                EditorGUI.DrawRect(nr, ColBody);
+                // 루트 강조 테두리
+                if (isRoot) EditorGUI.DrawRect(Expand(nr, 3), s_ColRoot);
+                EditorGUI.DrawRect(nr, s_ColBody);
 
                 // 헤더
                 var hr = new Rect(nr.x, nr.y, nr.width, HEADER_H);
                 EditorGUI.DrawRect(hr, bg);
 
-                string title = (isRoot ? "[R] " : "") + node.name;
+                string badge = GetBadge(node);
+                string label = node.DebugLabel;   // DebugLabel 사용
+                string title = (isRoot ? "[R] " : "") + (badge.Length > 0 ? $"[{badge}] " : "") + label;
                 var hs = new GUIStyle(EditorStyles.boldLabel)
-                    { alignment = TextAnchor.MiddleCenter, fontSize = 11 };
-                hs.normal.textColor = Color.black;
+                    { alignment = TextAnchor.MiddleCenter, fontSize = 11, normal = { textColor = Color.black } };
                 GUI.Label(hr, title, hs);
 
-                // 직렬화 필드 (읽기 전용)
+                // 직렬화 필드 표시
                 var so   = new SerializedObject(node);
                 var prop = so.GetIterator();
                 float py = nr.y + HEADER_H + 2f;
-                var   ps = new GUIStyle(EditorStyles.miniLabel)
-                    { normal = { textColor = new Color(0.75f, 0.75f, 0.75f) } };
+                var ps = new GUIStyle(EditorStyles.miniLabel) { normal = { textColor = new Color(0.75f, 0.75f, 0.75f) } };
                 prop.NextVisible(true);
                 while (prop.NextVisible(false))
                 {
-                    if (prop.name == "editorPosition") continue;
+                    if (prop.name is "EditorPosition" or "m_Child" or "m_Children") continue;
                     GUI.Label(new Rect(nr.x + 5, py, nr.width - 10, FIELD_H),
                         $"{prop.displayName}: {PropVal(prop)}", ps);
                     py += FIELD_H;
                 }
 
-                // ── 런타임 상태 바 ────────────────────────────────────────
-                Color statusCol = ColUnknown;
+                // 런타임 상태 바
+                Color statusCol  = s_ColUnknown;
                 string statusIcon = "";
-                if (Application.isPlaying && ctx != null &&
-                    ctx.TryGetLastStatus(node, out var st))
+                if (Application.isPlaying && ctx != null && ctx.TryGetLastStatus(node, out var st))
                 {
-                    statusCol  = st == BTStatus.Running ? ColRunning :
-                                 st == BTStatus.Success  ? ColSuccess : ColFailure;
-                    statusIcon = st == BTStatus.Running ? "▶" :
-                                 st == BTStatus.Success  ? "✓" : "✕";
+                    statusCol  = st == BTStatus.Running ? s_ColRunning
+                               : st == BTStatus.Success ? s_ColSuccess : s_ColFailure;
+                    statusIcon = st == BTStatus.Running ? "▶" : st == BTStatus.Success ? "✓" : "✕";
                 }
+                EditorGUI.DrawRect(new Rect(nr.x, nr.yMax - STATUS_BAR_H, nr.width, STATUS_BAR_H), statusCol);
 
-                var barRect = new Rect(nr.x, nr.yMax - STATUS_BAR_H, nr.width, STATUS_BAR_H);
-                EditorGUI.DrawRect(barRect, statusCol);
-
-                // 상태 아이콘 (헤더 우측)
                 if (!string.IsNullOrEmpty(statusIcon))
                 {
-                    var iconStyle = new GUIStyle(EditorStyles.boldLabel) { fontSize = 10 };
-                    iconStyle.normal.textColor = statusCol;
+                    var iconStyle = new GUIStyle(EditorStyles.boldLabel) { fontSize = 10, normal = { textColor = statusCol } };
                     GUI.Label(new Rect(nr.xMax - 18, hr.y, 16, HEADER_H), statusIcon, iconStyle);
                 }
             }
         }
 
+        // ── 와이어 그리기 ─────────────────────────────────────────────
         void DrawWires()
         {
-            foreach (var node in _nodes)
+            // 트리 구조를 따라 루트에서 재귀 순회 — 삽입 순서와 무관하게 정확히 그림
+            var asset = m_SelRunner?.EditorAsset;
+            if (asset?.Root == null) return;
+            DrawWiresRecursive(asset.Root);
+        }
+
+        void DrawWiresRecursive(BTNode node)
+        {
+            if (node == null) return;
+            Rect    pr   = NodeRect(node);
+            Vector2 from = new Vector2(pr.center.x, pr.yMax - STATUS_BAR_H);
+
+            if (node is BTComposite composite)
             {
-                if (node is not BTComposite composite) continue;
-                Rect    pr   = NodeRect(node);
-                Vector2 from = new Vector2(pr.center.x, pr.yMax - STATUS_BAR_H);
                 foreach (var child in composite.Children)
                 {
                     if (child == null) continue;
                     Rect cr = NodeRect(child);
-                    DrawBezier(from, new Vector2(cr.center.x, cr.yMin), ColWire);
+                    DrawBezier(from, new Vector2(cr.center.x, cr.yMin), s_ColWire);
+                    DrawWiresRecursive(child);
                 }
+            }
+            else if (node is BTDecorator decorator && decorator.Child != null)
+            {
+                Rect cr = NodeRect(decorator.Child);
+                DrawBezier(from, new Vector2(cr.center.x, cr.yMin), s_ColWire);
+                DrawWiresRecursive(decorator.Child);
             }
         }
 
         static void DrawBezier(Vector2 a, Vector2 b, Color col)
         {
             float dy = Mathf.Abs(b.y - a.y) * 0.5f + 20f;
-            Handles.DrawBezier(a, b,
-                new Vector3(a.x, a.y + dy),
-                new Vector3(b.x, b.y - dy),
-                col, null, 2f);
+            Handles.color = col;
+            Handles.DrawBezier(a, b, new Vector3(a.x, a.y + dy), new Vector3(b.x, b.y - dy), col, null, 2f);
         }
 
-        // ── 입력 처리 ────────────────────────────────────────────────────
+        // ── 입력 처리 ─────────────────────────────────────────────────
         void HandleGraphInput(Rect cr)
         {
             var e = Event.current;
             if (!cr.Contains(e.mousePosition)) return;
-
             Vector2 local = e.mousePosition - cr.position;
 
             switch (e.type)
             {
-                case EventType.MouseDown when e.button == 0 || e.button == 2:
-                    _panning  = true;
-                    _panStart = local;
-                    e.Use();
-                    break;
-
-                case EventType.MouseDrag when (e.button == 0 || e.button == 2) && _panning:
-                    _graphOffset += local - _panStart;
-                    _panStart     = local;
-                    e.Use();
-                    Repaint();
-                    break;
-
+                case EventType.MouseDown when e.button is 0 or 2:
+                    m_Panning = true; m_PanStart = local; e.Use(); break;
+                case EventType.MouseDrag when (e.button is 0 or 2) && m_Panning:
+                    m_GraphOffset += local - m_PanStart; m_PanStart = local; e.Use(); Repaint(); break;
                 case EventType.MouseUp:
-                    _panning = false;
-                    break;
-
+                    m_Panning = false; break;
                 case EventType.ScrollWheel:
-                    _graphOffset -= e.delta * 2f;
-                    e.Use();
-                    Repaint();
-                    break;
+                    m_GraphOffset -= e.delta * 2f; e.Use(); Repaint(); break;
             }
         }
 
-        // ── 유틸리티 ─────────────────────────────────────────────────────
+        // ── 레이아웃 유틸 ─────────────────────────────────────────────
         Rect NodeRect(BTNode node)
         {
-            var  so   = new SerializedObject(node);
-            var  prop = so.GetIterator();
-            int  fc   = 0;
+            // 직렬화 필드 수 계산 (m_Children 제외 — 자식 수가 많으면 노드가 너무 커짐)
+            int fc = 0;
+            var so   = new SerializedObject(node);
+            var prop = so.GetIterator();
             prop.NextVisible(true);
             while (prop.NextVisible(false))
-                if (prop.name != "editorPosition") fc++;
+                if (prop.name is not "EditorPosition" and not "m_Child" and not "m_Children") fc++;
 
-            float h = HEADER_H + fc * FIELD_H + STATUS_BAR_H + 6f;
-            return new Rect(
-                _graphOffset.x + node.editorPosition.x,
-                _graphOffset.y + node.editorPosition.y,
-                NODE_W, h);
+            float h  = HEADER_H + fc * FIELD_H + STATUS_BAR_H + 6f;
+            Vector2 p = m_HasLocalLayout && m_LocalLayout.TryGetValue(node, out var lp) ? lp : node.EditorPosition;
+            return new Rect(m_GraphOffset.x + p.x, m_GraphOffset.y + p.y, NODE_W, h);
         }
 
+        // ── Auto Layout (로컬, 에셋 불변) ────────────────────────────
+        void ApplyAutoLayout()
+        {
+            m_LocalLayout.Clear();
+            m_HasLocalLayout = false;
+
+            var root = m_SelRunner?.EditorAsset?.Root;
+            if (root == null) return;
+
+            int xCounter = 0;
+            ComputeLayout(root, 0, ref xCounter);
+            m_HasLocalLayout = true;
+            m_GraphOffset    = new Vector2(40f, 40f);
+            Repaint();
+        }
+
+        void ComputeLayout(BTNode node, int depth, ref int xCounter)
+        {
+            var children = GetNodeChildren(node);
+
+            if (children.Count == 0)
+            {
+                m_LocalLayout[node] = new Vector2(xCounter * AUTO_X_SP, depth * AUTO_Y_SP);
+                xCounter++;
+                return;
+            }
+
+            // 먼저 자식들을 재귀 배치
+            foreach (var child in children)
+                ComputeLayout(child, depth + 1, ref xCounter);
+
+            // 부모를 자식들의 중심 위에 배치
+            float minX = m_LocalLayout[children[0]].x;
+            float maxX = m_LocalLayout[children[^1]].x;
+            m_LocalLayout[node] = new Vector2((minX + maxX) * 0.5f, depth * AUTO_Y_SP);
+        }
+
+        static List<BTNode> GetNodeChildren(BTNode node)
+        {
+            if (node is BTComposite comp)
+                return comp.Children.Where(c => c != null).ToList();
+            if (node is BTDecorator dec && dec.Child != null)
+                return new List<BTNode> { dec.Child };
+            return new List<BTNode>();
+        }
+
+        void ClearLocalLayout() { m_LocalLayout.Clear(); m_HasLocalLayout = false; }
+
+        // ── 노드 색상 / 배지 ──────────────────────────────────────────
         static Color NodeHeaderColor(BTNode node)
         {
+            if (node is BTSelector)  return s_ColSelector;
+            if (node is BTSequence)  return s_ColSequence;
+            if (node is BTParallel)  return s_ColParallel;
+            if (node is BTCondition) return s_ColCondition;
+            if (node is BTService)   return s_ColService;
+            if (node is BTDecorator) return s_ColDecorator;
             string n = node.GetType().Name;
-            if (n.Contains("Selector"))  return ColSelector;
-            if (n.Contains("Sequence"))  return ColSequence;
-            if (n.Contains("Condition")) return ColCondition;
-            if (n.Contains("Action"))    return ColAction;
-            return ColDefault;
+            if (n.Contains("Action")) return s_ColAction;
+            return s_ColDefault;
         }
 
-        static Rect Expand(Rect r, float d) =>
-            new Rect(r.x - d, r.y - d, r.width + d * 2, r.height + d * 2);
-
-        static string PropVal(SerializedProperty p)
+        static string GetBadge(BTNode node)
         {
-            return p.propertyType switch
-            {
-                SerializedPropertyType.Float         => p.floatValue.ToString("F2"),
-                SerializedPropertyType.Integer       => p.intValue.ToString(),
-                SerializedPropertyType.Boolean       => p.boolValue.ToString(),
-                SerializedPropertyType.String        => p.stringValue,
-                SerializedPropertyType.ObjectReference =>
-                    p.objectReferenceValue != null ? p.objectReferenceValue.name : "None",
-                _ => "…"
-            };
+            if (node is BTCondition) return "C";
+            if (node is BTService)   return "S";
+            if (node is BTDecorator) return "D";
+            return "";
         }
+
+        static Rect Expand(Rect r, float d) => new Rect(r.x - d, r.y - d, r.width + d * 2, r.height + d * 2);
+
+        static string PropVal(SerializedProperty p) => p.propertyType switch
+        {
+            SerializedPropertyType.Float           => p.floatValue.ToString("F2"),
+            SerializedPropertyType.Integer         => p.intValue.ToString(),
+            SerializedPropertyType.Boolean         => p.boolValue.ToString(),
+            SerializedPropertyType.String          => $"\"{p.stringValue}\"",
+            SerializedPropertyType.ObjectReference => p.objectReferenceValue != null ? p.objectReferenceValue.name : "None",
+            _                                      => "…"
+        };
 
         static void DrawHint(Rect r, string msg)
         {
             var s = new GUIStyle(EditorStyles.boldLabel)
             {
-                alignment = TextAnchor.MiddleCenter,
-                fontSize  = 13,
-                normal    = { textColor = new Color(0.38f, 0.38f, 0.38f) }
+                alignment = TextAnchor.MiddleCenter, fontSize = 13,
+                normal    = { textColor = new Color(0.35f, 0.35f, 0.35f) }
             };
             GUI.Label(new Rect(0, 0, r.width, r.height), msg, s);
         }
@@ -479,42 +534,42 @@ namespace MonsterKitchen.Editor
             GUILayout.Space(3);
         }
 
-        // ── 씬 스캔 / 선택 ───────────────────────────────────────────────
-
-        /// <summary>씬에서 BTRunner 를 모두 탐색해 _runners 를 갱신한다.</summary>
+        // ── 씬 탐색 ──────────────────────────────────────────────────
         void Scan()
         {
-            // 기존 선택 유지
-            BTRunner prev = _selRunner;
+            BTRunner prev = m_SelRunner;
+            m_Runners.Clear();
+            m_Runners.AddRange(
+                FindObjectsByType<BTRunner>(FindObjectsInactive.Include).OrderBy(r => r.name));
 
-            _runners.Clear();
-            _runners.AddRange(
-                FindObjectsByType<BTRunner>(FindObjectsInactive.Include)
-                    .OrderBy(r => r.name));
+            // 이전 선택 유지 or 초기화
+            bool prevAlive = prev != null && m_Runners.Contains(prev);
+            m_SelRunner = prevAlive ? prev : null;
 
-            // null 정리 후 이전 선택 복원
-            _selRunner = _runners.Contains(prev) ? prev : null;
-            if (_selRunner != null)
+            if (m_SelRunner != null)
                 RefreshNodes();
             else
-                _nodes.Clear();
+            {
+                m_Nodes.Clear();
+                ClearLocalLayout();
+            }
         }
 
         void SelectRunner(BTRunner runner)
         {
-            _selRunner = runner;
+            m_SelRunner = runner;
             Selection.activeGameObject = runner.gameObject;
+            ClearLocalLayout();
             RefreshNodes();
-            // 그래프를 루트 노드 부근으로 리셋
-            _graphOffset = new Vector2(40, 40);
+            m_GraphOffset = new Vector2(40f, 40f);
             Repaint();
         }
 
         void RefreshNodes()
         {
-            _nodes.Clear();
-            if (_selRunner?.EditorAsset == null) return;
-            _nodes = _selRunner.EditorAsset.GetAllNodes();
+            m_Nodes.Clear();
+            if (m_SelRunner?.EditorAsset == null) return;
+            m_Nodes = m_SelRunner.EditorAsset.GetAllNodes();
         }
     }
 }

@@ -45,7 +45,7 @@ namespace MonsterKitchen.Data.Pipeline
                 {
                     string trimmed = raw.TrimEnd();
                     if (string.IsNullOrWhiteSpace(trimmed)) continue;
-                    if (trimmed.StartsWith(CsvParser.CommentChar.ToString()))
+                    if (trimmed.StartsWith(CsvParser.COMMENT_CHAR.ToString()))
                         sb.AppendLine(trimmed);
                     else
                         break;  // 헤더(또는 타입힌트) 도달 → 중단

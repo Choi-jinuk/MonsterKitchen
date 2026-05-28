@@ -3,7 +3,7 @@
 ; sourceMonsterIds: 파이프(|) 구분 uint MON id
 ; spriteAddress → DataManagerWindow Sync 시 자동 생성
 #TYPE,string,uint,string,string,AttributeType,RarityType,IngredientState,string
-_key,id,displayName,description,attribute,rarity,defaultState,sourceMonsterIds
+_key,Id,DisplayName,Description,Attribute,Rarity,DefaultState,SourceMonsterIds
 ING_001,2001,슬라임 젤리,초록 슬라임에서 채취한 투명한 젤리. 탄력이 있고 달콤하다.,Poison,Common,Raw,1001
 ING_002,2002,불꽃 슬라임 코어,불꽃 슬라임의 핵심 부위. 식히면 매콤한 향이 난다.,Fire,Common,Raw,1002
 ING_003,2003,고블린 뼈,숲 고블린의 단단한 소형 뼈. 육수 재료로 활용된다.,None,Common,Raw,1003

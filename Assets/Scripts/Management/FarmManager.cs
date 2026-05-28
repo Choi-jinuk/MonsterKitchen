@@ -9,17 +9,17 @@ namespace MonsterKitchen.Management
     /// </summary>
     public class FarmManager : MonoBehaviour
     {
-        [SerializeField] List<FarmPlot> plots = new();
+        [SerializeField] List<FarmPlot> m_Plots = new();
 
-        public IReadOnlyList<FarmPlot> Plots      => plots;
-        public int                     ReadyCount  => plots.FindAll(p => p.IsReady).Count;
-        public int                     PlantedCount=> plots.FindAll(p => p.IsPlanted && !p.IsReady).Count;
-        public int                     EmptyCount  => plots.FindAll(p => !p.IsPlanted).Count;
+        public IReadOnlyList<FarmPlot> Plots      => m_Plots;
+        public int                     ReadyCount  => m_Plots.FindAll(p => p.IsReady).Count;
+        public int                     PlantedCount=> m_Plots.FindAll(p => p.IsPlanted && !p.IsReady).Count;
+        public int                     EmptyCount  => m_Plots.FindAll(p => !p.IsPlanted).Count;
 
         void Start()
         {
-            if (plots.Count == 0)
-                plots.AddRange(GetComponentsInChildren<FarmPlot>());
+            if (m_Plots.Count == 0)
+                m_Plots.AddRange(GetComponentsInChildren<FarmPlot>());
 
             if (DayManager.Instance != null)
                 DayManager.Instance.OnDayStarted += HandleDayStarted;

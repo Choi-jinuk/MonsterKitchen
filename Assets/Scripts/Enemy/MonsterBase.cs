@@ -21,13 +21,13 @@ namespace MonsterKitchen.Enemy
     [RequireComponent(typeof(DropResolver))]
     public class MonsterBase : MonoBehaviour
     {
-        [SerializeField] protected MonsterData monsterData;
+        [SerializeField] protected MonsterData m_MonsterData;
 
-        public MonsterData Data => monsterData;
+        public MonsterData Data => m_MonsterData;
 
         protected Health       HP;
         protected DropResolver Dropper;
-        protected bool         _initialized;
+        protected bool         m_Initialized;
 
         // ----------------------------------------------------------------
         //  Init — SpawnManager 가 SetActive(true) 전에 호출
@@ -42,11 +42,11 @@ namespace MonsterKitchen.Enemy
             HP      = GetComponent<Health>();
             Dropper = GetComponent<DropResolver>();
 
-            monsterData = data;
+            m_MonsterData = data;
             if (data != null)
-                HP.SetMaxHp(data.hp);
+                HP.SetMaxHp(data.Hp);
 
-            _initialized = true;
+            m_Initialized = true;
         }
 
         // ----------------------------------------------------------------

@@ -184,7 +184,7 @@ SpriteRenderer:
   m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: -5
+  m_SortingOrder: -20
   m_MaskInteraction: 0
   m_Sprite: {fileID: -8784023717049522559, guid: 17366e056e39df145ae7b875bce53230, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
@@ -204,7 +204,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 13585191}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.38268346, y: 0, z: 0, w: 0.9238795}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: -10.58, y: -5.625, z: 1}
   m_LocalScale: {x: 2, y: 2, z: 1}
   m_ConstrainProportionsScale: 0
@@ -253,20 +253,25 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9c02c6cd1b75a0b4494a7c1b46ecc747, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MonsterKitchen.Dungeon.DungeonSceneController
-  _rooms:
+  m_Rooms:
   - room: {fileID: 1387831860}
+    roomRoot: {fileID: 1387831859}
+    exitDoor: {fileID: 2112928160}
     spawnTableId: 6001
     spawnPoints:
     - {fileID: 1306925357}
     - {fileID: 1357740843}
     - {fileID: 1982494686}
   - room: {fileID: 579660313}
+    roomRoot: {fileID: 579660312}
+    exitDoor: {fileID: 0}
     spawnTableId: 6002
     spawnPoints:
     - {fileID: 2033970002}
     - {fileID: 1677257169}
-  _exit: {fileID: 888100003}
-  _playerRef: {fileID: 0}
+  m_Exit: {fileID: 888100003}
+  m_CameraConfiner: {fileID: 0}
+  m_PlayerRef: {fileID: 0}
 --- !u!4 &114353588
 Transform:
   m_ObjectHideFlags: 0
@@ -274,105 +279,6 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 114353586}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &219470047
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 219470050}
-  - component: {fileID: 219470049}
-  - component: {fileID: 219470048}
-  m_Layer: 0
-  m_Name: DungeonBounds
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &219470048
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 219470047}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 488c2674612ffa4479c6cf4ce3efc9e6, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::MonsterKitchen.Dungeon.DungeonCameraConfiner
-  floorTilemap: {fileID: 612432134}
-  confiner: {fileID: 703443203}
---- !u!60 &219470049
-PolygonCollider2D:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 219470047}
-  m_Enabled: 1
-  serializedVersion: 3
-  m_Density: 1
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_ForceSendLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_ForceReceiveLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_ContactCaptureLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_CallbackLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_IsTrigger: 1
-  m_UsedByEffector: 0
-  m_CompositeOperation: 0
-  m_CompositeOrder: 0
-  m_Offset: {x: 0, y: 0}
-  m_SpriteTilingProperty:
-    border: {x: 0, y: 0, z: 0, w: 0}
-    pivot: {x: 0, y: 0}
-    oldSize: {x: 0, y: 0}
-    newSize: {x: 0, y: 0}
-    adaptiveTilingThreshold: 0
-    drawMode: 0
-    adaptiveTiling: 0
-  m_AutoTiling: 0
-  m_Points:
-    m_Paths:
-    - - {x: 0, y: 1}
-      - {x: -0.95105654, y: 0.30901697}
-      - {x: -0.5877852, y: -0.80901706}
-      - {x: 0.58778536, y: -0.80901694}
-      - {x: 0.9510565, y: 0.30901712}
-  m_UseDelaunayMesh: 1
---- !u!4 &219470050
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 219470047}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
@@ -413,7 +319,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 16b2928b14da4f54eaab30c5f7d91a57, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MonsterKitchen.Dungeon.ResourceNode
-  data: {fileID: 11400000, guid: e598cff6051d1b3429a2edb3bbbb2da9, type: 2}
+  m_Data: {fileID: 11400000, guid: e598cff6051d1b3429a2edb3bbbb2da9, type: 2}
 --- !u!61 &232162796
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -469,7 +375,7 @@ Transform:
   m_GameObject: {fileID: 232162794}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -5, y: 3, z: 3}
+  m_LocalPosition: {x: -5, y: 3, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -543,10 +449,9 @@ MonoBehaviour:
   m_GameObject: {fileID: 232162794}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 696771671f68e7149a2afcc1787446b1, type: 3}
+  m_Script: {fileID: 11500000, guid: f7eb69a9cf605254c82e51cd1e7be5a7, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::MonsterKitchen.Core.PerspectivePlaneSync
-  _isStatic: 1
+  m_EditorClassIdentifier: Assembly-CSharp::MonsterKitchen.Core.PerspectiveEntityTilt
 --- !u!1 &396445429
 GameObject:
   m_ObjectHideFlags: 0
@@ -593,6 +498,7 @@ GameObject:
   - component: {fileID: 519420029}
   - component: {fileID: 519420030}
   - component: {fileID: 519420033}
+  - component: {fileID: 519420034}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -727,29 +633,24 @@ MonoBehaviour:
   m_GameObject: {fileID: 519420028}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 72ece51f2901e7445ab60da3685d6b5f, type: 3}
+  m_Script: {fileID: 11500000, guid: 1da4a994bfdbc044bb303a9b834531c0, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Unity.Cinemachine::Unity.Cinemachine.CinemachineBrain
-  ShowDebugText: 0
-  ShowCameraFrustum: 1
-  IgnoreTimeScale: 0
-  WorldUpOverride: {fileID: 0}
-  ChannelMask: -1
-  UpdateMethod: 2
-  BlendUpdateMethod: 1
-  LensModeOverride:
-    Enabled: 0
-    DefaultMode: 2
-  DefaultBlend:
-    Style: 1
-    Time: 2
-    CustomCurve:
-      serializedVersion: 2
-      m_Curve: []
-      m_PreInfinity: 2
-      m_PostInfinity: 2
-      m_RotationOrder: 4
-  CustomBlends: {fileID: 0}
+  m_EditorClassIdentifier: Assembly-CSharp::MonsterKitchen.Core.CameraFollow
+  m_Target: {fileID: 0}
+  m_SmoothTime: 0.25
+--- !u!114 &519420034
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 519420028}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 05292afb70711ee40ab8443c1ca3bd5b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MonsterKitchen.Core.PerspectiveCameraSync
+  _config: {fileID: 11400000, guid: 9ef37e65254bf2c4186d3f7995f2b338, type: 2}
 --- !u!1 &579660312
 GameObject:
   m_ObjectHideFlags: 0
@@ -766,7 +667,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &579660313
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -906,7 +807,7 @@ TilemapRenderer:
   m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 0
+  m_SortingOrder: -10
   m_MaskInteraction: 0
   m_ChunkSize: {x: 32, y: 32, z: 32}
   m_ChunkCullingBounds: {x: 0, y: 0, z: 0}
@@ -4880,147 +4781,6 @@ Transform:
   - {fileID: 1365623304}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &703443198
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 703443202}
-  - component: {fileID: 703443201}
-  - component: {fileID: 703443200}
-  - component: {fileID: 703443203}
-  - component: {fileID: 703443199}
-  m_Layer: 0
-  m_Name: CM_Dungeon
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &703443199
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 703443198}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 17436205cb5e5064ab0a6e3979f74180, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::MonsterKitchen.Core.CinemachineAutoFollow
---- !u!114 &703443200
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 703443198}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 886251e9a18ece04ea8e61686c173e1b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Unity.Cinemachine::Unity.Cinemachine.CinemachinePositionComposer
-  CameraDistance: 10
-  DeadZoneDepth: 0
-  Composition:
-    ScreenPosition: {x: 0, y: 0}
-    DeadZone:
-      Enabled: 0
-      Size: {x: 0.2, y: 0.2}
-    HardLimits:
-      Enabled: 0
-      Size: {x: 0.8, y: 0.8}
-      Offset: {x: 0, y: 0}
-  CenterOnActivate: 1
-  TargetOffset: {x: 0, y: 0, z: 0}
-  Damping: {x: 0.2, y: 0.2, z: 0}
-  Lookahead:
-    Enabled: 0
-    Time: 0
-    Smoothing: 0
-    IgnoreY: 0
---- !u!114 &703443201
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 703443198}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f9dfa5b682dcd46bda6128250e975f58, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Unity.Cinemachine::Unity.Cinemachine.CinemachineCamera
-  Priority:
-    Enabled: 0
-    m_Value: 0
-  OutputChannel: 1
-  StandbyUpdate: 2
-  m_StreamingVersion: 20241001
-  m_LegacyPriority: 0
-  Target:
-    TrackingTarget: {fileID: 0}
-    LookAtTarget: {fileID: 0}
-    CustomLookAtTarget: 0
-  Lens:
-    FieldOfView: 55
-    OrthographicSize: 5
-    NearClipPlane: 0.1
-    FarClipPlane: 5000
-    Dutch: 0
-    ModeOverride: 2
-    PhysicalProperties:
-      GateFit: 2
-      SensorSize: {x: 21.946, y: 16.002}
-      LensShift: {x: 0, y: 0}
-      FocusDistance: 10
-      Iso: 200
-      ShutterSpeed: 0.005
-      Aperture: 16
-      BladeCount: 5
-      Curvature: {x: 2, y: 11}
-      BarrelClipping: 0.25
-      Anamorphism: 0
-  BlendHint: 0
---- !u!4 &703443202
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 703443198}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: -10}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &703443203
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 703443198}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f453f694addf4275988fac205bc91968, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Unity.Cinemachine::Unity.Cinemachine.CinemachineConfiner2D
-  BoundingShape2D: {fileID: 219470049}
-  Damping: 0.5
-  SlowingDistance: 5
-  OversizeWindow:
-    Enabled: 1
-    MaxWindowSize: 0
-    Padding: 0
-  m_LegacyMaxWindowSize: -2
 --- !u!1 &811611064
 GameObject:
   m_ObjectHideFlags: 0
@@ -5050,8 +4810,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 288a6806f0fb52b4ab25362d7013e41b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MonsterKitchen.Navigation.NavGrid
-  floorTilemap: {fileID: 612432134}
-  wallTilemap: {fileID: 2109976306}
+  m_FloorTilemap: {fileID: 612432134}
+  m_WallTilemap: {fileID: 2109976306}
+  m_ShowGizmos: 1
+  m_ShowBlocked: 0
 --- !u!4 &811611066
 Transform:
   m_ObjectHideFlags: 0
@@ -5228,10 +4990,9 @@ MonoBehaviour:
   m_GameObject: {fileID: 888100000}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 696771671f68e7149a2afcc1787446b1, type: 3}
+  m_Script: {fileID: 11500000, guid: f7eb69a9cf605254c82e51cd1e7be5a7, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::MonsterKitchen.Core.PerspectivePlaneSync
-  _isStatic: 1
+  m_EditorClassIdentifier: Assembly-CSharp::MonsterKitchen.Core.PerspectiveEntityTilt
 --- !u!1 &1042583481
 GameObject:
   m_ObjectHideFlags: 0
@@ -5342,7 +5103,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 16b2928b14da4f54eaab30c5f7d91a57, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MonsterKitchen.Dungeon.ResourceNode
-  data: {fileID: 11400000, guid: e598cff6051d1b3429a2edb3bbbb2da9, type: 2}
+  m_Data: {fileID: 11400000, guid: e598cff6051d1b3429a2edb3bbbb2da9, type: 2}
 --- !u!61 &1189144892
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -5398,7 +5159,7 @@ Transform:
   m_GameObject: {fileID: 1189144890}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 5, y: -4, z: -4}
+  m_LocalPosition: {x: 5, y: -4, z: -0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -5472,10 +5233,9 @@ MonoBehaviour:
   m_GameObject: {fileID: 1189144890}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 696771671f68e7149a2afcc1787446b1, type: 3}
+  m_Script: {fileID: 11500000, guid: f7eb69a9cf605254c82e51cd1e7be5a7, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::MonsterKitchen.Core.PerspectivePlaneSync
-  _isStatic: 1
+  m_EditorClassIdentifier: Assembly-CSharp::MonsterKitchen.Core.PerspectiveEntityTilt
 --- !u!1 &1189149371
 GameObject:
   m_ObjectHideFlags: 0
@@ -5777,7 +5537,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1510490912}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.38268346, y: 0, z: 0, w: 0.9238795}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -5943,7 +5703,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 16b2928b14da4f54eaab30c5f7d91a57, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MonsterKitchen.Dungeon.ResourceNode
-  data: {fileID: 11400000, guid: 43c981b973b77f642af6373dc0cb169e, type: 2}
+  m_Data: {fileID: 11400000, guid: 43c981b973b77f642af6373dc0cb169e, type: 2}
 --- !u!61 &1619361888
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -5999,7 +5759,7 @@ Transform:
   m_GameObject: {fileID: 1619361886}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 10, y: 5, z: 5}
+  m_LocalPosition: {x: 10, y: 5, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -6073,10 +5833,9 @@ MonoBehaviour:
   m_GameObject: {fileID: 1619361886}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 696771671f68e7149a2afcc1787446b1, type: 3}
+  m_Script: {fileID: 11500000, guid: f7eb69a9cf605254c82e51cd1e7be5a7, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::MonsterKitchen.Core.PerspectivePlaneSync
-  _isStatic: 1
+  m_EditorClassIdentifier: Assembly-CSharp::MonsterKitchen.Core.PerspectiveEntityTilt
 --- !u!1 &1677257168
 GameObject:
   m_ObjectHideFlags: 0
@@ -6140,7 +5899,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 16b2928b14da4f54eaab30c5f7d91a57, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MonsterKitchen.Dungeon.ResourceNode
-  data: {fileID: 11400000, guid: 6a7f657a47b3f364499891ccf930793b, type: 2}
+  m_Data: {fileID: 11400000, guid: 6a7f657a47b3f364499891ccf930793b, type: 2}
 --- !u!61 &1793469241
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -6196,7 +5955,7 @@ Transform:
   m_GameObject: {fileID: 1793469239}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -8, y: -2, z: -2}
+  m_LocalPosition: {x: -8, y: -2, z: -0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -6270,10 +6029,9 @@ MonoBehaviour:
   m_GameObject: {fileID: 1793469239}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 696771671f68e7149a2afcc1787446b1, type: 3}
+  m_Script: {fileID: 11500000, guid: f7eb69a9cf605254c82e51cd1e7be5a7, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::MonsterKitchen.Core.PerspectivePlaneSync
-  _isStatic: 1
+  m_EditorClassIdentifier: Assembly-CSharp::MonsterKitchen.Core.PerspectiveEntityTilt
 --- !u!1 &1982494685
 GameObject:
   m_ObjectHideFlags: 0
@@ -6347,9 +6105,6 @@ GameObject:
   - component: {fileID: 2109976301}
   - component: {fileID: 2109976306}
   - component: {fileID: 2109976305}
-  - component: {fileID: 2109976309}
-  - component: {fileID: 2109976308}
-  - component: {fileID: 2109976307}
   m_Layer: 0
   m_Name: Walls
   m_TagString: Untagged
@@ -6380,7 +6135,7 @@ TilemapRenderer:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2109976300}
-  m_Enabled: 1
+  m_Enabled: 0
   m_CastShadows: 0
   m_ReceiveShadows: 0
   m_DynamicOccludee: 1
@@ -7714,246 +7469,6 @@ Tilemap:
     e31: 0
     e32: 0
     e33: 1
---- !u!66 &2109976307
-CompositeCollider2D:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2109976300}
-  m_Enabled: 1
-  serializedVersion: 3
-  m_Density: 1
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_ForceSendLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_ForceReceiveLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_ContactCaptureLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_CallbackLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_IsTrigger: 0
-  m_UsedByEffector: 0
-  m_CompositeOperation: 0
-  m_CompositeOrder: 0
-  m_Offset: {x: 0, y: 0}
-  m_GeometryType: 1
-  m_GenerationType: 0
-  m_EdgeRadius: 0
-  m_ColliderPaths:
-  - m_Collider: {fileID: 2109976308}
-    m_ColliderPaths:
-    - - X: 150000000
-        Y: 35355336
-      - X: 330000000
-        Y: 35355336
-      - X: 330000000
-        Y: 21213202
-      - X: 340000000
-        Y: 21213202
-      - X: 340000000
-        Y: 42426404
-      - X: 140000000
-        Y: 42426404
-      - X: 140000000
-        Y: 21213202
-      - X: 150000000
-        Y: 21213202
-    - - X: -90000000
-        Y: 35355336
-      - X: 90000000
-        Y: 35355336
-      - X: 90000000
-        Y: 21213202
-      - X: 100000000
-        Y: 21213202
-      - X: 100000000
-        Y: 42426404
-      - X: -100000000
-        Y: 42426404
-      - X: -100000000
-        Y: 21213202
-      - X: -90000000
-        Y: 21213202
-    - - X: 340000000
-        Y: 21213200
-      - X: 330000000
-        Y: 21213200
-      - X: 330000000
-        Y: -21213200
-      - X: 340000000
-        Y: -21213200
-    - - X: 150000000
-        Y: 21213200
-      - X: 90000000
-        Y: 21213200
-      - X: 90000000
-        Y: 14142134
-      - X: 150000000
-        Y: 14142134
-    - - X: -90000000
-        Y: 21213200
-      - X: -100000000
-        Y: 21213200
-      - X: -100000000
-        Y: -21213200
-      - X: -90000000
-        Y: -21213200
-    - - X: 100000000
-        Y: -14142134
-      - X: 140000000
-        Y: -14142134
-      - X: 140000000
-        Y: -21213200
-      - X: 150000000
-        Y: -21213200
-      - X: 150000000
-        Y: -7071067
-      - X: 90000000
-        Y: -7071067
-      - X: 90000000
-        Y: -21213200
-      - X: 100000000
-        Y: -21213200
-    - - X: 100000000
-        Y: -21213202
-      - X: 90000000
-        Y: -21213202
-      - X: 90000000
-        Y: -35355336
-      - X: -90000000
-        Y: -35355336
-      - X: -90000000
-        Y: -21213202
-      - X: -100000000
-        Y: -21213202
-      - X: -100000000
-        Y: -42426404
-      - X: 100000000
-        Y: -42426404
-    - - X: 340000000
-        Y: -21213202
-      - X: 330000000
-        Y: -21213202
-      - X: 330000000
-        Y: -35355336
-      - X: 150000000
-        Y: -35355336
-      - X: 150000000
-        Y: -21213202
-      - X: 140000000
-        Y: -21213202
-      - X: 140000000
-        Y: -42426404
-      - X: 340000000
-        Y: -42426404
-  m_CompositePaths:
-    m_Paths:
-    - - {x: 9.99997, y: -4.2426405}
-      - {x: 10.00003, y: -1.4142134}
-      - {x: 14, y: -1.4142429}
-      - {x: 14.000029, y: -4.2426405}
-      - {x: 34, y: -4.2426114}
-      - {x: 33.999973, y: 4.2426405}
-      - {x: 14, y: 4.2426114}
-      - {x: 13.999971, y: 2.12132}
-      - {x: 10, y: 2.1213493}
-      - {x: 9.99997, y: 4.2426405}
-      - {x: -10, y: 4.2426114}
-      - {x: -9.99997, y: -4.2426405}
-    - - {x: 33, y: -3.535504}
-      - {x: 15, y: -3.535504}
-      - {x: 14.999971, y: -0.7071067}
-      - {x: 9, y: -0.70713603}
-      - {x: 8.99997, y: -3.5355337}
-      - {x: -9, y: -3.535504}
-      - {x: -8.99997, y: 3.5355337}
-      - {x: 9, y: 3.535504}
-      - {x: 9.00003, y: 1.4142134}
-      - {x: 15, y: 1.4142427}
-      - {x: 15.000029, y: 3.5355337}
-      - {x: 33, y: 3.535504}
-  m_VertexDistance: 0.0005
-  m_OffsetDistance: 0.00005
-  m_UseDelaunayMesh: 0
-  m_CompositeGameObject: {fileID: 2109976300}
---- !u!19719996 &2109976308
-TilemapCollider2D:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2109976300}
-  m_Enabled: 1
-  serializedVersion: 3
-  m_Density: 1
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_ForceSendLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_ForceReceiveLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_ContactCaptureLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_CallbackLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_IsTrigger: 0
-  m_UsedByEffector: 0
-  m_CompositeOperation: 1
-  m_CompositeOrder: 0
-  m_Offset: {x: 0, y: 0}
-  m_MaximumTileChangeCount: 1000
-  m_ExtrusionFactor: 0
-  m_UseDelaunayMesh: 0
---- !u!50 &2109976309
-Rigidbody2D:
-  serializedVersion: 5
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2109976300}
-  m_BodyType: 2
-  m_Simulated: 1
-  m_UseFullKinematicContacts: 0
-  m_UseAutoMass: 0
-  m_Mass: 1
-  m_LinearDamping: 0
-  m_AngularDamping: 0.05
-  m_GravityScale: 1
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_Interpolate: 0
-  m_SleepingMode: 1
-  m_CollisionDetection: 0
-  m_Constraints: 0
 --- !u!1 &2112928159
 GameObject:
   m_ObjectHideFlags: 0
@@ -8059,8 +7574,6 @@ SceneRoots:
   - {fileID: 588317337}
   - {fileID: 1510490914}
   - {fileID: 811611066}
-  - {fileID: 703443202}
-  - {fileID: 219470050}
   - {fileID: 232162797}
   - {fileID: 1189144893}
   - {fileID: 1793469242}

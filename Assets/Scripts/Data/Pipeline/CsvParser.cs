@@ -15,10 +15,10 @@ namespace MonsterKitchen.Data.Pipeline
     /// </summary>
     public static class CsvParser
     {
-        public const char CommentChar    = ';';
-        public const char IgnorePrefix   = '_';
-        public const char ArraySeparator = '|';
-        public const string TypeHintTag  = "#TYPE";
+        public const char COMMENT_CHAR    = ';';
+        public const char IGNORE_PREFIX   = '_';
+        public const char ARRAY_SEPARATOR = '|';
+        public const string TYPE_HINT_TAG  = "#TYPE";
 
         public class ParseResult
         {
@@ -50,12 +50,12 @@ namespace MonsterKitchen.Data.Pipeline
                 if (string.IsNullOrWhiteSpace(line)) continue;
 
                 // 주석 행
-                if (line.StartsWith(CommentChar.ToString())) continue;
+                if (line.StartsWith(COMMENT_CHAR.ToString())) continue;
 
                 var fields = SplitLine(line);
 
                 // 타입 힌트 행
-                if (fields.Length > 0 && fields[0].Trim() == TypeHintTag)
+                if (fields.Length > 0 && fields[0].Trim() == TYPE_HINT_TAG)
                 {
                     typeHints = fields;
                     continue;
@@ -88,13 +88,13 @@ namespace MonsterKitchen.Data.Pipeline
 
         /// <summary>특정 컬럼이 무시 컬럼인지 확인</summary>
         public static bool IsIgnoredColumn(string header)
-            => !string.IsNullOrEmpty(header) && header.TrimStart().StartsWith(IgnorePrefix.ToString());
+            => !string.IsNullOrEmpty(header) && header.TrimStart().StartsWith(IGNORE_PREFIX.ToString());
 
         /// <summary>값을 '|' 구분 배열로 분리</summary>
         public static string[] SplitArray(string value)
         {
             if (string.IsNullOrEmpty(value)) return Array.Empty<string>();
-            return value.Split(ArraySeparator);
+            return value.Split(ARRAY_SEPARATOR);
         }
 
         // ---- 내부 헬퍼 ----

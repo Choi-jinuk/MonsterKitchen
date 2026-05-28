@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 using UnityEngine.Tilemaps;
 
@@ -6,7 +7,7 @@ namespace MonsterKitchen.Navigation
     // ====================================================================
     //  NavGrid — Tilemap 기반 이동 가능 영역 맵 (씬별 싱글톤)
     //
-    //  ▶ floorTilemap 의 cellBounds 를 그리드 범위로 자동 계산.
+    //  ▶ m_FloorTilemap 의 cellBounds 를 그리드 범위로 자동 계산.
     //    → 방이 추가되거나 복도가 이어져도 Bake() 한 번으로 전체 커버.
     //  ▶ walkable = floor 타일 존재 AND wall 타일 없음.
     //  ▶ Grid 컴포넌트의 cellSize(1×1) 와 1:1 대응 — 셀 하나 = 타일 하나.
@@ -19,16 +20,16 @@ namespace MonsterKitchen.Navigation
     {
         [Header("Tilemap References")]
         [Tooltip("바닥 타일맵 — 이 타일맵의 cellBounds 가 그리드 범위가 된다.")]
-        [SerializeField] Tilemap floorTilemap;
+        [SerializeField] Tilemap m_FloorTilemap;
         [Tooltip("벽 타일맵 — 타일이 있는 셀은 이동 불가 처리된다.")]
-        [SerializeField] Tilemap wallTilemap;
+        [SerializeField] Tilemap m_WallTilemap;
 
         // ── 싱글톤 ─────────────────────────────────────────────────────
         public static NavGrid Instance { get; private set; }
 
         // ── 그리드 데이터 ───────────────────────────────────────────────
-        bool[,]     _walkable;
-        Vector3Int  _origin;   // 타일맵 cellBounds 의 min (셀 좌표)
+        bool[,]     m_Walkable;
+        Vector3Int  m_Origin;   // 타일맵 cellBounds 의 min (셀 좌표)
 
         public int Width  { get; private set; }
         public int Height { get; private set; }
@@ -45,6 +46,13 @@ namespace MonsterKitchen.Navigation
                 return;
             }
             Instance = this;
+            // Bake 는 Start 에서 1프레임 뒤에 실행.
+            // 씬 활성화 직후 Awake 가 몰리는 스파이크에서 분리한다.
+        }
+
+        IEnumerator Start()
+        {
+            yield return null;   // 씬의 모든 Awake 완료 후 다음 프레임
             Bake();
         }
 
@@ -63,44 +71,44 @@ namespace MonsterKitchen.Navigation
         /// </summary>
         public void Bake()
         {
-            if (floorTilemap == null)
+            if (m_FloorTilemap == null)
             {
-                Debug.LogError("[NavGrid] floorTilemap 이 설정되지 않았습니다.");
+                Debug.LogError("[NavGrid] m_FloorTilemap 이 설정되지 않았습니다.");
                 return;
             }
 
-            floorTilemap.CompressBounds();
-            if (wallTilemap != null) wallTilemap.CompressBounds();
+            m_FloorTilemap.CompressBounds();
+            if (m_WallTilemap != null) m_WallTilemap.CompressBounds();
 
-            BoundsInt floorBounds = floorTilemap.cellBounds;
+            BoundsInt floorBounds = m_FloorTilemap.cellBounds;
 
             // 벽 타일맵이 있으면 두 bounds 를 합산
             BoundsInt bounds = floorBounds;
-            if (wallTilemap != null)
+            if (m_WallTilemap != null)
             {
-                BoundsInt wallBounds = wallTilemap.cellBounds;
+                BoundsInt wallBounds = m_WallTilemap.cellBounds;
                 Vector3Int bMin = Vector3Int.Min(floorBounds.min, wallBounds.min);
                 Vector3Int bMax = Vector3Int.Max(floorBounds.max, wallBounds.max);
                 bounds = new BoundsInt(bMin, bMax - bMin);
             }
 
-            _origin = bounds.min;
-            Width   = bounds.size.x;
-            Height  = bounds.size.y;
-            _walkable = new bool[Width, Height];
+            m_Origin = bounds.min;
+            Width    = bounds.size.x;
+            Height   = bounds.size.y;
+            m_Walkable = new bool[Width, Height];
 
             for (int x = 0; x < Width; x++)
             for (int y = 0; y < Height; y++)
             {
-                var cellPos = new Vector3Int(_origin.x + x, _origin.y + y, 0);
+                var cellPos = new Vector3Int(m_Origin.x + x, m_Origin.y + y, 0);
 
-                bool hasFloor = floorTilemap.HasTile(cellPos);
-                bool hasWall  = wallTilemap != null && wallTilemap.HasTile(cellPos);
+                bool hasFloor = m_FloorTilemap.HasTile(cellPos);
+                bool hasWall  = m_WallTilemap != null && m_WallTilemap.HasTile(cellPos);
 
-                _walkable[x, y] = hasFloor && !hasWall;
+                m_Walkable[x, y] = hasFloor && !hasWall;
             }
 
-            Debug.Log($"[NavGrid] 베이크 완료  {Width}×{Height}  origin={_origin}");
+            Debug.Log($"[NavGrid] 베이크 완료  {Width}×{Height}  origin={m_Origin}");
         }
 
         // ================================================================
@@ -110,20 +118,20 @@ namespace MonsterKitchen.Navigation
         /// <summary>월드 좌표 → 그리드 인덱스. 범위 외이면 false 반환.</summary>
         public bool WorldToGrid(Vector2 worldPos, out int x, out int y)
         {
-            if (floorTilemap == null) { x = y = 0; return false; }
+            if (m_FloorTilemap == null) { x = y = 0; return false; }
 
-            Vector3Int cell = floorTilemap.WorldToCell(worldPos);
-            x = cell.x - _origin.x;
-            y = cell.y - _origin.y;
+            Vector3Int cell = m_FloorTilemap.WorldToCell(worldPos);
+            x = cell.x - m_Origin.x;
+            y = cell.y - m_Origin.y;
             return x >= 0 && x < Width && y >= 0 && y < Height;
         }
 
         /// <summary>그리드 인덱스 → 셀 중심 월드 좌표.</summary>
         public Vector2 GridToWorld(int x, int y)
         {
-            if (floorTilemap == null) return Vector2.zero;
-            var cellPos = new Vector3Int(_origin.x + x, _origin.y + y, 0);
-            return floorTilemap.GetCellCenterWorld(cellPos);
+            if (m_FloorTilemap == null) return Vector2.zero;
+            var cellPos = new Vector3Int(m_Origin.x + x, m_Origin.y + y, 0);
+            return m_FloorTilemap.GetCellCenterWorld(cellPos);
         }
 
         // ================================================================
@@ -133,17 +141,27 @@ namespace MonsterKitchen.Navigation
         /// <summary>월드 좌표가 이동 가능한 영역인지 반환한다.</summary>
         public bool IsWalkable(Vector2 worldPos)
         {
-            if (_walkable == null) return true;
+            if (m_Walkable == null) return true;
             if (!WorldToGrid(worldPos, out int x, out int y)) return false;
-            return _walkable[x, y];
+            return m_Walkable[x, y];
         }
 
         /// <summary>그리드 인덱스가 이동 가능한지 반환한다.</summary>
         public bool IsWalkableGrid(int x, int y)
         {
-            if (_walkable == null) return true;
+            if (m_Walkable == null) return true;
             if (x < 0 || y < 0 || x >= Width || y >= Height) return false;
-            return _walkable[x, y];
+            return m_Walkable[x, y];
+        }
+
+        /// <summary>
+        /// 월드 좌표가 이동 가능한 영역인지 반환한다.
+        /// 타일맵 기반 IsWalkable AND NavPolyObstacle 장애물 없음 을 동시에 검사한다.
+        /// </summary>
+        public bool PointIsValid(Vector2 worldPos)
+        {
+            if (!IsWalkable(worldPos)) return false;
+            return !NavObstacleLayer.IsBlocked(worldPos);
         }
 
         // ================================================================
@@ -151,16 +169,44 @@ namespace MonsterKitchen.Navigation
         // ================================================================
 
 #if UNITY_EDITOR
-        void OnDrawGizmosSelected()
+        [Header("Gizmo")]
+        [Tooltip("씬 뷰에서 베이킹된 이동 가능 영역을 항상 표시한다.")]
+        [SerializeField] bool m_ShowGizmos = true;
+        [Tooltip("이동 불가 셀도 표시한다 (빨간색).")]
+        [SerializeField] bool m_ShowBlocked;
+
+        void OnDrawGizmos()
         {
-            if (_walkable == null || floorTilemap == null) return;
+            if (!m_ShowGizmos || m_Walkable == null || m_FloorTilemap == null) return;
+
+            var walkableColor = new Color(0.1f, 0.9f, 0.2f, 0.18f);
+            var blockedColor  = new Color(0.9f, 0.15f, 0.1f, 0.22f);
+            var walkableWire  = new Color(0.1f, 0.9f, 0.2f, 0.35f);
+            var blockedWire   = new Color(0.9f, 0.15f, 0.1f, 0.45f);
+            var cellSize      = new Vector3(0.92f, 0.92f, 0.02f);
 
             for (int x = 0; x < Width; x++)
             for (int y = 0; y < Height; y++)
             {
-                if (!_walkable[x, y]) continue; // walkable 셀만 표시
-                Gizmos.color = new Color(0f, 1f, 0f, 0.12f);
-                Gizmos.DrawCube(GridToWorld(x, y), Vector3.one * 0.85f);
+                bool walkable = m_Walkable[x, y];
+                if (!walkable && !m_ShowBlocked) continue;
+
+                Vector3 center = GridToWorld(x, y);
+
+                Gizmos.color = walkable ? walkableColor : blockedColor;
+                Gizmos.DrawCube(center, cellSize);
+
+                Gizmos.color = walkable ? walkableWire : blockedWire;
+                Gizmos.DrawWireCube(center, cellSize);
+            }
+
+            if (Width > 0 && Height > 0)
+            {
+                Vector3 min    = GridToWorld(0, 0);
+                Vector3 max    = GridToWorld(Width - 1, Height - 1);
+                Vector3 bounds = new Vector3(max.x - min.x + 1f, max.y - min.y + 1f, 0.02f);
+                Gizmos.color = new Color(1f, 1f, 0f, 0.6f);
+                Gizmos.DrawWireCube((min + max) * 0.5f, bounds);
             }
         }
 #endif

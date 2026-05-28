@@ -27,10 +27,10 @@ namespace MonsterKitchen.Navigation
         public float WaypointProximity = 0.1f;
 
         // ── 내부 상태 ────────────────────────────────────────────────────
-        readonly Transform _transform;
-        Vector2[] _path;
-        int       _index;
-        Vector2   _lastGoal = Vector2.positiveInfinity;
+        readonly Transform m_Transform;
+        Vector2[] m_Path;
+        int       m_Index;
+        Vector2   m_LastGoal = Vector2.positiveInfinity;
 
         // ================================================================
         //  생성
@@ -38,7 +38,7 @@ namespace MonsterKitchen.Navigation
 
         public NavAgent(Transform transform)
         {
-            _transform = transform;
+            m_Transform = transform;
         }
 
         // ================================================================
@@ -46,10 +46,10 @@ namespace MonsterKitchen.Navigation
         // ================================================================
 
         /// <summary>현재 유효한 경로가 있는지.</summary>
-        public bool HasPath => _path != null && _index < _path.Length;
+        public bool HasPath => m_Path != null && m_Index < m_Path.Length;
 
         /// <summary>다음 경유지 (경로가 없으면 현재 위치 반환).</summary>
-        public Vector2 NextWaypoint => HasPath ? _path[_index] : (Vector2)_transform.position;
+        public Vector2 NextWaypoint => HasPath ? m_Path[m_Index] : (Vector2)m_Transform.position;
 
         // ================================================================
         //  공개 API
@@ -62,19 +62,19 @@ namespace MonsterKitchen.Navigation
         /// </summary>
         public void SetDestination(Vector2 goal)
         {
-            bool goalChanged = (_lastGoal - goal).sqrMagnitude
+            bool goalChanged = (m_LastGoal - goal).sqrMagnitude
                                > RepathThreshold * RepathThreshold;
 
             if (!goalChanged && HasPath) return;
 
-            _lastGoal = goal;
+            m_LastGoal = goal;
             ComputePath(goal);
         }
 
         /// <summary>목표와 관계없이 즉시 재경로를 계산한다.</summary>
         public void ForceRepath(Vector2 goal)
         {
-            _lastGoal = goal;
+            m_LastGoal = goal;
             ComputePath(goal);
         }
 
@@ -87,32 +87,32 @@ namespace MonsterKitchen.Navigation
         {
             if (!HasPath) return Vector2.zero;
 
-            Vector2 pos = _transform.position;
+            Vector2 pos = m_Transform.position;
 
             // 도달한 경유지 전진
             while (HasPath)
             {
-                Vector2 wp    = _path[_index];
-                bool    isLast = (_index == _path.Length - 1);
+                Vector2 wp    = m_Path[m_Index];
+                bool    isLast = (m_Index == m_Path.Length - 1);
                 float   prox  = isLast ? StoppingDistance : WaypointProximity;
 
                 if ((pos - wp).magnitude <= prox)
-                    _index++;
+                    m_Index++;
                 else
                     break;
             }
 
             if (!HasPath) return Vector2.zero;
 
-            return (_path[_index] - pos).normalized;
+            return (m_Path[m_Index] - pos).normalized;
         }
 
         /// <summary>경로와 상태를 초기화한다.</summary>
         public void Stop()
         {
-            _path      = null;
-            _index     = 0;
-            _lastGoal  = Vector2.positiveInfinity;
+            m_Path      = null;
+            m_Index     = 0;
+            m_LastGoal  = Vector2.positiveInfinity;
         }
 
         // ================================================================
@@ -121,14 +121,14 @@ namespace MonsterKitchen.Navigation
 
         void ComputePath(Vector2 goal)
         {
-            _path  = NavPathfinder.FindPath(_transform.position, goal);
-            _index = 0;
+            m_Path  = NavPathfinder.FindPath(m_Transform.position, goal);
+            m_Index = 0;
 
-            if (_path == null || _path.Length == 0) return;
+            if (m_Path == null || m_Path.Length == 0) return;
 
             // 출발 셀이 현재 위치와 매우 가까우면 건너뜀
-            if (((Vector2)_transform.position - _path[0]).magnitude < WaypointProximity)
-                _index = 1;
+            if (((Vector2)m_Transform.position - m_Path[0]).magnitude < WaypointProximity)
+                m_Index = 1;
         }
     }
 }

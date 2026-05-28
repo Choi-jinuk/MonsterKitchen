@@ -1,0 +1,8 @@
+; 채집 도구 데이터
+; id: uint (GTL_001=8001 ~)
+; compatibleNodeTypes: "Tree|Rock|Ore" 형식 (ResourceNodeType enum 이름)
+#TYPE,string,uint,string,string,int,float,float,string
+_key,Id,ToolName,ToolType,MaxDurability,GatherMultiplier,SpeedMultiplier,CompatibleNodeTypes
+GTL_001,8001,낡은 도끼,Axe,20,1.5,1.0,Tree
+GTL_002,8002,낡은 곡괭이,Pickaxe,20,1.5,1.0,Rock|Ore
+GTL_003,8003,만능 도구,Universal,30,1.2,1.0,Tree|Rock|Ore

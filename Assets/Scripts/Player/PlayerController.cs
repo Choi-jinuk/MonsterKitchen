@@ -1,3 +1,4 @@
+using MonsterKitchen.AI.BehaviorTree;
 using MonsterKitchen.Combat;
 using MonsterKitchen.Core;
 using MonsterKitchen.Data;
@@ -11,108 +12,133 @@ namespace MonsterKitchen.Player
     // ====================================================================
     //  PlayerController — 이동 · 자동 콤보 공격 · 스킬 · 궁극기 · 대시
     //
-    //  ▶ 공격 방식 (데이터 기반, AttackPattern enum 없음)
-    //    SkillData.missileSpeed == 0 → 즉발(근거리)
-    //      maxTargets == 1 → 가장 가까운 적 1명 (MeleeTarget)
-    //      maxTargets  > 1 → OverlapCircle 범위 (MeleeRange)
-    //    SkillData.missileSpeed  > 0 → 투사체 발사
-    //      IsAoe == true  → 적중 위치 폭발 (RangedAoE)
-    //      IsAoe == false → 단일 타겟 (RangedTarget)
+    //  ▶ BT 구동 방식
+    //    BTRunner 가 매 프레임 PlayerBT 트리를 실행한다.
+    //    · BTAction_PlayerMove        → SetBtMoveDir() 로 이동 방향 설정
+    //    · BTAction_PlayerAutoAttack  → ExecuteAutoAttack() 호출
+    //    · BTAction_PlayerDash        → StartDash() 호출
+    //    · BTAction_PlayerSkill       → ExecuteSkillGroup() 호출
+    //    입력 이벤트는 블랙보드 플래그("DashRequested" 등)로 변환된다.
     //
-    //  ▶ 자동 공격 (평타 체인)
-    //    PlayerStats.NormalAttackGroup 의 skillChain 을 순서대로 실행.
-    //    searchRange 내 적이 있을 때만 실행 (자동 조준).
-    //    comboWindow 내 다음 타격이 없으면 체인 초기화.
-    //
-    //  ▶ 스킬 / 궁극기 (Q · R · F 키)
-    //    PlayerStats.TryUseSkill / TryUseUltimate 호출 후 SkillGroupData 실행.
-    //    스킬의 체인 첫 번째 SkillData 를 즉시 적용한다.
-    //
-    //  ▶ 궁극기 게이지
-    //    적에게 데미지를 줘 처치 시 PlayerStats.AddUltimateGaugeOnKill 호출.
-    //    피격 시 게이지 적립은 PlayerStats 가 Health.OnDamaged 를 직접 구독.
-    //
-    //  ▶ 자동 AI (던전 전용)
-    //    DungeonScene 에서 유저 이동 입력이 없으면 자동으로 가장 가까운 적을
-    //    추적한다 (_autoChaseRange 내 탐색). 공격 범위 진입 시 정지.
-    //    WASD 입력이 들어오면 즉시 수동 이동으로 전환.
+    //  ▶ FixedUpdate 는 BT 가 설정한 m_BtMoveDir 을 읽어 물리 이동을 적용한다.
+    //    BT 미초기화 시 기존 GetEffectiveMoveDir() 폴백을 사용한다.
     // ====================================================================
 
+    [RequireComponent(typeof(BTRunner))]
     [RequireComponent(typeof(Rigidbody2D))]
     [RequireComponent(typeof(Animator))]
     [RequireComponent(typeof(PlayerStats))]
-    public class PlayerController : MonoBehaviour
+    public class PlayerController : MonoBehaviour, IBTBlackboardInitializer
     {
         [Header("Layer")]
-        [SerializeField] LayerMask enemyLayer;
-        // resourceNodeLayer 는 Inspector 설정 없이 런타임 자동 계산 ("ResourceNode" 레이어)
+        [SerializeField] LayerMask m_EnemyLayer;
 
         [Header("Fallback (무기 미장착 시 사용되는 기본값)")]
-        [SerializeField] float fallbackSearchRange = 2.5f;
-        [SerializeField] float fallbackAttackRange = 0.8f;
-        [SerializeField] float fallbackCooltime    = 0.4f;
+        [SerializeField] float m_FallbackSearchRange = 2.5f;
+        [SerializeField] float m_FallbackAttackRange = 0.8f;
+        [SerializeField] float m_FallbackCooltime    = 0.4f;
 
         [Header("Move")]
-        [Tooltip("이동 가속도 (units/s²). 클수록 반응이 빠르고, 작을수록 미끄러지는 느낌.")]
-        [SerializeField] float moveAcceleration = 30f;
         [Tooltip("공격 타이머가 남아있는 동안 이동 속도 배율. 0.5 = 절반 속도.")]
-        [SerializeField] float attackMovePenalty = 0.5f;
+        [SerializeField] float m_AttackMovePenalty = 0.5f;
 
         [Header("Auto AI (던전 전용)")]
-        [Tooltip("자동 추적 감지 반경. 이 범위 내 적이 있으면 자동으로 접근한다.")]
-        [SerializeField] float _autoChaseRange = 6f;
-        [Tooltip("자동 추적 시 공격 범위 앞에서 정지하는 비율 (0~1). 0.85 = 공격 범위의 85% 지점에서 멈춤.")]
-        [SerializeField] float _autoStopRatio  = 0.85f;
+        [Tooltip("자동 추적 감지 반경.")]
+        [SerializeField] float m_AutoChaseRange = 999f;
+        [Tooltip("자동 추적 시 공격 범위 앞에서 정지하는 비율 (0~1).")]
+        [SerializeField] float m_AutoStopRatio  = 0.85f;
 
         [Header("Dash")]
-        [SerializeField] float dashSpeed    = 18f;
-        [SerializeField] float dashDuration = 0.18f;
-        [SerializeField] float dashCooldown = 0.9f;
+        [SerializeField] float m_DashSpeed    = 18f;
+        [SerializeField] float m_DashDuration = 0.18f;
+        [SerializeField] float m_DashCooldown = 0.9f;
+
+        [Header("BT")]
+        [Tooltip("AssetManifest 에 등록된 PlayerBT 에셋 키. 빈칸이면 BT 를 로드하지 않는다.")]
+        [SerializeField] string m_BtAssetAddress = "bt/player/9001";
 
         // ── 컴포넌트 참조 ─────────────────────────────────────────────
-        [SerializeField] Rigidbody2D           _rb;
-        [SerializeField] Animator              _anim;
-        [SerializeField] Animator              _overlayAnim;   // Overlay 자식 Animator
-        [SerializeField] WeaponSocketController _weaponSocket; // 무기 소켓 (WeaponSocket 자식 GO)
-        [SerializeField] SpriteRenderer[]      _sprites;      // 자신 + 자식 SpriteRenderer (WeaponSocket 제외)
-        [SerializeField] Health                _health;
-        [SerializeField] PlayerStats           _stats;
+        [SerializeField] Rigidbody2D            m_Rb;
+        [SerializeField] Animator               m_Anim;
+        [SerializeField] Animator               m_OverlayAnim;
+        [SerializeField] WeaponSocketController m_WeaponSocket;
+        [SerializeField] SpriteRenderer[]       m_Sprites;
+        [SerializeField] Health                 m_Health;
+        [SerializeField] PlayerStats            m_Stats;
 
         // ── 이동 ──────────────────────────────────────────────────────
-        Vector2 _moveDir;
-        Vector2 _facingDir  = Vector2.down;
-        Vector2 _currentVel;          // 관성용 현재 속도
+        Vector2 m_MoveDir;          // HandleMove 로 수신한 원시 입력
+        Vector2 m_BtMoveDir;        // BT 가 계산한 최종 이동 방향
+        Vector2 m_FacingDir = Vector2.down;
+        Vector2 m_CurrentVel;
 
         // ── 자동 공격 (평타 체인) ──────────────────────────────────────
-        int   _comboStep;
-        float _comboWindowTimer;
-        float _atkTimer;
+        int   m_ComboStep;
+        float m_ComboWindowTimer;
+        float m_AtkTimer;
 
         // ── 대시 ──────────────────────────────────────────────────────
-        float _dashCooldownTimer;
-        bool  _isDashing;
+        float m_DashCooldownTimer;
+        bool  m_IsDashing;
 
-        // ── 자동 AI ───────────────────────────────────────────────────
-        bool _isInDungeon;
+        // ── 상태 ──────────────────────────────────────────────────────
+        bool m_IsInDungeon;
+        bool m_Initialized;
+
+        // ── BT 연동 ───────────────────────────────────────────────────
+        BTRunner     m_BtRunner;
+        BTBlackboard m_Blackboard;          // IBTBlackboardInitializer 콜백에서 캐시
 
         // ── Gizmo ─────────────────────────────────────────────────────
-        float   _gizmoAttackTime = -1f;
-        float   _gizmoRange;
-        Vector2 _gizmoCenter;
+        float   m_GizmoAttackTime = -1f;
+        float   m_GizmoRange;
+        Vector2 m_GizmoCenter;
 
-        bool _initialized;
+        static readonly int s_HashMoveX     = Animator.StringToHash("MoveX");
+        static readonly int s_HashMoveY     = Animator.StringToHash("MoveY");
+        static readonly int s_HashSpeed     = Animator.StringToHash("Speed");
+        static readonly int s_HashAttack    = Animator.StringToHash("Attack");
+        static readonly int s_HashDash      = Animator.StringToHash("Dash");
+        static readonly int s_HashComboStep = Animator.StringToHash("ComboStep");
 
-        static readonly int HashMoveX     = Animator.StringToHash("MoveX");
-        static readonly int HashMoveY     = Animator.StringToHash("MoveY");
-        static readonly int HashSpeed     = Animator.StringToHash("Speed");
-        static readonly int HashAttack    = Animator.StringToHash("Attack");
-        static readonly int HashDash      = Animator.StringToHash("Dash");
-        static readonly int HashComboStep = Animator.StringToHash("ComboStep");
+        static readonly WaitForFixedUpdate s_WaitFixed = new WaitForFixedUpdate();
 
-        static readonly WaitForFixedUpdate _waitFixed = new WaitForFixedUpdate();
+        static readonly Collider2D[] s_OverlapBuffer = new Collider2D[32];
 
-        // Physics2D 쿼리용 재사용 버퍼 — OverlapCircleNonAlloc 로 GC 배열 할당 제거
-        static readonly Collider2D[] _overlapBuffer = new Collider2D[32];
+        // ================================================================
+        //  공개 프로퍼티 — BT 노드에서 접근
+        // ================================================================
+
+        public bool             IsInitialized   => m_Initialized;
+        public bool             IsDashing        => m_IsDashing;
+        public bool             CanAttack        => m_AtkTimer <= 0f;
+        public bool             DashCooledDown   => m_DashCooldownTimer <= 0f;
+        public Vector2          FacingDir        => m_FacingDir;
+        public Rigidbody2D      Rb               => m_Rb;
+        public Animator         Anim             => m_Anim;
+        public PlayerStats      Stats            => m_Stats;
+        public Health           PlayerHealth     => m_Health;
+        public LayerMask        EnemyLayer       => m_EnemyLayer;
+        public bool             IsInDungeon      => m_IsInDungeon;
+        public float            AutoChaseRange   => m_AutoChaseRange;
+        public float            AutoStopRatio    => m_AutoStopRatio;
+
+        // ================================================================
+        //  IBTBlackboardInitializer
+        // ================================================================
+
+        public void InitializeBlackboard(BTBlackboard bb)
+        {
+            m_Blackboard = bb;
+
+            bb.Set("MoveInput",          Vector2.zero);
+            bb.Set("IsDashing",          false);
+            bb.Set("DashRequested",      false);
+            bb.Set("Skill1Requested",    false);
+            bb.Set("Skill2Requested",    false);
+            bb.Set("UltimateRequested",  false);
+            bb.Set("IsInDungeon",        m_IsInDungeon);
+        }
 
         // ================================================================
         //  Mono
@@ -130,14 +156,14 @@ namespace MonsterKitchen.Player
                 im.OnUltimate += HandleUltimate;
             }
 
-            if (_health != null)
+            if (m_Health != null)
             {
-                _health.OnDamaged += OnPlayerDamaged;
-                _health.OnDeath   += OnPlayerDied;
+                m_Health.OnDamaged += OnPlayerDamaged;
+                m_Health.OnDeath   += OnPlayerDied;
             }
 
-            if (_stats != null)
-                _stats.OnWeaponChanged += OnWeaponChanged;
+            if (m_Stats != null)
+                m_Stats.OnWeaponChanged += OnWeaponChanged;
 
             SceneManager.sceneLoaded += OnSceneLoaded;
             UpdateDungeonState(SceneManager.GetActiveScene().name);
@@ -155,141 +181,128 @@ namespace MonsterKitchen.Player
                 im.OnUltimate -= HandleUltimate;
             }
 
-            if (_health != null)
+            if (m_Health != null)
             {
-                _health.OnDamaged -= OnPlayerDamaged;
-                _health.OnDeath   -= OnPlayerDied;
+                m_Health.OnDamaged -= OnPlayerDamaged;
+                m_Health.OnDeath   -= OnPlayerDied;
             }
 
-            if (_stats != null)
-                _stats.OnWeaponChanged -= OnWeaponChanged;
+            if (m_Stats != null)
+                m_Stats.OnWeaponChanged -= OnWeaponChanged;
 
             SceneManager.sceneLoaded -= OnSceneLoaded;
         }
 
-        // 씬에 직접 배치된 경우 PlayerManager 없이도 Start 에서 자동 Init
         void Start()
         {
-            if (!_initialized)
+            if (!m_Initialized)
                 Init(null);
         }
 
         // ================================================================
-        //  Init — GetComponent + 스탯 초기화. SetActive(true) 전에 호출된다.
+        //  Init — SpawnManager 패턴
         // ================================================================
 
-        public void Init(PlayerSpawnData data)
+        public void Init(PlayerCharData data)
         {
-            _stats.Init(data);
+            m_Stats.Init(data);
 
-            // SpawnManager 패턴: Init()은 OnEnable() 전에 호출되므로
-            // OnWeaponChanged 이벤트가 아직 구독 전일 수 있다.
-            // 초기 무기를 WeaponSocket 에 직접 동기화.
-            _weaponSocket?.SetWeapon(_stats.EquippedWeapon);
-            _weaponSocket?.SetFacingDirection(_facingDir);
+            m_WeaponSocket?.SetWeapon(m_Stats.EquippedWeapon);
+            m_WeaponSocket?.SetFacingDirection(m_FacingDir);
 
-            _initialized = true;
+            // BTRunner 에 PlayerBT 에셋 설정
+            // 우선순위: data.BtAssetAddress (CSV 데이터) → m_BtAssetAddress (Inspector 폴백)
+            m_BtRunner = GetComponent<BTRunner>();
+            string btKey = (data != null && !string.IsNullOrEmpty(data.BtAssetAddress))
+                ? data.BtAssetAddress
+                : m_BtAssetAddress;
 
-            Debug.Log("[PlayerController] Init 완료");
+            if (m_BtRunner != null && !string.IsNullOrEmpty(btKey))
+            {
+                var btAsset = AssetLoadManager.Instance?.Load<BTAsset>(btKey);
+                if (btAsset != null)
+                    m_BtRunner.SetAsset(btAsset);
+                else
+                    Debug.LogWarning(StringUtil.Format("[PlayerController] BT 에셋 로드 실패 — 키: {0}", btKey), this);
+            }
+
+            m_Initialized = true;
+
+            Debug.Log("[PlayerController] Init 완료 (BT 구동)");
         }
 
 #if UNITY_EDITOR
-        // 에디터에서 컴포넌트 추가 또는 Reset 시 자동 배선.
-        // 빌드에 포함되지 않으므로 런타임 비용 없음.
         void Reset()
         {
-            _rb           = GetComponent<Rigidbody2D>();
-            _anim         = GetComponent<Animator>();
-            _weaponSocket = GetComponentInChildren<WeaponSocketController>(true);
-            _health       = GetComponent<Health>();
-            _stats        = GetComponent<PlayerStats>();
+            m_Rb           = GetComponent<Rigidbody2D>();
+            m_Anim         = GetComponent<Animator>();
+            m_WeaponSocket = GetComponentInChildren<WeaponSocketController>(true);
+            m_Health       = GetComponent<Health>();
+            m_Stats        = GetComponent<PlayerStats>();
 
-            // WeaponSocket SR 제외하고 나머지 SpriteRenderer 수집
-            var weaponSR = _weaponSocket != null ? _weaponSocket.SR : null;
+            var weaponSR = m_WeaponSocket != null ? m_WeaponSocket.SR : null;
             var all = GetComponentsInChildren<SpriteRenderer>(true);
             var filtered = new System.Collections.Generic.List<SpriteRenderer>();
             foreach (var sr in all)
                 if (sr != weaponSR) filtered.Add(sr);
-            _sprites = filtered.ToArray();
+            m_Sprites = filtered.ToArray();
         }
 #endif
 
         // ================================================================
-        //  Update / FixedUpdate
+        //  Update — 타이머만 처리. 행동 결정은 BT 담당.
         // ================================================================
 
         void Update()
         {
-            if (!_initialized) return;
+            if (!m_Initialized) return;
 
-            if (_atkTimer > 0f)          _atkTimer         -= Time.deltaTime;
-            if (_dashCooldownTimer > 0f) _dashCooldownTimer -= Time.deltaTime;
+            if (m_AtkTimer > 0f)          m_AtkTimer         -= Time.deltaTime;
+            if (m_DashCooldownTimer > 0f) m_DashCooldownTimer -= Time.deltaTime;
 
-            // 콤보 창 카운트다운
-            if (_comboWindowTimer > 0f)
+            if (m_ComboWindowTimer > 0f)
             {
-                _comboWindowTimer -= Time.deltaTime;
-                if (_comboWindowTimer <= 0f)
-                {
-                    _comboStep = 0;
-                    Debug.Log("[PlayerController] 콤보 창 만료 → 초기화");
-                }
-            }
-
-            // 자동 공격: 쿨타임 종료 + 감지 범위 내 적 존재 시. 적 없으면 채집 노드 공격.
-            if (_atkTimer <= 0f)
-            {
-                float searchRange = GetCurrentSearchRange();
-                var   target      = FindNearestEnemy(searchRange);
-                if (target != null)
-                {
-                    _facingDir = ((Vector2)(target.position - transform.position)).normalized;
-                    _weaponSocket?.SetFacingDirection(_facingDir); // 공격 전 소켓 방향 선반영
-                    DoComboAttack(target);
-                }
-                else
-                {
-                    TryHarvestNode();
-                }
+                m_ComboWindowTimer -= Time.deltaTime;
+                if (m_ComboWindowTimer <= 0f)
+                    m_ComboStep = 0;
             }
         }
 
+        // ================================================================
+        //  FixedUpdate — BT 가 결정한 방향으로 물리 이동 적용
+        // ================================================================
+
         void FixedUpdate()
         {
-            if (!_initialized || _isDashing) return;
+            if (!m_Initialized || m_IsDashing) return;
 
-            float speed = _stats != null ? _stats.FinalMoveSpeed : 5f;
+            float speed = m_Stats != null ? m_Stats.FinalMoveSpeed : 5f;
+            if (m_AtkTimer > 0f) speed *= m_AttackMovePenalty;
 
-            // 공격 타이머가 남아있으면 이동 속도 패널티 (공격 모션 중 느려짐)
-            if (_atkTimer > 0f) speed *= attackMovePenalty;
+            // BT 가 설정한 방향을 사용. BT 미초기화(m_Bb == null) 시 폴백.
+            Vector2 effectiveDir = m_Blackboard != null ? m_BtMoveDir : GetEffectiveMoveDir();
 
-            // 유저 입력 없고 던전 씬이면 자동 AI 방향 사용
-            Vector2 effectiveDir = GetEffectiveMoveDir();
-
-            // MoveTowards 로 가속/감속 — nav 맵이 있으면 벽 슬라이딩 적용
-            Vector2 targetVel = ComputeNavVelocity(effectiveDir, speed);
-            _currentVel = Vector2.MoveTowards(_currentVel, targetVel, moveAcceleration * Time.fixedDeltaTime);
-            _rb.linearVelocity = _currentVel;
+            Vector2 targetPos = ComputeNavPosition(effectiveDir, speed, Time.fixedDeltaTime);
+            m_CurrentVel = (targetPos - m_Rb.position) / Time.fixedDeltaTime;
+            m_Rb.MovePosition(targetPos);
 
             if (effectiveDir.sqrMagnitude > 0.01f)
-                _facingDir = effectiveDir.normalized;
+                m_FacingDir = effectiveDir.normalized;
 
-            _anim.SetFloat(HashMoveX, _facingDir.x);
-            _anim.SetFloat(HashMoveY, _facingDir.y);
-            _anim.SetFloat(HashSpeed, _currentVel.magnitude);
+            m_Anim.SetFloat(s_HashMoveX, m_FacingDir.x);
+            m_Anim.SetFloat(s_HashMoveY, m_FacingDir.y);
+            m_Anim.SetFloat(s_HashSpeed, m_CurrentVel.magnitude);
 
-            _overlayAnim?.SetFloat(HashMoveX, _facingDir.x);
-            _overlayAnim?.SetFloat(HashMoveY, _facingDir.y);
+            m_OverlayAnim?.SetFloat(s_HashMoveX, m_FacingDir.x);
+            m_OverlayAnim?.SetFloat(s_HashMoveY, m_FacingDir.y);
 
-            // 무기 소켓 방향 갱신 (360도 world space 회전)
-            _weaponSocket?.SetFacingDirection(_facingDir);
+            m_WeaponSocket?.SetFacingDirection(m_FacingDir);
 
-            // WeaponSocket SR 은 자체적으로 방향을 처리하므로 flipX 루프에서 제외
-            if (_facingDir.x != 0f && _sprites != null)
+            if (m_FacingDir.x != 0f && m_Sprites != null)
             {
-                bool flip = _facingDir.x > 0f;
-                var  weaponSR = _weaponSocket != null ? _weaponSocket.SR : null;
-                foreach (var sr in _sprites)
+                bool flip     = m_FacingDir.x > 0f;
+                var  weaponSR = m_WeaponSocket != null ? m_WeaponSocket.SR : null;
+                foreach (var sr in m_Sprites)
                 {
                     if (sr == weaponSR) continue;
                     sr.flipX = flip;
@@ -298,78 +311,133 @@ namespace MonsterKitchen.Player
         }
 
         // ================================================================
-        //  자동 AI 헬퍼
+        //  BT 노드에서 호출하는 공개 API
         // ================================================================
 
-        /// <summary>
-        /// 이동에 사용할 실제 방향을 반환한다.
-        /// 유저 입력(WASD)이 있으면 수동 우선, 없고 DungeonScene이면 자동 추적.
-        /// </summary>
-        Vector2 GetEffectiveMoveDir()
+        /// <summary>BTAction_PlayerMove 가 매 틱 호출해 이동 방향을 설정한다.</summary>
+        public void SetBtMoveDir(Vector2 dir) => m_BtMoveDir = dir;
+
+        /// <summary>대시를 시작한다. 쿨타임·중복 체크는 호출 전 확인할 것.</summary>
+        public void StartDash() => StartCoroutine(DashCoroutine());
+
+        /// <summary>감지 범위 내 가장 가까운 적을 반환한다.</summary>
+        public Transform FindNearestEnemy(float range)
         {
-            // 유저 입력 최우선
-            if (_moveDir.sqrMagnitude > 0.01f) return _moveDir;
-
-            // 던전 외 씬이거나 대시 중에는 자동 없음
-            if (!_isInDungeon || _isDashing) return Vector2.zero;
-
-            // 가장 가까운 적 탐색
-            var target = FindNearestEnemy(_autoChaseRange);
-            if (target == null) return Vector2.zero;
-
-            float dist     = Vector2.Distance(transform.position, target.position);
-            float stopDist = GetCurrentSearchRange() * _autoStopRatio;
-
-            // 이미 공격 범위 근처에 있으면 정지 (자동 공격이 처리)
-            if (dist <= stopDist) return Vector2.zero;
-
-            return ((Vector2)(target.position - transform.position)).normalized;
+            var filter = new ContactFilter2D();
+            filter.SetLayerMask(m_EnemyLayer);
+            filter.useTriggers = true;
+            int hitCount = Physics2D.OverlapCircle(transform.position, range, filter, s_OverlapBuffer);
+            Transform nearest = null;
+            float     minDist  = float.MaxValue;
+            for (int i = 0; i < hitCount; i++)
+            {
+                float d = Vector2.Distance(transform.position, s_OverlapBuffer[i].transform.position);
+                if (d < minDist) { minDist = d; nearest = s_OverlapBuffer[i].transform; }
+            }
+            return nearest;
         }
 
-        void OnSceneLoaded(Scene scene, LoadSceneMode _) => UpdateDungeonState(scene.name);
+        /// <summary>현재 콤보 스텝의 서치 범위를 반환한다.</summary>
+        public float GetCurrentSearchRange()
+        {
+            var group = m_Stats?.NormalAttackGroup;
+            if (group == null || group.ChainLength == 0) return m_FallbackSearchRange;
+            int  step  = Mathf.Clamp(m_ComboStep, 0, group.ChainLength - 1);
+            var  skill = group.GetStep(step);
+            return skill != null ? skill.SearchRange : m_FallbackSearchRange;
+        }
 
-        void UpdateDungeonState(string sceneName) => _isInDungeon = sceneName == "DungeonScene";
+        /// <summary>현재 콤보 스텝의 공격 범위를 반환한다.</summary>
+        public float GetCurrentAttackRange()
+        {
+            var group = m_Stats?.NormalAttackGroup;
+            if (group == null || group.ChainLength == 0) return m_FallbackAttackRange;
+            int  step  = Mathf.Clamp(m_ComboStep, 0, group.ChainLength - 1);
+            var  skill = group.GetStep(step);
+            return skill != null ? skill.AttackRange : m_FallbackAttackRange;
+        }
+
+        /// <summary>
+        /// 타겟 방향으로 페이싱 갱신 후 콤보 공격을 실행한다.
+        /// BTAction_PlayerAutoAttack 에서 호출.
+        /// </summary>
+        public void ExecuteAutoAttack(Transform target)
+        {
+            m_FacingDir = ((Vector2)(target.position - transform.position)).normalized;
+            m_WeaponSocket?.SetFacingDirection(m_FacingDir);
+            DoComboAttack(target);
+        }
+
+        /// <summary>인접 채집 노드 수확을 시도한다. BTAction_PlayerAutoAttack 에서 호출.</summary>
+        public void DoHarvestNode() => TryHarvestNode();
+
+        /// <summary>스킬 그룹을 즉시 실행한다. BTAction_PlayerSkill 에서 호출.</summary>
+        public void ExecuteSkillGroup(SkillGroupData group)
+        {
+            var skill = group.GetStep(0);
+            if (skill == null) return;
+
+            int           dmg  = Mathf.RoundToInt((m_Stats?.FinalAttack ?? 10) * skill.DamageMultiplier);
+            AttributeType attr = m_Stats?.AttackAttribute ?? AttributeType.None;
+
+            int triggerHash = string.IsNullOrEmpty(skill.AnimTriggerOverride)
+                ? s_HashAttack
+                : Animator.StringToHash(skill.AnimTriggerOverride);
+            m_Anim.SetTrigger(triggerHash);
+
+            m_OverlayAnim?.SetFloat(s_HashMoveX, m_FacingDir.x);
+            m_OverlayAnim?.SetFloat(s_HashMoveY, m_FacingDir.y);
+            m_OverlayAnim?.SetTrigger(s_HashAttack);
+
+            m_WeaponSocket?.TriggerWeaponAnim(triggerHash);
+
+            ExecuteSkillStep(skill, dmg, attr);
+            m_Stats?.ConsumeWeaponDurabilityOnHit();
+        }
+
+        /// <summary>스킬 슬롯 1·2 발동 시도. BTAction_PlayerSkill 에서 호출.</summary>
+        public bool TryUseSkill(int slot, out SkillGroupData skill) =>
+            m_Stats.TryUseSkill(slot, out skill);
+
+        /// <summary>궁극기 발동 시도. BTAction_PlayerSkill 에서 호출.</summary>
+        public bool TryUseUltimate(out SkillGroupData skill) =>
+            m_Stats.TryUseUltimate(out skill);
 
         // ================================================================
-        //  InputManager 이벤트 핸들러
+        //  InputManager 이벤트 핸들러 — 블랙보드 플래그 기록
         // ================================================================
 
-        void HandleMove(Vector2 dir) => _moveDir = dir;
+        void HandleMove(Vector2 dir)
+        {
+            m_MoveDir = dir;                    // 폴백 이동용
+            m_Blackboard?.Set("MoveInput", dir);
+        }
 
         void HandleDash()
         {
-            if (!_initialized || _isDashing || _dashCooldownTimer > 0f) return;
+            if (!m_Initialized || m_IsDashing || m_DashCooldownTimer > 0f) return;
             if (UI.UIManager.Instance != null && UI.UIManager.Instance.HasOpenPopup) return;
-            if (UnityEngine.SceneManagement.SceneManager.GetActiveScene().name == "KitchenScene") return;
+            if (SceneManager.GetActiveScene().name == "KitchenScene") return;
 
-            StartCoroutine(DashCoroutine());
+            m_Blackboard?.Set("DashRequested", true);
         }
 
         void HandleSkill1()
         {
-            if (!_initialized || _isDashing) return;
-            if (!_stats.TryUseSkill(1, out var skill)) return;
-
-            Debug.Log($"[PlayerController] 스킬1 발동: {skill.skillName}");
-            ExecuteSkillGroup(skill);
+            if (!m_Initialized || m_IsDashing) return;
+            m_Blackboard?.Set("Skill1Requested", true);
         }
 
         void HandleSkill2()
         {
-            if (!_initialized || _isDashing) return;
-            if (!_stats.TryUseSkill(2, out var skill)) return;
-
-            Debug.Log($"[PlayerController] 스킬2 발동: {skill.skillName}");
-            ExecuteSkillGroup(skill);
+            if (!m_Initialized || m_IsDashing) return;
+            m_Blackboard?.Set("Skill2Requested", true);
         }
 
         void HandleUltimate()
         {
-            if (!_initialized || _isDashing) return;
-            if (!_stats.TryUseUltimate(out var skill)) return;
-
-            Debug.Log($"[PlayerController] 궁극기 발동: {skill.skillName}");
-            ExecuteSkillGroup(skill);
+            if (!m_Initialized || m_IsDashing) return;
+            m_Blackboard?.Set("UltimateRequested", true);
         }
 
         // ================================================================
@@ -378,122 +446,82 @@ namespace MonsterKitchen.Player
 
         void DoComboAttack(Transform target)
         {
-            if (_isDashing) return;
+            if (m_IsDashing) return;
 
-            var group = _stats?.NormalAttackGroup;
+            var group = m_Stats?.NormalAttackGroup;
 
-            // 평타 체인 없음 → 기본 즉발 근거리 1타
+            // 평타 체인 없음 → fallback 즉발 근거리
             if (group == null || group.ChainLength == 0)
             {
-                _atkTimer = fallbackCooltime;
-                int   dmg    = _stats != null ? _stats.FinalAttack : 10;
-                AttributeType attr = _stats != null ? _stats.AttackAttribute : AttributeType.None;
-                SimpleMeleeHit(target, dmg, fallbackAttackRange, attr);
-                _stats?.ConsumeWeaponDurabilityOnHit();
+                m_AtkTimer = m_FallbackCooltime;
+                int           dmg  = m_Stats != null ? m_Stats.FinalAttack : 10;
+                AttributeType attr = m_Stats != null ? m_Stats.AttackAttribute : AttributeType.None;
+                SimpleMeleeHit(target, dmg, m_FallbackAttackRange, attr);
+                m_Stats?.ConsumeWeaponDurabilityOnHit();
                 return;
             }
 
-            int step  = Mathf.Clamp(_comboStep, 0, group.ChainLength - 1);
+            int step  = Mathf.Clamp(m_ComboStep, 0, group.ChainLength - 1);
             var skill = group.GetStep(step);
             if (skill == null) return;
 
-            int dmgFinal = Mathf.RoundToInt((_stats?.FinalAttack ?? 10) * skill.damageMultiplier);
-            AttributeType attrFinal = _stats?.AttackAttribute ?? AttributeType.None;
+            int           dmgFinal  = Mathf.RoundToInt((m_Stats?.FinalAttack ?? 10) * skill.DamageMultiplier);
+            AttributeType attrFinal = m_Stats?.AttackAttribute ?? AttributeType.None;
 
-            _atkTimer = skill.cooltime;
+            m_AtkTimer = skill.Cooltime;
 
             bool isLast = (step >= group.ChainLength - 1);
             if (isLast)
             {
-                _comboStep        = 0;
-                _comboWindowTimer = 0f;
+                m_ComboStep        = 0;
+                m_ComboWindowTimer = 0f;
             }
             else
             {
-                _comboStep        = step + 1;
-                _comboWindowTimer = skill.comboWindow;
+                m_ComboStep        = step + 1;
+                m_ComboWindowTimer = skill.ComboWindow;
             }
 
-            // 애니메이션
-            _anim.SetInteger(HashComboStep, step);
-            int triggerHash = string.IsNullOrEmpty(skill.animTriggerOverride)
-                ? HashAttack
-                : Animator.StringToHash(skill.animTriggerOverride);
-            _anim.SetTrigger(triggerHash);
+            m_Anim.SetInteger(s_HashComboStep, step);
+            int triggerHash = string.IsNullOrEmpty(skill.AnimTriggerOverride)
+                ? s_HashAttack
+                : Animator.StringToHash(skill.AnimTriggerOverride);
+            m_Anim.SetTrigger(triggerHash);
 
-            // Overlay: 모든 방향에서 발동 (_facingDir.y < 0.5f 핵 제거)
-            // 트리거 발동 직전에 파라미터 동기화 (FixedUpdate 딜레이 방지)
-            _overlayAnim?.SetFloat(HashMoveX, _facingDir.x);
-            _overlayAnim?.SetFloat(HashMoveY, _facingDir.y);
-            _overlayAnim?.SetTrigger(HashAttack);
+            m_OverlayAnim?.SetFloat(s_HashMoveX, m_FacingDir.x);
+            m_OverlayAnim?.SetFloat(s_HashMoveY, m_FacingDir.y);
+            m_OverlayAnim?.SetTrigger(s_HashAttack);
 
-            // 무기 소켓 애니메이션 (활 시위 등 무기별 모션)
-            _weaponSocket?.TriggerWeaponAnim(triggerHash);
+            m_WeaponSocket?.TriggerWeaponAnim(triggerHash);
 
             ExecuteSkillStep(skill, dmgFinal, attrFinal);
-            _stats?.ConsumeWeaponDurabilityOnHit();
-
-            Debug.Log($"[PlayerController] 평타 {step + 1}타");
+            m_Stats?.ConsumeWeaponDurabilityOnHit();
         }
 
         // ================================================================
-        //  스킬 그룹 실행 (스킬1·2·궁극기)
+        //  SkillData 실행
         // ================================================================
 
-        /// <summary>SkillGroupData 의 첫 번째 SkillData 를 즉시 실행한다.</summary>
-        void ExecuteSkillGroup(SkillGroupData group)
-        {
-            var skill = group.GetStep(0);
-            if (skill == null) return;
-
-            int           dmg  = Mathf.RoundToInt((_stats?.FinalAttack ?? 10) * skill.damageMultiplier);
-            AttributeType attr = _stats?.AttackAttribute ?? AttributeType.None;
-
-            // 애니메이션
-            int triggerHash = string.IsNullOrEmpty(skill.animTriggerOverride)
-                ? HashAttack
-                : Animator.StringToHash(skill.animTriggerOverride);
-            _anim.SetTrigger(triggerHash);
-
-            // Overlay: 모든 방향에서 발동
-            _overlayAnim?.SetFloat(HashMoveX, _facingDir.x);
-            _overlayAnim?.SetFloat(HashMoveY, _facingDir.y);
-            _overlayAnim?.SetTrigger(HashAttack);
-
-            // 무기 소켓 애니메이션
-            _weaponSocket?.TriggerWeaponAnim(triggerHash);
-
-            ExecuteSkillStep(skill, dmg, attr);
-            _stats?.ConsumeWeaponDurabilityOnHit();
-        }
-
-        // ================================================================
-        //  SkillData 실행 — 데이터 필드로 공격 방식 결정
-        // ================================================================
-
-        /// <summary>SkillData 의 필드 값에 따라 근거리/투사체 분기 실행.</summary>
         void ExecuteSkillStep(SkillData skill, int dmg, AttributeType attr)
         {
             if (skill.IsProjectile)
             {
                 SpawnProjectile(skill, dmg, attr);
             }
-            else if (skill.maxTargets == 1)
+            else if (skill.MaxTargets == 1)
             {
-                // 단일 근거리
-                var target = FindNearestEnemy(skill.searchRange);
+                var target = FindNearestEnemy(skill.SearchRange);
                 if (target != null)
-                    SingleMeleeHit(target, skill.attackRange, dmg, attr, skill);
+                    SingleMeleeHit(target, skill.AttackRange, dmg, attr, skill);
             }
             else
             {
-                // 범위 근거리 — OverlapCircle
-                Vector2 center = (Vector2)transform.position + _facingDir * (skill.attackRange * 0.5f);
-                AoeMeleeHit(center, skill.attackRange * 0.5f, skill.maxTargets, dmg, attr, skill);
+                Vector2 center = (Vector2)transform.position + m_FacingDir * (skill.AttackRange * 0.5f);
+                AoeMeleeHit(center, skill.AttackRange * 0.5f, skill.MaxTargets, dmg, attr, skill);
 
-                _gizmoAttackTime = Time.time;
-                _gizmoRange      = skill.attackRange * 0.5f;
-                _gizmoCenter     = center;
+                m_GizmoAttackTime = Time.time;
+                m_GizmoRange      = skill.AttackRange * 0.5f;
+                m_GizmoCenter     = center;
             }
         }
 
@@ -501,7 +529,6 @@ namespace MonsterKitchen.Player
         //  근거리 공격
         // ================================================================
 
-        /// <summary>가장 가까운 적 1명에게 즉시 데미지 (단일 타겟 fallback).</summary>
         void SimpleMeleeHit(Transform target, int dmg, float range, AttributeType attr)
         {
             float dist = Vector2.Distance(transform.position, target.position);
@@ -514,22 +541,19 @@ namespace MonsterKitchen.Player
             hp.TakeDamage(dmg, attr);
             if (!wasDead && hp.IsDead)
             {
-                _stats?.AddUltimateGaugeOnKill();
-                _stats?.ConsumeWeaponDurabilityOnKill();
-                Debug.Log("[PlayerController] 처치 게이지 적립");
+                m_Stats?.AddUltimateGaugeOnKill();
+                m_Stats?.ConsumeWeaponDurabilityOnKill();
             }
-            // fallback 공격은 SkillData 없음 → CC 없음
         }
 
-        /// <summary>단일 타겟 근거리 (SkillData.maxTargets == 1).</summary>
-        void SingleMeleeHit(Transform target, float attackRange, int dmg, AttributeType attr, Data.SkillData skill = null)
+        void SingleMeleeHit(Transform target, float attackRange, int dmg, AttributeType attr, SkillData skill = null)
         {
             float dist = Vector2.Distance(transform.position, target.position);
             if (dist > attackRange) return;
 
-            _gizmoAttackTime = Time.time;
-            _gizmoRange      = attackRange;
-            _gizmoCenter     = target.position;
+            m_GizmoAttackTime = Time.time;
+            m_GizmoRange      = attackRange;
+            m_GizmoCenter     = target.position;
 
             var hp = target.GetComponent<Health>();
             if (hp == null) return;
@@ -538,38 +562,32 @@ namespace MonsterKitchen.Player
             hp.TakeDamage(dmg, attr);
             if (!wasDead && hp.IsDead)
             {
-                _stats?.AddUltimateGaugeOnKill();
-                _stats?.ConsumeWeaponDurabilityOnKill();
-                Debug.Log("[PlayerController] 처치 게이지 적립");
+                m_Stats?.AddUltimateGaugeOnKill();
+                m_Stats?.ConsumeWeaponDurabilityOnKill();
             }
 
             TryApplyCC(skill, target, transform.position);
         }
 
-        /// <summary>범위 근거리 — OverlapCircle.</summary>
-        void AoeMeleeHit(Vector2 center, float radius, int maxTargets, int dmg, AttributeType attr, Data.SkillData skill = null)
+        void AoeMeleeHit(Vector2 center, float radius, int maxTargets, int dmg, AttributeType attr, SkillData skill = null)
         {
-            var meleeFilter = new ContactFilter2D();
-            meleeFilter.SetLayerMask(enemyLayer);
-            meleeFilter.useTriggers = true;
-            int hitCount = Physics2D.OverlapCircle(center, radius, meleeFilter, _overlapBuffer);
-            int count = 0;
+            var filter = new ContactFilter2D();
+            filter.SetLayerMask(m_EnemyLayer);
+            filter.useTriggers = true;
+            int hitCount = Physics2D.OverlapCircle(center, radius, filter, s_OverlapBuffer);
+            int count    = 0;
 
             for (int i = 0; i < hitCount; i++)
             {
                 if (count >= maxTargets) break;
-
-                var col = _overlapBuffer[i];
-                var hp = col.GetComponent<Health>();
+                var col = s_OverlapBuffer[i];
+                var hp  = col.GetComponent<Health>();
                 if (hp == null) continue;
 
                 bool wasDead = hp.IsDead;
                 hp.TakeDamage(dmg, attr);
                 if (!wasDead && hp.IsDead)
-                {
-                    _stats?.AddUltimateGaugeOnKill();
-                    Debug.Log("[PlayerController] 처치 게이지 적립");
-                }
+                    m_Stats?.AddUltimateGaugeOnKill();
 
                 TryApplyCC(skill, col.transform, transform.position);
                 count++;
@@ -577,229 +595,175 @@ namespace MonsterKitchen.Player
         }
 
         // ================================================================
-        //  투사체 공격
+        //  투사체
         // ================================================================
 
         void SpawnProjectile(SkillData skill, int dmg, AttributeType attr)
         {
-            _gizmoAttackTime = Time.time;
+            m_GizmoAttackTime = Time.time;
 
-            // 가장 가까운 적을 타겟으로 지정 — 없으면 페이싱 방향으로 직진
-            var    target  = FindNearestEnemy(skill.searchRange);
+            var     target  = FindNearestEnemy(skill.SearchRange);
             Vector2 fireDir = target != null
                 ? ((Vector2)(target.position - transform.position)).normalized
-                : _facingDir;
+                : m_FacingDir;
 
-            var go = new GameObject(skill.IsAoe ? "AoEProjectile" : "Projectile");
+            var go   = new GameObject(skill.IsAoe ? "AoEProjectile" : "Projectile");
             go.transform.position = transform.position;
 
             var proj = go.AddComponent<Projectile>();
             proj.Init(
-                damage:            dmg,
-                attr:              attr,
-                direction:         fireDir,
-                speed:             skill.missileSpeed,
-                maxDistance:       skill.missileMaxRange,
-                targetLayer:       enemyLayer,
-                isAoe:             skill.IsAoe,
-                aoeRadius:         skill.attackRange,
-                maxTargets:        skill.maxTargets,
-                onKill:            () =>
-                {
-                    _stats?.AddUltimateGaugeOnKill();
-                    Debug.Log("[PlayerController] 처치 게이지 적립");
-                },
-                homingTarget:      target,
-                ccForce:       skill.ccForce,
-                ccDuration:    skill.ccDuration,
-                stunDuration:  skill.stunDuration,
+                damage:        dmg,
+                attr:          attr,
+                direction:     fireDir,
+                speed:         skill.MissileSpeed,
+                maxDistance:   skill.MissileMaxRange,
+                targetLayer:   m_EnemyLayer,
+                isAoe:         skill.IsAoe,
+                aoeRadius:     skill.AttackRange,
+                maxTargets:    skill.MaxTargets,
+                onKill:        () => m_Stats?.AddUltimateGaugeOnKill(),
+                homingTarget:  target,
+                ccForce:       skill.CcForce,
+                ccDuration:    skill.CcDuration,
+                stunDuration:  skill.StunDuration,
                 fireSourcePos: transform.position
             );
         }
 
         // ================================================================
-        //  CC 적용 헬퍼
+        //  CC 적용
         // ================================================================
 
-        /// <summary>
-        /// SkillData 의 CC 파라미터를 읽어 대상에게 적용한다.
-        /// 우선순위: knockbackForce > stunDuration > pullInForce.
-        /// skill 이 null 이거나 모든 CC 값이 0 이면 아무것도 하지 않는다.
-        /// </summary>
         void TryApplyCC(SkillData skill, Transform target, Vector2 sourcePos)
         {
             if (skill == null || target == null) return;
-
             var cc = target.GetComponent<Combat.CrowdControlComponent>();
             if (cc == null) return;
 
-            if (skill.ccForce > 0f)
+            if (skill.CcForce > 0f)
             {
-                // 양수 → 넉백 (시전자 반대 방향)
                 Vector2 dir = ((Vector2)target.position - sourcePos).normalized;
-                cc.TryApplyKnockback(dir, skill.ccForce, skill.ccDuration);
+                cc.TryApplyKnockback(dir, skill.CcForce, skill.CcDuration);
             }
-            else if (skill.ccForce < 0f)
+            else if (skill.CcForce < 0f)
             {
-                // 음수 → 풀인 (시전자 방향으로, 절댓값을 힘으로 사용)
-                cc.TryApplyPullIn(sourcePos, -skill.ccForce, skill.ccDuration);
+                cc.TryApplyPullIn(sourcePos, -skill.CcForce, skill.CcDuration);
             }
-            else if (skill.stunDuration > 0f)
+            else if (skill.StunDuration > 0f)
             {
-                cc.TryApplyStun(skill.stunDuration);
+                cc.TryApplyStun(skill.StunDuration);
             }
         }
 
         // ================================================================
-        //  내부 유틸
+        //  채집 노드
         // ================================================================
 
-        /// <summary>
-        /// NavMapProvider 가 있으면 벽 슬라이딩을 적용한 목표 속도를 반환한다.
-        /// 맵이 없으면 입력 방향 × 속도를 그대로 반환 (기존 동작 유지).
-        ///
-        /// 슬라이딩 우선순위:
-        ///   1. 원하는 방향 전체 이동 가능 → 그대로
-        ///   2. X 축만 이동 가능           → 수평 슬라이드
-        ///   3. Y 축만 이동 가능           → 수직 슬라이드
-        ///   4. 둘 다 불가                 → 정지
-        /// </summary>
-        Vector2 ComputeNavVelocity(Vector2 inputDir, float speed)
-        {
-            if (inputDir.sqrMagnitude < 0.01f)
-                return Vector2.zero;
-
-            var grid = NavGrid.Instance;
-            if (grid == null)
-                return inputDir.normalized * speed; // NavGrid 없는 씬 → 직선 이동
-
-            float   dt      = Time.fixedDeltaTime;
-            Vector2 pos     = transform.position;
-            Vector2 normDir = inputDir.normalized;
-            Vector2 desired = pos + normDir * speed * dt;
-
-            // 원하는 방향으로 이동 가능
-            if (grid.IsWalkable(desired))
-                return normDir * speed;
-
-            // 수평 슬라이드 (X 방향만)
-            if (Mathf.Abs(normDir.x) > 0.01f)
-            {
-                Vector2 hPos = new Vector2(desired.x, pos.y);
-                if (grid.IsWalkable(hPos))
-                    return new Vector2(normDir.x, 0f) * speed;
-            }
-
-            // 수직 슬라이드 (Y 방향만)
-            if (Mathf.Abs(normDir.y) > 0.01f)
-            {
-                Vector2 vPos = new Vector2(pos.x, desired.y);
-                if (grid.IsWalkable(vPos))
-                    return new Vector2(0f, normDir.y) * speed;
-            }
-
-            return Vector2.zero;
-        }
-
-        float GetCurrentSearchRange()
-        {
-            var group = _stats?.NormalAttackGroup;
-            if (group == null || group.ChainLength == 0) return fallbackSearchRange;
-
-            int  step  = Mathf.Clamp(_comboStep, 0, group.ChainLength - 1);
-            var  skill = group.GetStep(step);
-            return skill != null ? skill.searchRange : fallbackSearchRange;
-        }
-
-        Transform FindNearestEnemy(float range)
-        {
-            var enemyFilter = new ContactFilter2D();
-            enemyFilter.SetLayerMask(enemyLayer);
-            enemyFilter.useTriggers = true;
-            int hitCount = Physics2D.OverlapCircle(transform.position, range, enemyFilter, _overlapBuffer);
-            Transform nearest = null;
-            float     minDist = float.MaxValue;
-
-            for (int i = 0; i < hitCount; i++)
-            {
-                float d = Vector2.Distance(transform.position, _overlapBuffer[i].transform.position);
-                if (d < minDist) { minDist = d; nearest = _overlapBuffer[i].transform; }
-            }
-            return nearest;
-        }
-
-        /// <summary>
-        /// 적 없을 때 인접한 채집 노드를 공격한다.
-        /// attackRange 내 가장 가까운 미소진 ResourceNode 에 무기 데미지를 전달.
-        /// "ResourceNode" 레이어는 런타임에 자동 계산 — Inspector 연결 불필요.
-        /// </summary>
         void TryHarvestNode()
         {
             int nodeLayerIdx = LayerMask.NameToLayer("ResourceNode");
-            if (nodeLayerIdx < 0) return;          // 레이어 미등록 시 채집 생략
+            if (nodeLayerIdx < 0) return;
             LayerMask nodeLayer = 1 << nodeLayerIdx;
 
             float attackRange = GetCurrentAttackRange();
             var nodeFilter = new ContactFilter2D();
             nodeFilter.SetLayerMask(nodeLayer);
             nodeFilter.useTriggers = true;
-            int hitCount = Physics2D.OverlapCircle(transform.position, attackRange, nodeFilter, _overlapBuffer);
+            int hitCount = Physics2D.OverlapCircle(transform.position, attackRange, nodeFilter, s_OverlapBuffer);
 
-            ResourceNode nearest  = null;
-            float        minDist  = float.MaxValue;
+            ResourceNode nearest = null;
+            float        minDist = float.MaxValue;
             for (int i = 0; i < hitCount; i++)
             {
-                var h = _overlapBuffer[i];
-                var node = h.GetComponent<ResourceNode>();
+                var node = s_OverlapBuffer[i].GetComponent<ResourceNode>();
                 if (node == null || node.Depleted) continue;
-                float d = Vector2.Distance(transform.position, h.transform.position);
+                float d = Vector2.Distance(transform.position, s_OverlapBuffer[i].transform.position);
                 if (d < minDist) { minDist = d; nearest = node; }
             }
             if (nearest == null) return;
 
-            int dmg = _stats != null ? _stats.FinalAttack : 10;
-            _atkTimer  = GetCurrentCooltime();
-            _facingDir = ((Vector2)(nearest.transform.position - transform.position)).normalized;
-            _weaponSocket?.SetFacingDirection(_facingDir);
-            _anim.SetTrigger(HashAttack);
-
-            nearest.TakeHarvestDamage(dmg, _stats);
-            _stats?.ConsumeWeaponDurabilityOnHit();
-        }
-
-        float GetCurrentAttackRange()
-        {
-            var group = _stats?.NormalAttackGroup;
-            if (group == null || group.ChainLength == 0) return fallbackAttackRange;
-            int  step  = Mathf.Clamp(_comboStep, 0, group.ChainLength - 1);
-            var  skill = group.GetStep(step);
-            return skill != null ? skill.attackRange : fallbackAttackRange;
+            int dmg = m_Stats != null ? m_Stats.FinalAttack : 10;
+            m_AtkTimer  = GetCurrentCooltime();
+            m_FacingDir = ((Vector2)(nearest.transform.position - transform.position)).normalized;
+            m_WeaponSocket?.SetFacingDirection(m_FacingDir);
+            m_Anim.SetTrigger(s_HashAttack);
+            nearest.TakeHarvestDamage(dmg, m_Stats);
+            m_Stats?.ConsumeWeaponDurabilityOnHit();
         }
 
         float GetCurrentCooltime()
         {
-            var group = _stats?.NormalAttackGroup;
-            if (group == null || group.ChainLength == 0) return fallbackCooltime;
-            int  step  = Mathf.Clamp(_comboStep, 0, group.ChainLength - 1);
+            var group = m_Stats?.NormalAttackGroup;
+            if (group == null || group.ChainLength == 0) return m_FallbackCooltime;
+            int  step  = Mathf.Clamp(m_ComboStep, 0, group.ChainLength - 1);
             var  skill = group.GetStep(step);
-            return skill != null ? skill.cooltime : fallbackCooltime;
+            return skill != null ? skill.Cooltime : m_FallbackCooltime;
         }
 
         // ================================================================
-        //  Health 이벤트
+        //  자동 추적 폴백 (BT 미초기화 시)
         // ================================================================
 
-        void OnPlayerDamaged(int amount, AttributeType attr) =>
-            Debug.Log($"[PlayerController] 피격 -{amount}  속성:{attr}  HP:{_health?.CurrentHp}/{_health?.MaxHp}");
+        Vector2 GetEffectiveMoveDir()
+        {
+            if (m_MoveDir.sqrMagnitude > 0.01f) return m_MoveDir;
+            if (!m_IsInDungeon || m_IsDashing) return Vector2.zero;
 
-        void OnPlayerDied(AttributeType killAttr) =>
-            Debug.Log($"[PlayerController] 사망  막타속성:{killAttr}");
+            var target = FindNearestEnemy(m_AutoChaseRange);
+            if (target == null) return Vector2.zero;
 
-        /// <summary>
-        /// 무기 교체 이벤트 핸들러.
-        /// PlayerStats.EquipWeapon() 호출 시 발동 — WeaponSocket 시각 갱신.
-        /// </summary>
-        void OnWeaponChanged(Data.WeaponData weapon) => _weaponSocket?.SetWeapon(weapon);
+            float dist     = Vector2.Distance(transform.position, target.position);
+            float stopDist = GetCurrentAttackRange() * m_AutoStopRatio;
+            if (dist <= stopDist) return Vector2.zero;
+
+            return ((Vector2)(target.position - transform.position)).normalized;
+        }
+
+        // ================================================================
+        //  씬 전환
+        // ================================================================
+
+        void OnSceneLoaded(Scene scene, LoadSceneMode _) => UpdateDungeonState(scene.name);
+
+        void UpdateDungeonState(string sceneName)
+        {
+            m_IsInDungeon = sceneName == "DungeonScene";
+            m_Blackboard?.Set("IsInDungeon", m_IsInDungeon);
+        }
+
+        // ================================================================
+        //  NavGrid 이동 계산
+        // ================================================================
+
+        Vector2 ComputeNavPosition(Vector2 inputDir, float speed, float dt)
+        {
+            Vector2 pos = m_Rb.position;
+            if (inputDir.sqrMagnitude < 0.01f) return pos;
+
+            var     grid    = NavGrid.Instance;
+            Vector2 normDir = inputDir.normalized;
+            float   step    = speed * dt;
+
+            if (grid == null) return pos + normDir * step;
+
+            Vector2 newPos = pos + normDir * step;
+            if (grid.PointIsValid(newPos)) return newPos;
+
+            float angle = Mathf.Atan2(normDir.y, normDir.x) * Mathf.Rad2Deg;
+            if (angle == 0f || angle == 90f || angle == -90f || angle == 180f) return pos;
+
+            float   xStep    = normDir.x * step;
+            bool    canSlideX = grid.PointIsValid(new Vector2(pos.x + xStep, pos.y));
+            Vector2 altDir;
+
+            if (canSlideX)
+                altDir = (angle > 90f || angle < -90f) ? Vector2.left : Vector2.right;
+            else
+                altDir = angle > 0f ? Vector2.up : Vector2.down;
+
+            Vector2 altPos = pos + altDir * step;
+            return grid.PointIsValid(altPos) ? altPos : pos;
+        }
 
         // ================================================================
         //  대시
@@ -807,27 +771,42 @@ namespace MonsterKitchen.Player
 
         System.Collections.IEnumerator DashCoroutine()
         {
-            _isDashing = true;
-            if (_health != null) _health.IsInvincible = true;
+            m_IsDashing = true;
+            if (m_Health != null) m_Health.IsInvincible = true;
 
-            Vector2 dir = _moveDir.sqrMagnitude > 0.01f ? _moveDir.normalized : _facingDir;
-            _anim.SetTrigger(HashDash);
+            Vector2 dir = m_MoveDir.sqrMagnitude > 0.01f ? m_MoveDir.normalized : m_FacingDir;
+            m_Anim.SetTrigger(s_HashDash);
 
             float elapsed = 0f;
-            while (elapsed < dashDuration)
+            while (elapsed < m_DashDuration)
             {
-                _rb.linearVelocity = dir * dashSpeed;
+                Vector2 nextPos = m_Rb.position + dir * m_DashSpeed * Time.fixedDeltaTime;
+                var grid = NavGrid.Instance;
+                if (grid != null && !grid.PointIsValid(nextPos)) break;
+                m_Rb.MovePosition(nextPos);
                 elapsed += Time.fixedDeltaTime;
-                yield return _waitFixed;
+                yield return s_WaitFixed;
             }
 
-            // 대시 종료 — 관성 초기화 (대시 속도가 그대로 남지 않도록)
-            _currentVel        = Vector2.zero;
-            _rb.linearVelocity = Vector2.zero;
-            _isDashing         = false;
-            _dashCooldownTimer = dashCooldown;
-            if (_health != null) _health.IsInvincible = false;
+            m_CurrentVel        = Vector2.zero;
+            m_Rb.linearVelocity = Vector2.zero;
+            m_IsDashing         = false;
+            m_DashCooldownTimer = m_DashCooldown;
+            if (m_Health != null) m_Health.IsInvincible = false;
         }
+
+        // ================================================================
+        //  Health 이벤트
+        // ================================================================
+
+        void OnPlayerDamaged(int amount, AttributeType attr) =>
+            Debug.Log(StringUtil.Format("[PlayerController] 피격 -{0}  속성:{1}  HP:{2}/{3}",
+                amount, attr, m_Health?.CurrentHp, m_Health?.MaxHp));
+
+        void OnPlayerDied(AttributeType killAttr) =>
+            Debug.Log(StringUtil.Format("[PlayerController] 사망  막타속성:{0}", killAttr));
+
+        void OnWeaponChanged(Data.WeaponData weapon) => m_WeaponSocket?.SetWeapon(weapon);
 
         // ================================================================
         //  Gizmo
@@ -835,19 +814,17 @@ namespace MonsterKitchen.Player
 
         void OnDrawGizmos()
         {
-            float searchRange = Application.isPlaying ? GetCurrentSearchRange() : fallbackSearchRange;
+            float searchRange = Application.isPlaying ? GetCurrentSearchRange() : m_FallbackSearchRange;
 
-            // 자동 감지 범위 (파란색)
             Gizmos.color = new Color(0.2f, 0.6f, 1f, 0.2f);
             Gizmos.DrawSphere(transform.position, searchRange);
             Gizmos.color = new Color(0.2f, 0.6f, 1f, 0.6f);
             Gizmos.DrawWireSphere(transform.position, searchRange);
 
-            // 마지막 공격 히트박스 (0.3초간 플래시)
-            if (Application.isPlaying && (Time.time - _gizmoAttackTime) < 0.3f)
+            if (Application.isPlaying && (Time.time - m_GizmoAttackTime) < 0.3f)
             {
                 Gizmos.color = Color.yellow;
-                Gizmos.DrawWireSphere(_gizmoCenter, _gizmoRange);
+                Gizmos.DrawWireSphere(m_GizmoCenter, m_GizmoRange);
             }
         }
     }

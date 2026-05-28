@@ -120,5 +120,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0cdaa63cce5e3914ebd673582977f2ec, type: 3}
   m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::MonsterKitchen.Combat.ItemDrop
-  spriteRenderer: {fileID: 1000002}
-  pickupRadius: 0.35
+  m_SpriteRenderer: {fileID: 1000002}
+  m_PickupRadius: 0.35

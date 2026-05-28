@@ -99,7 +99,7 @@ namespace MonsterKitchen.Restaurant
                 yield break;
             }
 
-            Debug.Log($"[Customer] 주문: {OrderedFood.displayName}");
+            Debug.Log($"[Customer] 주문: {OrderedFood.DisplayName}");
             _patienceTimer = patience;
             _state         = State.Waiting;
         }
@@ -108,12 +108,12 @@ namespace MonsterKitchen.Restaurant
         {
             if (possibleOrderIds == null || possibleOrderIds.Length == 0) return null;
 
-            var fi       = FoodInventory.Instance;
+            var inv      = PlayerDataManager.Instance?.Inventory;
             var registry = DataRegistry.Instance;
             foreach (var foodId in possibleOrderIds)
             {
                 if (foodId == 0u) continue;
-                if (fi != null && fi.GetCount(foodId) > 0)
+                if (inv != null && inv.GetFoodCount(foodId) > 0)
                     return registry?.GetFood(foodId);
             }
             // FoodInventory에 없어도 첫 번째 메뉴로 주문 (MVP 폴백)
@@ -136,14 +136,13 @@ namespace MonsterKitchen.Restaurant
         public void Serve(FoodData food, FoodGrade grade)
         {
             if (_state != State.Waiting) return;
-            if (food.id != OrderedFood.id)
+            if (food.Id != OrderedFood.Id)
             {
-                Debug.Log($"[Customer] 잘못된 음식: {food.displayName}");
+                Debug.Log($"[Customer] 잘못된 음식: {food.DisplayName}");
                 return;
             }
 
             _state = State.Served;
-            FoodInventory.Instance?.Remove(food.id);
             StartCoroutine(EatAndPay(food, grade));
         }
 
@@ -155,17 +154,17 @@ namespace MonsterKitchen.Restaurant
             // 등급 배율 적용
             float gradeMult = grade switch
             {
-                FoodGrade.Good      => food.goodMultiplier,
-                FoodGrade.Perfect   => food.perfectMultiplier,
-                FoodGrade.Legendary => food.legendaryMultiplier,
+                FoodGrade.Good      => food.GoodMultiplier,
+                FoodGrade.Perfect   => food.PerfectMultiplier,
+                FoodGrade.Legendary => food.LegendaryMultiplier,
                 _                   => 1f,
             };
 
-            float shopMult = ShopManager.Instance != null ? ShopManager.Instance.TipMultiplier : 1f;
-            int   pay      = Mathf.RoundToInt(food.basePrice * gradeMult * shopMult);
-            GoldManager.Instance?.Earn(pay);
-            Debug.Log($"[Customer] {food.displayName} [{grade}] 식사 완료. 지불: {pay}G " +
-                      $"(base {food.basePrice} × grade {gradeMult:F2} × shop {shopMult:F2})");
+            float shopMult = PlayerDataManager.Instance?.Upgrades.ShopTipMultiplier ?? 1f;
+            int   pay      = Mathf.RoundToInt(food.BasePrice * gradeMult * shopMult);
+            NetworkManager.Instance?.RequestEarnGold(pay);
+            Debug.Log($"[Customer] {food.DisplayName} [{grade}] 식사 완료. 지불: {pay}G " +
+                      $"(base {food.BasePrice} × grade {gradeMult:F2} × shop {shopMult:F2})");
 
             StartCoroutine(LeaveRoutine(paid: true));
         }

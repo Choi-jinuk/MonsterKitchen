@@ -10,18 +10,19 @@ namespace MonsterKitchen.Cooking
     /// <summary>
     /// 주방의 조리대.
     /// 플레이어가 접근해 Interact 키 → CookingUI 열기 → 레시피 선택 → 요리.
+    /// 요리 요청은 NetworkManager.RequestCook() 을 통해 서버에 전달된다.
     /// </summary>
     public class CookingStation : MonoBehaviour
     {
         [Header("Settings")]
-        [SerializeField] float cookDuration = 1.5f;
+        [SerializeField] float m_CookDuration = 1.5f;
 
         [Header("VFX")]
-        [SerializeField] ParticleSystem cookCompleteVFX;
+        [SerializeField] ParticleSystem m_CookCompleteVFX;
 
         public event Action<RecipeData, FoodData> OnCookComplete;
 
-        bool _isCooking;
+        bool m_IsCooking;
 
         void OnTriggerEnter2D(Collider2D other)
         {
@@ -46,7 +47,7 @@ namespace MonsterKitchen.Cooking
 
         void TryOpenUI()
         {
-            if (_isCooking) return;
+            if (m_IsCooking) return;
 
             var ui = UIManager.Instance?.GetPanel<CookingUI>("CookingUI");
             if (ui == null)
@@ -60,35 +61,41 @@ namespace MonsterKitchen.Cooking
         /// <summary>CookingUI에서 선택된 레시피와 등급으로 조리 시작.</summary>
         public void CookRecipe(RecipeData recipe, FoodGrade grade = FoodGrade.Normal)
         {
-            if (_isCooking || recipe == null) return;
+            if (m_IsCooking || recipe == null) return;
             StartCoroutine(CookRoutine(recipe, grade));
         }
 
         IEnumerator CookRoutine(RecipeData recipe, FoodGrade grade)
         {
-            _isCooking = true;
-            Debug.Log($"[CookingStation] 조리 시작: {recipe.displayName} [{grade}] ({cookDuration}s)");
+            m_IsCooking = true;
+            Debug.Log($"[CookingStation] 조리 시작: {recipe.DisplayName} [{grade}] ({m_CookDuration}s)");
 
-            yield return new WaitForSeconds(cookDuration);
+            yield return new WaitForSeconds(m_CookDuration);
 
-            if (!RecipeMatcher.ConsumeIngredients(recipe, Inventory.Instance))
+            // 요리 요청 → 서버(스텁)에서 재료 검증·소모 + 음식 추가
+            bool cookSuccess = false;
+            FoodData resultFood = null;
+
+            NetworkManager.Instance?.RequestCook(recipe, grade, (success, food) =>
             {
-                Debug.LogWarning("[CookingStation] 재료 소모 실패.");
-                _isCooking = false;
-                yield break;
+                cookSuccess = success;
+                resultFood  = food;
+            });
+
+            if (cookSuccess)
+            {
+                if (m_CookCompleteVFX != null)
+                    m_CookCompleteVFX.Play();
+
+                Debug.Log($"[CookingStation] 완성! {resultFood?.DisplayName ?? "???"} [{grade}] → FoodInventory 추가");
+                OnCookComplete?.Invoke(recipe, resultFood);
+            }
+            else
+            {
+                Debug.LogWarning("[CookingStation] 요리 실패 (재료 부족).");
             }
 
-            FoodData food = DataRegistry.Instance?.GetFood(recipe.resultFoodId);
-            if (food != null)
-                FoodInventory.Instance?.AddWithGrade(recipe.resultFoodId, grade);
-
-            if (cookCompleteVFX != null)
-                cookCompleteVFX.Play();
-
-            Debug.Log($"[CookingStation] 완성! {food?.displayName ?? "???"} [{grade}] → FoodInventory 추가");
-
-            OnCookComplete?.Invoke(recipe, food);
-            _isCooking = false;
+            m_IsCooking = false;
         }
     }
 }

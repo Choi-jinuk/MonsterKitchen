@@ -13,39 +13,38 @@ namespace MonsterKitchen.AI.BehaviorTree
     [Serializable]
     public class BBEntry
     {
-        public string      key         = "";
-        public BBValueType valueType   = BBValueType.Float;
-        public float       floatValue;
-        public int         intValue;
-        public bool        boolValue;
-        public string      stringValue = "";
-        public Vector2     vector2Value;
-        public Vector3     vector3Value;
+        public string      Key         = "";
+        public BBValueType ValueType   = BBValueType.Float;
+        public float       FloatValue;
+        public int         IntValue;
+        public bool        BoolValue;
+        public string      StringValue = "";
+        public Vector2     Vector2Value;
+        public Vector3     Vector3Value;
     }
 
     // ====================================================================
     //  BTAsset — 행동 트리 구조를 저장하는 ScriptableObject
     //
     //  ▶ 노드들은 이 에셋의 sub-asset 으로 저장된다.
-    //  ▶ blackboardDefaults 는 BTRunner.Start() 에서 IBTBlackboardInitializer
+    //  ▶ BlackboardDefaults 는 BTRunner.Start() 에서 IBTBlackboardInitializer
     //    보다 먼저 적용된다.
     // ====================================================================
 
     [CreateAssetMenu(menuName = "MonsterKitchen/BehaviorTree/BT Asset", fileName = "NewBTAsset")]
     public class BTAsset : ScriptableObject
     {
-        [SerializeField] public BTNode      root;
+        [SerializeField] public BTNode      Root;
 
         [Tooltip("BTRunner 시작 시 블랙보드에 미리 채울 기본값 목록.\n" +
                  "IBTBlackboardInitializer 보다 먼저 적용되므로 코드에서 덮어쓸 수 있다.")]
-        [SerializeField] public List<BBEntry> blackboardDefaults = new();
+        [SerializeField] public List<BBEntry> BlackboardDefaults = new();
 
 #if UNITY_EDITOR
         // ================================================================
         //  에디터 전용 — sub-asset 관리
         // ================================================================
 
-        /// <summary>새 노드 SO 를 sub-asset 으로 추가하고 반환한다.</summary>
         public T AddNode<T>() where T : BTNode
         {
             var node = CreateInstance<T>();
@@ -64,19 +63,20 @@ namespace MonsterKitchen.AI.BehaviorTree
             return node;
         }
 
-        /// <summary>노드 SO 를 sub-asset 에서 제거하고 파괴한다.</summary>
         public void RemoveNode(BTNode node)
         {
             if (node == null) return;
+            if (Root == node) Root = null;
 
-            if (root == node) root = null;
-
-            // 모든 Composite 의 자식 목록에서 제거
             string path = UnityEditor.AssetDatabase.GetAssetPath(this);
             foreach (var sub in UnityEditor.AssetDatabase.LoadAllAssetsAtPath(path))
             {
+                // BTComposite (Sequence, Selector) — 다자식
                 if (sub is BTComposite composite)
                     composite.RemoveChild(node);
+                // BTDecorator (Condition, Service, Inverter 등) — 단일 자식
+                else if (sub is BTDecorator decorator && decorator.Child == node)
+                    decorator.ClearChild();
             }
 
             UnityEditor.AssetDatabase.RemoveObjectFromAsset(node);
@@ -84,7 +84,6 @@ namespace MonsterKitchen.AI.BehaviorTree
             UnityEditor.EditorUtility.SetDirty(this);
         }
 
-        /// <summary>이 BTAsset 에 속한 모든 BTNode sub-asset 목록을 반환한다.</summary>
         public List<BTNode> GetAllNodes()
         {
             var result = new List<BTNode>();

@@ -1,0 +1,131 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &-8387321861448376761
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 851f05ade22f668448702c53b2285728, type: 3}
+  m_Name: Skill1
+  m_EditorClassIdentifier: Assembly-CSharp::MonsterKitchen.AI.BehaviorTree.Player.BTAction_PlayerSkill
+  EditorPosition: {x: 180, y: 140}
+  m_Slot: 1
+--- !u!114 &-7577940204979509983
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9dbb7cb3163e3614ab108bcf7cb6c44a, type: 3}
+  m_Name: Move
+  m_EditorClassIdentifier: Assembly-CSharp::MonsterKitchen.AI.BehaviorTree.Player.BTAction_PlayerMove
+  EditorPosition: {x: 900, y: 140}
+--- !u!114 &-4459227523009043648
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 851f05ade22f668448702c53b2285728, type: 3}
+  m_Name: Skill2
+  m_EditorClassIdentifier: Assembly-CSharp::MonsterKitchen.AI.BehaviorTree.Player.BTAction_PlayerSkill
+  EditorPosition: {x: 360, y: 140}
+  m_Slot: 2
+--- !u!114 &-3792320326593915065
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c570cdbedc02c0045981643f9e4a555d, type: 3}
+  m_Name: AutoAttack
+  m_EditorClassIdentifier: Assembly-CSharp::MonsterKitchen.AI.BehaviorTree.Player.BTAction_PlayerAutoAttack
+  EditorPosition: {x: 720, y: 260}
+--- !u!114 &-2216374943278092217
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 067f5e0782ac04f4b8f75d7f0f5aa0c1, type: 3}
+  m_Name: Dash
+  m_EditorClassIdentifier: Assembly-CSharp::MonsterKitchen.AI.BehaviorTree.Player.BTAction_PlayerDash
+  EditorPosition: {x: 0, y: 140}
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 33fd8ba2180f4f44ab63886a30ddad10, type: 3}
+  m_Name: PlayerBT
+  m_EditorClassIdentifier: Assembly-CSharp::MonsterKitchen.AI.BehaviorTree.BTAsset
+  Root: {fileID: 1929802990344277028}
+  BlackboardDefaults: []
+--- !u!114 &609310492391709820
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9295550116b1f5641b21004de8837820, type: 3}
+  m_Name: Cond_AttackRange
+  m_EditorClassIdentifier: Assembly-CSharp::MonsterKitchen.AI.BehaviorTree.Player.BTCondition_PlayerEnemyInAttackRange
+  EditorPosition: {x: 720, y: 140}
+  m_Child: {fileID: -3792320326593915065}
+--- !u!114 &1929802990344277028
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 536dc67da7bd7d64d83f5642d1816025, type: 3}
+  m_Name: Root_Selector
+  m_EditorClassIdentifier: Assembly-CSharp::MonsterKitchen.AI.BehaviorTree.BTSelector
+  EditorPosition: {x: 0, y: 0}
+  m_Children:
+  - {fileID: -2216374943278092217}
+  - {fileID: -8387321861448376761}
+  - {fileID: -4459227523009043648}
+  - {fileID: 2214947387660479917}
+  - {fileID: 609310492391709820}
+  - {fileID: -7577940204979509983}
+--- !u!114 &2214947387660479917
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 851f05ade22f668448702c53b2285728, type: 3}
+  m_Name: Ultimate
+  m_EditorClassIdentifier: Assembly-CSharp::MonsterKitchen.AI.BehaviorTree.Player.BTAction_PlayerSkill
+  EditorPosition: {x: 540, y: 140}
+  m_Slot: 3

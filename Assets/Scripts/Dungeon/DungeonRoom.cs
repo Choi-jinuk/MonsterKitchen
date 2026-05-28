@@ -27,10 +27,10 @@ namespace MonsterKitchen.Dungeon
     {
         public event Action OnRoomCleared;
 
-        int  _aliveCount;
-        bool _cleared;
+        int  m_AliveCount;
+        bool m_Cleared;
 
-        public bool IsCleared => _cleared;
+        public bool IsCleared => m_Cleared;
 
         // ================================================================
         //  Public API
@@ -42,17 +42,17 @@ namespace MonsterKitchen.Dungeon
         /// </summary>
         public void RegisterMonsters(IEnumerable<MonsterBase> monsters)
         {
-            _aliveCount = 0;
+            m_AliveCount = 0;
             foreach (var m in monsters)
             {
                 if (m == null) continue;
                 var hp = m.GetComponent<Health>();
                 if (hp == null) continue;
                 hp.OnDeath += _ => OnMonsterDied();
-                _aliveCount++;
+                m_AliveCount++;
             }
 
-            if (_aliveCount == 0)
+            if (m_AliveCount == 0)
                 TriggerCleared();
         }
 
@@ -62,14 +62,14 @@ namespace MonsterKitchen.Dungeon
 
         void OnMonsterDied()
         {
-            if (_cleared) return;
-            _aliveCount = Mathf.Max(0, _aliveCount - 1);
-            if (_aliveCount == 0) TriggerCleared();
+            if (m_Cleared) return;
+            m_AliveCount = Mathf.Max(0, m_AliveCount - 1);
+            if (m_AliveCount == 0) TriggerCleared();
         }
 
         void TriggerCleared()
         {
-            _cleared = true;
+            m_Cleared = true;
             Debug.Log($"[DungeonRoom] '{name}' 클리어!");
             OnRoomCleared?.Invoke();
         }

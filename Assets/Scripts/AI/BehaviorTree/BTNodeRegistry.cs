@@ -10,12 +10,12 @@ namespace MonsterKitchen.AI.BehaviorTree
     /// </summary>
     public static class BTNodeRegistry
     {
-        static Dictionary<string, Type> _byPath;
+        static Dictionary<string, Type> s_ByPath;
 
         static void EnsureLoaded()
         {
-            if (_byPath != null) return;
-            _byPath = new Dictionary<string, Type>();
+            if (s_ByPath != null) return;
+            s_ByPath = new Dictionary<string, Type>();
 
             foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
             {
@@ -28,7 +28,7 @@ namespace MonsterKitchen.AI.BehaviorTree
                     if (type.IsAbstract || !type.IsSubclassOf(typeof(BTNode))) continue;
                     var attr = type.GetCustomAttribute<BTNodeAttribute>();
                     if (attr != null)
-                        _byPath[attr.Path] = type;
+                        s_ByPath[attr.Path] = type;
                 }
             }
         }
@@ -36,10 +36,10 @@ namespace MonsterKitchen.AI.BehaviorTree
         /// <summary>[BTNode] 어트리뷰트가 있는 타입 — Path → Type.</summary>
         public static IReadOnlyDictionary<string, Type> AllByPath
         {
-            get { EnsureLoaded(); return _byPath; }
+            get { EnsureLoaded(); return s_ByPath; }
         }
 
         /// <summary>도메인 리로드 후 캐시를 초기화한다.</summary>
-        public static void Invalidate() => _byPath = null;
+        public static void Invalidate() => s_ByPath = null;
     }
 }

@@ -12,22 +12,36 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: aca54419020a7d941825784d40d92123, type: 3}
   m_Name: AssetManifest
   m_EditorClassIdentifier: Assembly-CSharp::MonsterKitchen.Core.AssetManifest
-  _entries:
-  - key: prefab/hud
-    asset: {fileID: 8047966772451013677, guid: 55b8869db5dce474c8d746d5bd4bdc04, type: 3}
-  - key: prefab/player
-    asset: {fileID: 5357646181186029780, guid: bc5a2932bd66799438daa34c9f85f1f0, type: 3}
-  - key: prefab/damage_popup
-    asset: {fileID: 3833689095776743830, guid: ecf85d1e4df418c4998de4de4a5cf1ad, type: 3}
-  - key: prefab/customer
-    asset: {fileID: 5015245969387161486, guid: 957783e1d5b08964688de7935deee5b6, type: 3}
-  - key: data/player_spawn
-    asset: {fileID: 11400000, guid: 5ff57c893a9f41b4aa173dce868c7d2a, type: 2}
-  - key: prefab/monster/1001
-    asset: {fileID: 5250572445987000973, guid: ca6144aec3d7ada4bbc99f8c5cb080d9, type: 3}
-  - key: prefab/monster/1002
-    asset: {fileID: 5250572445987000973, guid: ca6144aec3d7ada4bbc99f8c5cb080d9, type: 3}
-  - key: sprite/monster/1001
-    asset: {fileID: -7282886668606283007, guid: 4f4247ec0a7c4b648b37352cf74ceb1a, type: 3}
-  - key: sprite/monster/1002
-    asset: {fileID: -7282886668606283007, guid: 4f4247ec0a7c4b648b37352cf74ceb1a, type: 3}
+  m_Entries:
+  - Key: prefab/hud
+    Asset: {fileID: 8047966772451013677, guid: 55b8869db5dce474c8d746d5bd4bdc04, type: 3}
+  - Key: prefab/player
+    Asset: {fileID: 5357646181186029780, guid: bc5a2932bd66799438daa34c9f85f1f0, type: 3}
+  - Key: prefab/player/9001
+    Asset: {fileID: 5357646181186029780, guid: bc5a2932bd66799438daa34c9f85f1f0, type: 3}
+  - Key: prefab/damage_popup
+    Asset: {fileID: 3833689095776743830, guid: ecf85d1e4df418c4998de4de4a5cf1ad, type: 3}
+  - Key: prefab/customer
+    Asset: {fileID: 5015245969387161486, guid: 957783e1d5b08964688de7935deee5b6, type: 3}
+  - Key: data/table_data
+    Asset: {fileID: 11400000, guid: 124817bb77c2adb4fb65e946d0d4b853, type: 2}
+  - Key: prefab/monster/1001
+    Asset: {fileID: 5250572445987000973, guid: ca6144aec3d7ada4bbc99f8c5cb080d9, type: 3}
+  - Key: prefab/monster/1002
+    Asset: {fileID: 5250572445987000973, guid: ca6144aec3d7ada4bbc99f8c5cb080d9, type: 3}
+  - Key: sprite/monster/1001
+    Asset: {fileID: -7282886668606283007, guid: 4f4247ec0a7c4b648b37352cf74ceb1a, type: 3}
+  - Key: sprite/monster/1002
+    Asset: {fileID: -7282886668606283007, guid: 4f4247ec0a7c4b648b37352cf74ceb1a, type: 3}
+  - Key: bt/monster/1001
+    Asset: {fileID: 11400000, guid: 83770707d836a2849a8924867c84900f, type: 2}
+  - Key: bt/monster/1002
+    Asset: {fileID: 11400000, guid: 83770707d836a2849a8924867c84900f, type: 2}
+  - Key: bt/monster/1003
+    Asset: {fileID: 11400000, guid: 83770707d836a2849a8924867c84900f, type: 2}
+  - Key: bt/monster/1004
+    Asset: {fileID: 11400000, guid: 83770707d836a2849a8924867c84900f, type: 2}
+  - Key: bt/monster/1005
+    Asset: {fileID: 11400000, guid: 83770707d836a2849a8924867c84900f, type: 2}
+  - Key: bt/player/9001
+    Asset: {fileID: 11400000, guid: d38dfc3098a907142a45f4f23a34d1a8, type: 2}

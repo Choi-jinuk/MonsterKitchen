@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+using MonsterKitchen.Core.Collections;
 using UnityEngine;
 
 namespace MonsterKitchen.Navigation
@@ -16,14 +16,14 @@ namespace MonsterKitchen.Navigation
     public static class NavPathfinder
     {
         // 8방향 오프셋
-        static readonly Vector2Int[] Dirs = {
+        static readonly Vector2Int[] s_Dirs = {
             new Vector2Int( 0,  1), new Vector2Int( 0, -1),
             new Vector2Int(-1,  0), new Vector2Int( 1,  0),
             new Vector2Int(-1,  1), new Vector2Int( 1,  1),
             new Vector2Int(-1, -1), new Vector2Int( 1, -1),
         };
 
-        const float SqrtTwo = 1.41421356f;
+        const float SQRT_TWO = 1.41421356f;
 
         // ── A* 노드 ─────────────────────────────────────────────────────
 
@@ -33,7 +33,7 @@ namespace MonsterKitchen.Navigation
             public float g = float.MaxValue;
             public float h;
             public Node parent;
-            public bool inOpen;
+            public bool InOpen;
             public float F => g + h;
         }
 
@@ -76,13 +76,14 @@ namespace MonsterKitchen.Navigation
             int w = grid.Width, h = grid.Height;
             var nodes = new Node[w, h];
 
-            // 오픈 리스트 (단순 리스트, 작은 그리드에서 충분히 빠름)
-            var open = new List<Node>(64);
+            // 오픈 리스트 — PooledList 로 ArrayPool 재사용.
+            // using var 로 감싸 어떤 반환 경로에서도 Dispose 보장 (우려 1).
+            using var open = new PooledList<Node>(64);
 
             var start = GetNode(nodes, sx, sy);
             start.g = 0;
             start.h = Heuristic(sx, sy, ex, ey);
-            start.inOpen = true;
+            start.InOpen = true;
             open.Add(start);
 
             while (open.Count > 0)
@@ -96,14 +97,14 @@ namespace MonsterKitchen.Navigation
                 }
 
                 var cur = open[bestIdx];
-                open[bestIdx] = open[open.Count - 1];
+                open[bestIdx] = open[open.Count - 1]; // swap-and-pop
                 open.RemoveAt(open.Count - 1);
-                cur.inOpen = false;
+                cur.InOpen = false;
 
                 if (cur.x == ex && cur.y == ey)
-                    return RetracePath(grid, cur);
+                    return RetracePath(grid, cur); // open.Dispose() 는 return 후 자동 호출
 
-                foreach (var dir in Dirs)
+                foreach (var dir in s_Dirs)
                 {
                     int nx = cur.x + dir.x;
                     int ny = cur.y + dir.y;
@@ -116,7 +117,7 @@ namespace MonsterKitchen.Navigation
                               || !grid.IsWalkableGrid(cur.x, cur.y + dir.y)))
                         continue;
 
-                    float moveCost = diag ? SqrtTwo : 1f;
+                    float moveCost = diag ? SQRT_TWO : 1f;
                     float newG = cur.g + moveCost;
 
                     var nbr = GetNode(nodes, nx, ny);
@@ -126,15 +127,15 @@ namespace MonsterKitchen.Navigation
                     nbr.h = Heuristic(nx, ny, ex, ey);
                     nbr.parent = cur;
 
-                    if (!nbr.inOpen)
+                    if (!nbr.InOpen)
                     {
-                        nbr.inOpen = true;
+                        nbr.InOpen = true;
                         open.Add(nbr);
                     }
                 }
             }
 
-            return null; // 경로 없음
+            return null; // 경로 없음 — using var open 이 Dispose 처리
         }
 
         static Node GetNode(Node[,] nodes, int x, int y)
@@ -146,11 +147,13 @@ namespace MonsterKitchen.Navigation
 
         static Vector2[] RetracePath(NavGrid grid, Node end)
         {
-            var pts = new List<Vector2>();
+            // using var: Dispose 보장 (우려 1).
+            // ToArray() 는 using 블록 안에서 호출 — 배열 복사 후 Dispose (우려 2).
+            using var pts = new PooledList<Vector2>();
             for (var n = end; n != null; n = n.parent)
                 pts.Add(grid.GridToWorld(n.x, n.y));
             pts.Reverse();
-            return pts.ToArray();
+            return pts.ToArray(); // 복사 완료 → using 블록 종료 시 내부 배열 반환
         }
 
         // ================================================================
@@ -161,7 +164,7 @@ namespace MonsterKitchen.Navigation
         {
             int dx = Mathf.Abs(ax - bx);
             int dy = Mathf.Abs(ay - by);
-            return Mathf.Max(dx, dy) + (SqrtTwo - 1f) * Mathf.Min(dx, dy);
+            return Mathf.Max(dx, dy) + (SQRT_TWO - 1f) * Mathf.Min(dx, dy);
         }
 
         // ================================================================
@@ -201,7 +204,8 @@ namespace MonsterKitchen.Navigation
         {
             if (path == null || path.Length <= 2) return path;
 
-            var result = new List<Vector2> { path[0] };
+            using var result = new PooledList<Vector2>();
+            result.Add(path[0]);
             int cur = 0;
 
             while (cur < path.Length - 1)

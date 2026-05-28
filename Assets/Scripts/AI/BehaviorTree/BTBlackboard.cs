@@ -8,24 +8,24 @@ namespace MonsterKitchen.AI.BehaviorTree
     /// </summary>
     public class BTBlackboard
     {
-        readonly Dictionary<string, object> _data = new();
+        readonly Dictionary<string, object> m_Data = new();
 
-        public void Set<T>(string key, T value) => _data[key] = value;
+        public void Set<T>(string key, T value) => m_Data[key] = value;
 
-        public bool Has(string key) => _data.ContainsKey(key);
+        public bool Has(string key) => m_Data.ContainsKey(key);
 
-        public void Clear(string key) => _data.Remove(key);
+        public void Clear(string key) => m_Data.Remove(key);
 
         public T Get<T>(string key)
         {
-            if (_data.TryGetValue(key, out var val) && val is T typed)
+            if (m_Data.TryGetValue(key, out var val) && val is T typed)
                 return typed;
             return default;
         }
 
         public bool TryGet<T>(string key, out T result)
         {
-            if (_data.TryGetValue(key, out var val) && val is T typed)
+            if (m_Data.TryGetValue(key, out var val) && val is T typed)
             {
                 result = typed;
                 return true;
@@ -35,9 +35,7 @@ namespace MonsterKitchen.AI.BehaviorTree
         }
 
 #if UNITY_EDITOR
-        /// <summary>에디터에서 블랙보드 전체 항목을 열람한다.</summary>
-        public System.Collections.Generic.IEnumerable<System.Collections.Generic.KeyValuePair<string, object>>
-            EditorEntries => _data;
+        public IEnumerable<KeyValuePair<string, object>> EditorEntries => m_Data;
 #endif
     }
 }

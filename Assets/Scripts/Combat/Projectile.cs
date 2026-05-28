@@ -33,33 +33,33 @@ namespace MonsterKitchen.Combat
     [RequireComponent(typeof(CircleCollider2D))]
     public class Projectile : MonoBehaviour
     {
-        static readonly Collider2D[] _overlapBuffer = new Collider2D[16];
+        static readonly Collider2D[] s_OverlapBuffer = new Collider2D[16];
 
         // ── 런타임 상태 ─────────────────────────────────────────────────
-        int           _damage;
-        AttributeType _attr;
-        float         _speed;
-        float         _maxDistance;
-        Vector3       _startPos;
-        LayerMask     _targetLayer;
-        bool          _isAoe;
-        float         _aoeRadius;
-        int           _maxTargets;
-        Action        _onKill;
-        bool          _hit;
+        int           m_Damage;
+        AttributeType m_Attr;
+        float         m_Speed;
+        float         m_MaxDistance;
+        Vector3       m_StartPos;
+        LayerMask     m_TargetLayer;
+        bool          m_IsAoe;
+        float         m_AoeRadius;
+        int           m_MaxTargets;
+        Action        m_OnKill;
+        bool          m_Hit;
 
-        Transform     _homingTarget;
-        float         _homingTurnSpeed;
+        Transform     m_HomingTarget;
+        float         m_HomingTurnSpeed;
 
         // ── CC 파라미터 ──────────────────────────────────────────────────
-        float   _ccForce;         // 양수=넉백, 음수=풀인, 0=없음
-        float   _ccDuration;
-        float   _stunDuration;
-        Vector3 _fireSourcePos;   // 시전자 위치 (풀인 방향 계산용)
+        float   m_CcForce;         // 양수=넉백, 음수=풀인, 0=없음
+        float   m_CcDuration;
+        float   m_StunDuration;
+        Vector3 m_FireSourcePos;   // 시전자 위치 (풀인 방향 계산용)
 
-        Rigidbody2D   _rb;
+        Rigidbody2D m_Rb;
 
-        static Sprite _sharedSprite;
+        static Sprite s_SharedSprite;
 
         // ================================================================
         //  Awake
@@ -67,10 +67,10 @@ namespace MonsterKitchen.Combat
 
         void Awake()
         {
-            _rb = GetComponent<Rigidbody2D>();
-            _rb.gravityScale           = 0f;
-            _rb.collisionDetectionMode = CollisionDetectionMode2D.Continuous;
-            _rb.constraints            = RigidbodyConstraints2D.FreezeRotation;
+            m_Rb = GetComponent<Rigidbody2D>();
+            m_Rb.gravityScale           = 0f;
+            m_Rb.collisionDetectionMode = CollisionDetectionMode2D.Continuous;
+            m_Rb.constraints            = RigidbodyConstraints2D.FreezeRotation;
 
             var col = GetComponent<CircleCollider2D>();
             col.isTrigger = true;
@@ -115,24 +115,24 @@ namespace MonsterKitchen.Combat
                          float stunDuration = 0f,
                          Vector3 fireSourcePos = default)
         {
-            _damage          = damage;
-            _attr            = attr;
-            _speed           = speed;
-            _maxDistance     = maxDistance;
-            _targetLayer     = targetLayer;
-            _isAoe           = isAoe;
-            _aoeRadius       = aoeRadius;
-            _maxTargets      = Mathf.Max(1, maxTargets);
-            _onKill          = onKill;
-            _homingTarget    = homingTarget;
-            _homingTurnSpeed = homingTurnSpeed;
-            _startPos        = transform.position;
-            _hit             = false;
+            m_Damage          = damage;
+            m_Attr            = attr;
+            m_Speed           = speed;
+            m_MaxDistance     = maxDistance;
+            m_TargetLayer     = targetLayer;
+            m_IsAoe           = isAoe;
+            m_AoeRadius       = aoeRadius;
+            m_MaxTargets      = Mathf.Max(1, maxTargets);
+            m_OnKill          = onKill;
+            m_HomingTarget    = homingTarget;
+            m_HomingTurnSpeed = homingTurnSpeed;
+            m_StartPos        = transform.position;
+            m_Hit             = false;
 
-            _ccForce       = ccForce;
-            _ccDuration    = ccDuration;
-            _stunDuration  = stunDuration;
-            _fireSourcePos = fireSourcePos == default ? transform.position : fireSourcePos;
+            m_CcForce       = ccForce;
+            m_CcDuration    = ccDuration;
+            m_StunDuration  = stunDuration;
+            m_FireSourcePos = fireSourcePos == default ? transform.position : fireSourcePos;
 
             // 색상: AoE(보라) / 유도(노랑) / 직선(주황)
             var sr = GetComponent<SpriteRenderer>();
@@ -143,7 +143,7 @@ namespace MonsterKitchen.Combat
                         ? new Color(1f, 0.85f, 0.1f)  // 노랑 — 유도
                         : new Color(1f, 0.4f, 0.1f);  // 주황 — 직선
 
-            _rb.linearVelocity = direction.normalized * speed;
+            m_Rb.linearVelocity = direction.normalized * speed;
         }
 
         // ================================================================
@@ -152,32 +152,32 @@ namespace MonsterKitchen.Combat
 
         void Update()
         {
-            if (_hit) return;
+            if (m_Hit) return;
 
             // 사거리 초과 소멸
-            if (Vector3.Distance(transform.position, _startPos) >= _maxDistance)
+            if (Vector3.Distance(transform.position, m_StartPos) >= m_MaxDistance)
             {
                 Destroy(gameObject);
                 return;
             }
 
             // 유도 선회
-            if (_homingTarget != null)
+            if (m_HomingTarget != null)
             {
-                var hp = _homingTarget.GetComponent<Health>();
+                var hp = m_HomingTarget.GetComponent<Health>();
                 if (hp == null || hp.IsDead)
                 {
-                    _homingTarget = null;   // 타겟 소멸 → 직진 유지
+                    m_HomingTarget = null;   // 타겟 소멸 → 직진 유지
                 }
                 else
                 {
-                    Vector2 toTarget     = (Vector2)(_homingTarget.position - transform.position);
-                    float   currentAngle = Mathf.Atan2(_rb.linearVelocity.y, _rb.linearVelocity.x) * Mathf.Rad2Deg;
+                    Vector2 toTarget     = (Vector2)(m_HomingTarget.position - transform.position);
+                    float   currentAngle = Mathf.Atan2(m_Rb.linearVelocity.y, m_Rb.linearVelocity.x) * Mathf.Rad2Deg;
                     float   targetAngle  = Mathf.Atan2(toTarget.y, toTarget.x) * Mathf.Rad2Deg;
-                    float   newAngle     = Mathf.MoveTowardsAngle(currentAngle, targetAngle, _homingTurnSpeed * Time.deltaTime);
-                    _rb.linearVelocity   = new Vector2(
+                    float   newAngle     = Mathf.MoveTowardsAngle(currentAngle, targetAngle, m_HomingTurnSpeed * Time.deltaTime);
+                    m_Rb.linearVelocity  = new Vector2(
                         Mathf.Cos(newAngle * Mathf.Deg2Rad),
-                        Mathf.Sin(newAngle * Mathf.Deg2Rad)) * _speed;
+                        Mathf.Sin(newAngle * Mathf.Deg2Rad)) * m_Speed;
                 }
             }
         }
@@ -188,29 +188,29 @@ namespace MonsterKitchen.Combat
 
         void OnTriggerEnter2D(Collider2D other)
         {
-            if (_hit) return;
-            if (((1 << other.gameObject.layer) & _targetLayer.value) == 0) return;
+            if (m_Hit) return;
+            if (((1 << other.gameObject.layer) & m_TargetLayer.value) == 0) return;
 
-            _hit = true;
+            m_Hit = true;
 
-            if (_isAoe)
+            if (m_IsAoe)
             {
                 var aoeFilter = new ContactFilter2D();
-                aoeFilter.SetLayerMask(_targetLayer);
+                aoeFilter.SetLayerMask(m_TargetLayer);
                 aoeFilter.useTriggers = true;
-                int hitCount = Physics2D.OverlapCircle(transform.position, _aoeRadius, aoeFilter, _overlapBuffer);
+                int hitCount = Physics2D.OverlapCircle(transform.position, m_AoeRadius, aoeFilter, s_OverlapBuffer);
                 int count = 0;
 
                 for (int i = 0; i < hitCount; i++)
                 {
-                    var col = _overlapBuffer[i];
-                    if (count >= _maxTargets) break;
+                    var col = s_OverlapBuffer[i];
+                    if (count >= m_MaxTargets) break;
                     var hp = col.GetComponent<Health>();
                     if (hp == null) continue;
 
                     bool wasDead = hp.IsDead;
-                    hp.TakeDamage(_damage, _attr);
-                    if (!wasDead && hp.IsDead) _onKill?.Invoke();
+                    hp.TakeDamage(m_Damage, m_Attr);
+                    if (!wasDead && hp.IsDead) m_OnKill?.Invoke();
 
                     ApplyProjectileCC(col.transform);
                     count++;
@@ -223,8 +223,8 @@ namespace MonsterKitchen.Combat
                 if (hp != null)
                 {
                     bool wasDead = hp.IsDead;
-                    hp.TakeDamage(_damage, _attr);
-                    if (!wasDead && hp.IsDead) _onKill?.Invoke();
+                    hp.TakeDamage(m_Damage, m_Attr);
+                    if (!wasDead && hp.IsDead) m_OnKill?.Invoke();
                 }
                 ApplyProjectileCC(other.transform);
             }
@@ -243,22 +243,22 @@ namespace MonsterKitchen.Combat
             var cc = target.GetComponent<CrowdControlComponent>();
             if (cc == null) return;
 
-            if (_ccForce > 0f)
+            if (m_CcForce > 0f)
             {
                 // 양수 → 넉백: 투사체 진행 방향으로 밀어냄
-                Vector2 dir = _rb.linearVelocity.sqrMagnitude > 0.01f
-                    ? _rb.linearVelocity.normalized
-                    : ((Vector2)(target.position - _fireSourcePos)).normalized;
-                cc.TryApplyKnockback(dir, _ccForce, _ccDuration);
+                Vector2 dir = m_Rb.linearVelocity.sqrMagnitude > 0.01f
+                    ? m_Rb.linearVelocity.normalized
+                    : ((Vector2)(target.position - m_FireSourcePos)).normalized;
+                cc.TryApplyKnockback(dir, m_CcForce, m_CcDuration);
             }
-            else if (_ccForce < 0f)
+            else if (m_CcForce < 0f)
             {
                 // 음수 → 풀인: 시전자 방향으로 끌어당김
-                cc.TryApplyPullIn((Vector2)_fireSourcePos, -_ccForce, _ccDuration);
+                cc.TryApplyPullIn((Vector2)m_FireSourcePos, -m_CcForce, m_CcDuration);
             }
-            else if (_stunDuration > 0f)
+            else if (m_StunDuration > 0f)
             {
-                cc.TryApplyStun(_stunDuration);
+                cc.TryApplyStun(m_StunDuration);
             }
         }
 
@@ -268,7 +268,7 @@ namespace MonsterKitchen.Combat
 
         static Sprite GetOrCreateSprite()
         {
-            if (_sharedSprite != null) return _sharedSprite;
+            if (s_SharedSprite != null) return s_SharedSprite;
 
             const int size = 64;
             var tex    = new Texture2D(size, size, TextureFormat.RGBA32, false);
@@ -286,9 +286,9 @@ namespace MonsterKitchen.Combat
             tex.SetPixels(pixels);
             tex.Apply();
 
-            _sharedSprite = Sprite.Create(
+            s_SharedSprite = Sprite.Create(
                 tex, new Rect(0, 0, size, size), new Vector2(0.5f, 0.5f), size);
-            return _sharedSprite;
+            return s_SharedSprite;
         }
     }
 }

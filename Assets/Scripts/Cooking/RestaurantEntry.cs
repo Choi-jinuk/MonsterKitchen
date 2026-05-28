@@ -9,12 +9,12 @@ namespace MonsterKitchen.Cooking
     /// </summary>
     public class RestaurantEntry : MonoBehaviour
     {
-        [SerializeField] string targetScene = "RestaurantScene";
+        [SerializeField] string m_TargetScene = "RestaurantScene";
 
         void OnTriggerEnter2D(Collider2D other)
         {
             if (!other.CompareTag("Player")) return;
-            SceneLoader.Instance?.LoadScene(targetScene);
+            SceneLoader.Instance?.LoadScene(m_TargetScene);
         }
     }
 }

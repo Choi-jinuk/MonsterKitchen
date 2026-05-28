@@ -68,9 +68,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c051b5886eeecd14f879298e1d490a2e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MonsterKitchen.Cooking.CookingUI
-  _layer: 20
-  _isPopup: 1
-  _toggleKey: 0
+  m_Layer: 20
+  m_IsPopup: 1
+  m_ToggleKey: 0
 --- !u!1 &8047966772451013677
 GameObject:
   m_ObjectHideFlags: 0
@@ -209,6 +209,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bbf1664260bb81940a3ee788d5a6a07c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MonsterKitchen.UI.InventoryUI
-  _layer: 20
-  _isPopup: 0
-  _toggleKey: 23
+  m_Layer: 20
+  m_IsPopup: 0
+  m_ToggleKey: 23

@@ -14,39 +14,39 @@ namespace MonsterKitchen.Enemy
     public class EnemyHpBar : MonoBehaviour
     {
         [Header("레이아웃")]
-        [SerializeField] Vector3 barOffset = new Vector3(0f, 0.7f, 0f);
-        [SerializeField] float   barWidth  = 0.8f;
-        [SerializeField] float   barHeight = 0.1f;
+        [SerializeField] Vector3 m_BarOffset = new Vector3(0f, 0.7f, 0f);
+        [SerializeField] float   m_BarWidth  = 0.8f;
+        [SerializeField] float   m_BarHeight = 0.1f;
 
         [Header("색상")]
-        [SerializeField] Color colHigh   = new Color(0.15f, 0.85f, 0.15f, 1f); // 초록
-        [SerializeField] Color colMid    = new Color(0.95f, 0.80f, 0.05f, 1f); // 노랑
-        [SerializeField] Color colLow    = new Color(0.90f, 0.15f, 0.10f, 1f); // 빨강
-        [SerializeField] Color colBg     = new Color(0.08f, 0.08f, 0.08f, 0.9f);
-        [SerializeField] Color colBorder = new Color(0f,    0f,    0f,    1f);
+        [SerializeField] Color m_ColHigh   = new Color(0.15f, 0.85f, 0.15f, 1f); // 초록
+        [SerializeField] Color m_ColMid    = new Color(0.95f, 0.80f, 0.05f, 1f); // 노랑
+        [SerializeField] Color m_ColLow    = new Color(0.90f, 0.15f, 0.10f, 1f); // 빨강
+        [SerializeField] Color m_ColBg     = new Color(0.08f, 0.08f, 0.08f, 0.9f);
+        [SerializeField] Color m_ColBorder = new Color(0f,    0f,    0f,    1f);
 
-        Health _health;
-        Slider _slider;
-        Image  _fill;
+        Health m_Health;
+        Slider m_Slider;
+        Image  m_Fill;
 
         // ── Unity 생명주기 ────────────────────────────────────────────
 
         void Awake()
         {
-            _health = GetComponent<Health>();
+            m_Health = GetComponent<Health>();
             BuildSlider();
 
-            if (_health != null)
+            if (m_Health != null)
             {
-                _health.OnHpChanged += UpdateBar;
-                UpdateBar(_health.CurrentHp, _health.MaxHp);
+                m_Health.OnHpChanged += UpdateBar;
+                UpdateBar(m_Health.CurrentHp, m_Health.MaxHp);
             }
         }
 
         void OnDestroy()
         {
-            if (_health != null)
-                _health.OnHpChanged -= UpdateBar;
+            if (m_Health != null)
+                m_Health.OnHpChanged -= UpdateBar;
         }
 
         // ── 슬라이더 빌드 ─────────────────────────────────────────────
@@ -56,7 +56,7 @@ namespace MonsterKitchen.Enemy
             // ── 루트 캔버스 (월드 스페이스) ──────────────────────────
             var canvasGO = new GameObject("HpBar_Canvas");
             canvasGO.transform.SetParent(transform);
-            canvasGO.transform.localPosition = barOffset;
+            canvasGO.transform.localPosition = m_BarOffset;
             canvasGO.transform.localRotation = Quaternion.identity;
             canvasGO.transform.localScale    = Vector3.one * 0.01f; // 픽셀→월드 단위 변환
 
@@ -67,31 +67,31 @@ namespace MonsterKitchen.Enemy
             var canvasRt = canvasGO.GetComponent<RectTransform>();
             // 픽셀 단위로 설계 후 scale 0.01 로 월드 단위 변환
             // barWidth=0.8 → 80픽셀, barHeight=0.1 → 10픽셀
-            canvasRt.sizeDelta = new Vector2(barWidth * 100f, barHeight * 100f);
+            canvasRt.sizeDelta = new Vector2(m_BarWidth * 100f, m_BarHeight * 100f);
 
             // ── 외곽선 (Border) ───────────────────────────────────────
             var borderGO  = new GameObject("Border");
             borderGO.transform.SetParent(canvasGO.transform, false);
             var borderImg = borderGO.AddComponent<Image>();
-            borderImg.color = colBorder;
+            borderImg.color = m_ColBorder;
             Stretch(borderImg.rectTransform, 0, 0);
 
             // ── 배경 (BG) ─────────────────────────────────────────────
             var bgGO  = new GameObject("BG");
             bgGO.transform.SetParent(canvasGO.transform, false);
             var bgImg = bgGO.AddComponent<Image>();
-            bgImg.color = colBg;
+            bgImg.color = m_ColBg;
             Stretch(bgImg.rectTransform, 1, 1); // 1px 안쪽 = 외곽선 효과
 
             // ── Slider ────────────────────────────────────────────────
             var sliderGO = new GameObject("Slider");
             sliderGO.transform.SetParent(canvasGO.transform, false);
-            _slider           = sliderGO.AddComponent<Slider>();
-            _slider.minValue  = 0f;
-            _slider.maxValue  = 1f;
-            _slider.value     = 1f;
-            _slider.wholeNumbers = false;
-            _slider.direction = Slider.Direction.LeftToRight;
+            m_Slider           = sliderGO.AddComponent<Slider>();
+            m_Slider.minValue  = 0f;
+            m_Slider.maxValue  = 1f;
+            m_Slider.value     = 1f;
+            m_Slider.wholeNumbers = false;
+            m_Slider.direction = Slider.Direction.LeftToRight;
             Stretch(sliderGO.GetComponent<RectTransform>(), 2, 2); // 배경보다 1px 더 안쪽
 
             // Fill Area
@@ -106,16 +106,16 @@ namespace MonsterKitchen.Enemy
             // Fill
             var fillGO = new GameObject("Fill");
             fillGO.transform.SetParent(fillAreaGO.transform, false);
-            _fill = fillGO.AddComponent<Image>();
-            _fill.color = colHigh;
-            var fillRt = _fill.rectTransform;
+            m_Fill = fillGO.AddComponent<Image>();
+            m_Fill.color = m_ColHigh;
+            var fillRt = m_Fill.rectTransform;
             fillRt.anchorMin = Vector2.zero;
             fillRt.anchorMax = Vector2.one;
             fillRt.offsetMin = Vector2.zero;
             fillRt.offsetMax = Vector2.zero;
 
             // Slider에 fillRect 연결
-            _slider.fillRect = fillRt;
+            m_Slider.fillRect = fillRt;
         }
 
         static void Stretch(RectTransform rt, float insetH, float insetV)
@@ -130,12 +130,12 @@ namespace MonsterKitchen.Enemy
 
         void UpdateBar(int current, int max)
         {
-            if (_slider == null || _fill == null) return;
+            if (m_Slider == null || m_Fill == null) return;
             float ratio = max > 0 ? (float)current / max : 0f;
-            _slider.value = ratio;
-            _fill.color   = ratio > 0.5f ? colHigh
-                          : ratio > 0.25f ? colMid
-                          : colLow;
+            m_Slider.value = ratio;
+            m_Fill.color   = ratio > 0.5f ? m_ColHigh
+                           : ratio > 0.25f ? m_ColMid
+                           : m_ColLow;
         }
     }
 }

@@ -13,379 +13,1445 @@ MonoBehaviour:
   m_Name: TableData
   m_EditorClassIdentifier: Assembly-CSharp::MonsterKitchen.Data.TableData
   Monsters:
-    _dict:
-      _keys: e9030000ea030000eb030000ec030000ed030000
-      _values:
-      - id: 1001
-        displayName: "\uCD08\uB85D \uC2AC\uB77C\uC784"
-        description: "\uC5D0\uBC84\uADF8\uB9B0 \uC232\uC5D0 \uAC00\uC7A5 \uD754\uD788
+    m_Dict:
+      m_Keys: e9030000ea030000eb030000ec030000ed030000
+      m_Values:
+      - Id: 1001
+        DisplayName: "\uCD08\uB85D \uC2AC\uB77C\uC784"
+        Description: "\uC5D0\uBC84\uADF8\uB9B0 \uC232\uC5D0 \uAC00\uC7A5 \uD754\uD788
           \uCD9C\uBAB0\uD558\uB294 \uC824\uB9AC\uD615 \uBAAC\uC2A4\uD130. \uB3C5\uC131
           \uC810\uC561\uC744 \uBD84\uBE44\uD55C\uB2E4."
-        hp: 30
-        attack: 5
-        defense: 2
-        attribute: 6
-        rarity: 0
-        skills: []
-        dropTableId: 5001
-        prefabAddress: prefab/monster/1001
-        spriteAddress: sprite/monster/1001
-        immuneToKnockback: 0
-        immuneToStun: 0
-        immuneToPullIn: 0
-      - id: 1002
-        displayName: "\uBD88\uAF43 \uC2AC\uB77C\uC784"
-        description: "\uC6A9\uC554 \uC9C0\uB300\uC5D0\uC11C \uD758\uB7EC\uC628 \uC2AC\uB77C\uC784.
+        Hp: 30
+        Attack: 5
+        Defense: 2
+        MoveSpeed: 5
+        Attribute: 6
+        Rarity: 0
+        SkillGroupIds:
+        - SGD_101
+        SkillGroups:
+        - Id: 10101
+          SkillGroupId: SGD_101
+          SkillIconAddress: sprite/skill/SGD_101
+          SkillName: "\uC2AC\uB77C\uC784 \uB36E\uCE58\uAE30"
+          Description: 
+          StepIds:
+          - 11301
+          SkillChain:
+          - Id: 11301
+            SkillId: SKL_M01
+            SkillName: "\uC2AC\uB77C\uC784 \uB36E\uCE58\uAE30"
+            Cooltime: 1.2
+            ComboWindow: 0
+            DamageMultiplier: 1
+            SearchRange: 1.5
+            AttackRange: 0.7
+            MaxTargets: 3
+            MissileSpeed: 0
+            MissileMaxRange: 8
+            CcForce: 3
+            CcDuration: 0.2
+            StunDuration: 0
+            AnimTriggerOverride: Attack
+            ProjectilePrefabAddress: prefab/projectile/SKL_M01
+          SkillCooltime: 0
+          AllowedWeaponTypes: 
+        DropTableId: 5001
+        PrefabAddress: prefab/monster/1001
+        SpriteAddress: sprite/monster/1001
+        BtAssetAddress: bt/monster/1001
+        ImmuneToKnockback: 0
+        ImmuneToStun: 0
+        ImmuneToPullIn: 0
+      - Id: 1002
+        DisplayName: "\uBD88\uAF43 \uC2AC\uB77C\uC784"
+        Description: "\uC6A9\uC554 \uC9C0\uB300\uC5D0\uC11C \uD758\uB7EC\uC628 \uC2AC\uB77C\uC784.
           \uBAB8\uCCB4\uAC00 \uB728\uAC81\uAC8C \uB2EC\uC544\uC62C\uB77C \uC788\uB2E4."
-        hp: 35
-        attack: 8
-        defense: 2
-        attribute: 1
-        rarity: 0
-        skills: []
-        dropTableId: 5002
-        prefabAddress: prefab/monster/1002
-        spriteAddress: sprite/monster/1002
-        immuneToKnockback: 0
-        immuneToStun: 0
-        immuneToPullIn: 0
-      - id: 1003
-        displayName: "\uC232 \uACE0\uBE14\uB9B0"
-        description: "\uC5D0\uBC84\uADF8\uB9B0 \uC232\uC744 \uADFC\uAC70\uC9C0\uB85C
+        Hp: 35
+        Attack: 8
+        Defense: 2
+        MoveSpeed: 2
+        Attribute: 1
+        Rarity: 0
+        SkillGroupIds:
+        - SGD_101
+        SkillGroups:
+        - Id: 10101
+          SkillGroupId: SGD_101
+          SkillIconAddress: sprite/skill/SGD_101
+          SkillName: "\uC2AC\uB77C\uC784 \uB36E\uCE58\uAE30"
+          Description: 
+          StepIds:
+          - 11301
+          SkillChain:
+          - Id: 11301
+            SkillId: SKL_M01
+            SkillName: "\uC2AC\uB77C\uC784 \uB36E\uCE58\uAE30"
+            Cooltime: 1.2
+            ComboWindow: 0
+            DamageMultiplier: 1
+            SearchRange: 1.5
+            AttackRange: 0.7
+            MaxTargets: 3
+            MissileSpeed: 0
+            MissileMaxRange: 8
+            CcForce: 3
+            CcDuration: 0.2
+            StunDuration: 0
+            AnimTriggerOverride: Attack
+            ProjectilePrefabAddress: prefab/projectile/SKL_M01
+          SkillCooltime: 0
+          AllowedWeaponTypes: 
+        DropTableId: 5002
+        PrefabAddress: prefab/monster/1002
+        SpriteAddress: sprite/monster/1002
+        BtAssetAddress: bt/monster/1002
+        ImmuneToKnockback: 0
+        ImmuneToStun: 0
+        ImmuneToPullIn: 0
+      - Id: 1003
+        DisplayName: "\uC232 \uACE0\uBE14\uB9B0"
+        Description: "\uC5D0\uBC84\uADF8\uB9B0 \uC232\uC744 \uADFC\uAC70\uC9C0\uB85C
           \uC0BC\uB294 \uC18C\uD615 \uC778\uAC04\uD615 \uBAAC\uC2A4\uD130. \uBF08
           \uBABD\uB465\uC774\uB97C \uD718\uB450\uB978\uB2E4."
-        hp: 45
-        attack: 10
-        defense: 5
-        attribute: 0
-        rarity: 1
-        skills: []
-        dropTableId: 5003
-        prefabAddress: prefab/monster/1003
-        spriteAddress: sprite/monster/1003
-        immuneToKnockback: 0
-        immuneToStun: 0
-        immuneToPullIn: 0
-      - id: 1004
-        displayName: "\uAC70\uB300 \uBC84\uC12F\uC778\uAC04"
-        description: "\uC232 \uAE4A\uC740 \uACF3\uC758 \uADE0\uB958\uC5D0\uC11C \uD0DC\uC5B4\uB09C
+        Hp: 45
+        Attack: 10
+        Defense: 5
+        MoveSpeed: 3
+        Attribute: 0
+        Rarity: 1
+        SkillGroupIds:
+        - SGD_102
+        SkillGroups:
+        - Id: 10102
+          SkillGroupId: SGD_102
+          SkillIconAddress: sprite/skill/SGD_102
+          SkillName: "\uACE0\uBE14\uB9B0 \uBABD\uB465\uC774\uC9C8"
+          Description: 
+          StepIds:
+          - 11302
+          SkillChain:
+          - Id: 11302
+            SkillId: SKL_M02
+            SkillName: "\uACE0\uBE14\uB9B0 \uBABD\uB465\uC774"
+            Cooltime: 1
+            ComboWindow: 0
+            DamageMultiplier: 1.2
+            SearchRange: 2
+            AttackRange: 0.9
+            MaxTargets: 1
+            MissileSpeed: 0
+            MissileMaxRange: 8
+            CcForce: 4
+            CcDuration: 0.25
+            StunDuration: 0
+            AnimTriggerOverride: Attack
+            ProjectilePrefabAddress: prefab/projectile/SKL_M02
+          SkillCooltime: 0
+          AllowedWeaponTypes: 
+        DropTableId: 5003
+        PrefabAddress: prefab/monster/1003
+        SpriteAddress: sprite/monster/1003
+        BtAssetAddress: bt/monster/1003
+        ImmuneToKnockback: 0
+        ImmuneToStun: 0
+        ImmuneToPullIn: 0
+      - Id: 1004
+        DisplayName: "\uAC70\uB300 \uBC84\uC12F\uC778\uAC04"
+        Description: "\uC232 \uAE4A\uC740 \uACF3\uC758 \uADE0\uB958\uC5D0\uC11C \uD0DC\uC5B4\uB09C
           \uBAAC\uC2A4\uD130. \uD3EC\uC790\uB97C \uBFDC\uC5B4 \uC2DC\uC57C\uB97C
           \uD750\uB9B0\uB2E4."
-        hp: 60
-        attack: 8
-        defense: 8
-        attribute: 6
-        rarity: 1
-        skills: []
-        dropTableId: 5004
-        prefabAddress: prefab/monster/1004
-        spriteAddress: sprite/monster/1004
-        immuneToKnockback: 0
-        immuneToStun: 0
-        immuneToPullIn: 0
-      - id: 1005
-        displayName: "\uC232 \uBCF4\uC2A4 \u2014 \uADF8\uB9B0 \uC6DC"
-        description: "\uC5D0\uBC84\uADF8\uB9B0 \uC232 \uC9C0\uD558\uC5D0 \uC11C\uC2DD\uD558\uB294
+        Hp: 60
+        Attack: 8
+        Defense: 8
+        MoveSpeed: 1.5
+        Attribute: 6
+        Rarity: 1
+        SkillGroupIds:
+        - SGD_103
+        SkillGroups:
+        - Id: 10103
+          SkillGroupId: SGD_103
+          SkillIconAddress: sprite/skill/SGD_103
+          SkillName: "\uBC84\uC12F \uD3EC\uC790 \uD22C\uC0AC"
+          Description: 
+          StepIds:
+          - 11303
+          SkillChain:
+          - Id: 11303
+            SkillId: SKL_M03
+            SkillName: "\uD3EC\uC790 \uD22C\uC0AC"
+            Cooltime: 2
+            ComboWindow: 0
+            DamageMultiplier: 0.8
+            SearchRange: 5
+            AttackRange: 0.5
+            MaxTargets: 3
+            MissileSpeed: 4
+            MissileMaxRange: 8
+            CcForce: 0
+            CcDuration: 0.25
+            StunDuration: 0.5
+            AnimTriggerOverride: Attack
+            ProjectilePrefabAddress: prefab/projectile/SKL_M03
+          SkillCooltime: 0
+          AllowedWeaponTypes: 
+        DropTableId: 5004
+        PrefabAddress: prefab/monster/1004
+        SpriteAddress: sprite/monster/1004
+        BtAssetAddress: bt/monster/1004
+        ImmuneToKnockback: 0
+        ImmuneToStun: 0
+        ImmuneToPullIn: 0
+      - Id: 1005
+        DisplayName: "\uC232 \uBCF4\uC2A4 \u2014 \uADF8\uB9B0 \uC6DC"
+        Description: "\uC5D0\uBC84\uADF8\uB9B0 \uC232 \uC9C0\uD558\uC5D0 \uC11C\uC2DD\uD558\uB294
           \uB300\uD615 \uC9C0\uB801\uC774 \uBAAC\uC2A4\uD130. \uB545\uC744 \uD30C\uACE0\uB4E4\uC5B4
           \uAE30\uC2B5\uD55C\uB2E4."
-        hp: 200
-        attack: 18
-        defense: 10
-        attribute: 4
-        rarity: 2
-        skills: []
-        dropTableId: 5005
-        prefabAddress: prefab/monster/1005
-        spriteAddress: sprite/monster/1005
-        immuneToKnockback: 0
-        immuneToStun: 1
-        immuneToPullIn: 0
+        Hp: 200
+        Attack: 18
+        Defense: 10
+        MoveSpeed: 2.5
+        Attribute: 4
+        Rarity: 2
+        SkillGroupIds:
+        - SGD_104
+        - SGD_105
+        SkillGroups:
+        - Id: 10104
+          SkillGroupId: SGD_104
+          SkillIconAddress: sprite/skill/SGD_104
+          SkillName: "\uC6DC \uBB3C\uAE30"
+          Description: 
+          StepIds:
+          - 11304
+          SkillChain:
+          - Id: 11304
+            SkillId: SKL_M04
+            SkillName: "\uC6DC \uBB3C\uAE30"
+            Cooltime: 1.5
+            ComboWindow: 0
+            DamageMultiplier: 1.5
+            SearchRange: 2
+            AttackRange: 1
+            MaxTargets: 1
+            MissileSpeed: 0
+            MissileMaxRange: 8
+            CcForce: 6
+            CcDuration: 0.3
+            StunDuration: 0
+            AnimTriggerOverride: Attack
+            ProjectilePrefabAddress: prefab/projectile/SKL_M04
+          SkillCooltime: 0
+          AllowedWeaponTypes: 
+        - Id: 10105
+          SkillGroupId: SGD_105
+          SkillIconAddress: sprite/skill/SGD_105
+          SkillName: "\uC6DC \uB3CC\uC9C4"
+          Description: 
+          StepIds:
+          - 11305
+          SkillChain:
+          - Id: 11305
+            SkillId: SKL_M05
+            SkillName: "\uC6DC \uB3CC\uC9C4"
+            Cooltime: 3
+            ComboWindow: 0
+            DamageMultiplier: 2
+            SearchRange: 6
+            AttackRange: 1.2
+            MaxTargets: 3
+            MissileSpeed: 0
+            MissileMaxRange: 8
+            CcForce: 8
+            CcDuration: 0.4
+            StunDuration: 0.3
+            AnimTriggerOverride: Rush
+            ProjectilePrefabAddress: prefab/projectile/SKL_M05
+          SkillCooltime: 0
+          AllowedWeaponTypes: 
+        DropTableId: 5005
+        PrefabAddress: prefab/monster/1005
+        SpriteAddress: sprite/monster/1005
+        BtAssetAddress: bt/monster/1005
+        ImmuneToKnockback: 0
+        ImmuneToStun: 1
+        ImmuneToPullIn: 0
   Ingredients:
-    _dict:
-      _keys: d1070000d2070000d3070000d4070000d5070000d6070000d7070000d8070000
-      _values:
-      - id: 2001
-        displayName: "\uC2AC\uB77C\uC784 \uC824\uB9AC"
-        description: "\uCD08\uB85D \uC2AC\uB77C\uC784\uC5D0\uC11C \uCC44\uCDE8\uD55C
+    m_Dict:
+      m_Keys: d1070000d2070000d3070000d4070000d5070000d6070000d7070000d8070000
+      m_Values:
+      - Id: 2001
+        DisplayName: "\uC2AC\uB77C\uC784 \uC824\uB9AC"
+        Description: "\uCD08\uB85D \uC2AC\uB77C\uC784\uC5D0\uC11C \uCC44\uCDE8\uD55C
           \uD22C\uBA85\uD55C \uC824\uB9AC. \uD0C4\uB825\uC774 \uC788\uACE0 \uB2EC\uCF64\uD558\uB2E4."
-        attribute: 6
-        rarity: 0
-        defaultState: 0
-        sourceMonsterIds: 1001
-        spriteAddress: sprite/ingredient/2001
-      - id: 2002
-        displayName: "\uBD88\uAF43 \uC2AC\uB77C\uC784 \uCF54\uC5B4"
-        description: "\uBD88\uAF43 \uC2AC\uB77C\uC784\uC758 \uD575\uC2EC \uBD80\uC704.
+        Attribute: 6
+        Rarity: 0
+        DefaultState: 0
+        SourceMonsterIds: 1001
+        SpriteAddress: sprite/ingredient/2001
+      - Id: 2002
+        DisplayName: "\uBD88\uAF43 \uC2AC\uB77C\uC784 \uCF54\uC5B4"
+        Description: "\uBD88\uAF43 \uC2AC\uB77C\uC784\uC758 \uD575\uC2EC \uBD80\uC704.
           \uC2DD\uD788\uBA74 \uB9E4\uCF64\uD55C \uD5A5\uC774 \uB09C\uB2E4."
-        attribute: 1
-        rarity: 0
-        defaultState: 0
-        sourceMonsterIds: 1002
-        spriteAddress: sprite/ingredient/2002
-      - id: 2003
-        displayName: "\uACE0\uBE14\uB9B0 \uBF08"
-        description: "\uC232 \uACE0\uBE14\uB9B0\uC758 \uB2E8\uB2E8\uD55C \uC18C\uD615
+        Attribute: 1
+        Rarity: 0
+        DefaultState: 0
+        SourceMonsterIds: 1002
+        SpriteAddress: sprite/ingredient/2002
+      - Id: 2003
+        DisplayName: "\uACE0\uBE14\uB9B0 \uBF08"
+        Description: "\uC232 \uACE0\uBE14\uB9B0\uC758 \uB2E8\uB2E8\uD55C \uC18C\uD615
           \uBF08. \uC721\uC218 \uC7AC\uB8CC\uB85C \uD65C\uC6A9\uB41C\uB2E4."
-        attribute: 0
-        rarity: 0
-        defaultState: 0
-        sourceMonsterIds: 1003
-        spriteAddress: sprite/ingredient/2003
-      - id: 2004
-        displayName: "\uACE0\uBE14\uB9B0 \uACE0\uAE30"
-        description: "\uC232 \uACE0\uBE14\uB9B0\uC758 \uC0B4\uCF54\uAE30. \uC7A1\uB0B4\uAC00
+        Attribute: 0
+        Rarity: 0
+        DefaultState: 0
+        SourceMonsterIds: 1003
+        SpriteAddress: sprite/ingredient/2003
+      - Id: 2004
+        DisplayName: "\uACE0\uBE14\uB9B0 \uACE0\uAE30"
+        Description: "\uC232 \uACE0\uBE14\uB9B0\uC758 \uC0B4\uCF54\uAE30. \uC7A1\uB0B4\uAC00
           \uC788\uC5B4 \uC190\uC9C8\uC774 \uD544\uC694\uD558\uB2E4."
-        attribute: 0
-        rarity: 1
-        defaultState: 0
-        sourceMonsterIds: 1003
-        spriteAddress: sprite/ingredient/2004
-      - id: 2005
-        displayName: "\uBC84\uC12F\uC778\uAC04 \uAC13"
-        description: "\uAC70\uB300 \uBC84\uC12F\uC778\uAC04\uC758 \uC6B0\uC0B0 \uBD80\uC704.
+        Attribute: 0
+        Rarity: 1
+        DefaultState: 0
+        SourceMonsterIds: 1003
+        SpriteAddress: sprite/ingredient/2004
+      - Id: 2005
+        DisplayName: "\uBC84\uC12F\uC778\uAC04 \uAC13"
+        Description: "\uAC70\uB300 \uBC84\uC12F\uC778\uAC04\uC758 \uC6B0\uC0B0 \uBD80\uC704.
           \uD48D\uBBF8\uAC00 \uAE4A\uACE0 \uB450\uD23C\uD558\uB2E4."
-        attribute: 6
-        rarity: 1
-        defaultState: 0
-        sourceMonsterIds: 1004
-        spriteAddress: sprite/ingredient/2005
-      - id: 2006
-        displayName: "\uBC84\uC12F\uC778\uAC04 \uD3EC\uC790"
-        description: "\uBC84\uC12F\uC778\uAC04\uC774 \uBD84\uBE44\uD558\uB294 \uD3EC\uC790.
+        Attribute: 6
+        Rarity: 1
+        DefaultState: 0
+        SourceMonsterIds: 1004
+        SpriteAddress: sprite/ingredient/2005
+      - Id: 2006
+        DisplayName: "\uBC84\uC12F\uC778\uAC04 \uD3EC\uC790"
+        Description: "\uBC84\uC12F\uC778\uAC04\uC774 \uBD84\uBE44\uD558\uB294 \uD3EC\uC790.
           \uC18C\uB7C9\uC774\uBA74 \uD5A5\uC2E0\uB8CC\uB85C \uC4F8 \uC218 \uC788\uB2E4."
-        attribute: 6
-        rarity: 1
-        defaultState: 0
-        sourceMonsterIds: 1004
-        spriteAddress: sprite/ingredient/2006
-      - id: 2007
-        displayName: "\uADF8\uB9B0 \uC6DC \uACE0\uAE30"
-        description: "\uADF8\uB9B0 \uC6DC\uC758 \uB300\uD615 \uC0B4\uCF54\uAE30.
+        Attribute: 6
+        Rarity: 1
+        DefaultState: 0
+        SourceMonsterIds: 1004
+        SpriteAddress: sprite/ingredient/2006
+      - Id: 2007
+        DisplayName: "\uADF8\uB9B0 \uC6DC \uACE0\uAE30"
+        Description: "\uADF8\uB9B0 \uC6DC\uC758 \uB300\uD615 \uC0B4\uCF54\uAE30.
           \uCAC4\uAE43\uD558\uACE0 \uC601\uC591\uC774 \uD48D\uBD80\uD558\uB2E4."
-        attribute: 4
-        rarity: 2
-        defaultState: 0
-        sourceMonsterIds: 1005
-        spriteAddress: sprite/ingredient/2007
-      - id: 2008
-        displayName: "\uADF8\uB9B0 \uC6DC \uAECD\uC9C8"
-        description: "\uADF8\uB9B0 \uC6DC\uC758 \uB450\uAEBC\uC6B4 \uC678\uD53C.
+        Attribute: 4
+        Rarity: 2
+        DefaultState: 0
+        SourceMonsterIds: 1005
+        SpriteAddress: sprite/ingredient/2007
+      - Id: 2008
+        DisplayName: "\uADF8\uB9B0 \uC6DC \uAECD\uC9C8"
+        Description: "\uADF8\uB9B0 \uC6DC\uC758 \uB450\uAEBC\uC6B4 \uC678\uD53C.
           \uC624\uB798 \uB053\uC774\uBA74 \uAD6D\uBB3C\uC774 \uC9C4\uD574\uC9C4\uB2E4."
-        attribute: 4
-        rarity: 2
-        defaultState: 0
-        sourceMonsterIds: 1005
-        spriteAddress: sprite/ingredient/2008
+        Attribute: 4
+        Rarity: 2
+        DefaultState: 0
+        SourceMonsterIds: 1005
+        SpriteAddress: sprite/ingredient/2008
   Foods:
-    _dict:
-      _keys: b90b0000ba0b0000bb0b0000bc0b0000bd0b0000
-      _values:
-      - id: 3001
-        displayName: "\uC2AC\uB77C\uC784 \uC824\uB9AC \uB514\uC800\uD2B8"
-        description: "\uB2EC\uCF64\uD55C \uC2AC\uB77C\uC784 \uC824\uB9AC\uB97C \uAD73\uD600
+    m_Dict:
+      m_Keys: b90b0000ba0b0000bb0b0000bc0b0000bd0b0000
+      m_Values:
+      - Id: 3001
+        DisplayName: "\uC2AC\uB77C\uC784 \uC824\uB9AC \uB514\uC800\uD2B8"
+        Description: "\uB2EC\uCF64\uD55C \uC2AC\uB77C\uC784 \uC824\uB9AC\uB97C \uAD73\uD600
           \uB9CC\uB4E0 \uB514\uC800\uD2B8. \uD68C\uBCF5 \uD6A8\uACFC\uAC00 \uC788\uB2E4."
-        basePrice: 50
-        hpRestore: 20
-        buffAttribute: 0
-        buffMultiplier: 1
-        buffDurationDays: 0
-        goodMultiplier: 1.2
-        perfectMultiplier: 1.5
-        legendaryMultiplier: 2
-        spriteAddress: sprite/food/3001
-      - id: 3002
-        displayName: "\uB9E4\uCF64 \uC2AC\uB77C\uC784 \uBCF6\uC74C"
-        description: "\uBD88\uAF43 \uC2AC\uB77C\uC784 \uCF54\uC5B4\uB97C \uBCF6\uC544\uB0B8
+        BasePrice: 50
+        HpRestore: 20
+        BuffAttribute: 0
+        BuffMultiplier: 1
+        BuffDurationDays: 0
+        GoodMultiplier: 1.2
+        PerfectMultiplier: 1.5
+        LegendaryMultiplier: 2
+        SpriteAddress: sprite/food/3001
+      - Id: 3002
+        DisplayName: "\uB9E4\uCF64 \uC2AC\uB77C\uC784 \uBCF6\uC74C"
+        Description: "\uBD88\uAF43 \uC2AC\uB77C\uC784 \uCF54\uC5B4\uB97C \uBCF6\uC544\uB0B8
           \uB9E4\uCF64\uD55C \uC694\uB9AC. \uACF5\uACA9\uB825\uC774 \uC624\uB978\uB2E4."
-        basePrice: 80
-        hpRestore: 10
-        buffAttribute: 1
-        buffMultiplier: 1.15
-        buffDurationDays: 1
-        goodMultiplier: 1.2
-        perfectMultiplier: 1.5
-        legendaryMultiplier: 2
-        spriteAddress: sprite/food/3002
-      - id: 3003
-        displayName: "\uACE0\uBE14\uB9B0 \uBF08 \uC721\uC218"
-        description: "\uACE0\uBE14\uB9B0 \uBF08\uB97C \uC6B0\uB824\uB0B8 \uAE4A\uC740
+        BasePrice: 80
+        HpRestore: 10
+        BuffAttribute: 1
+        BuffMultiplier: 1.15
+        BuffDurationDays: 1
+        GoodMultiplier: 1.2
+        PerfectMultiplier: 1.5
+        LegendaryMultiplier: 2
+        SpriteAddress: sprite/food/3002
+      - Id: 3003
+        DisplayName: "\uACE0\uBE14\uB9B0 \uBF08 \uC721\uC218"
+        Description: "\uACE0\uBE14\uB9B0 \uBF08\uB97C \uC6B0\uB824\uB0B8 \uAE4A\uC740
           \uC721\uC218. \uCCB4\uB825 \uD68C\uBCF5\uC5D0 \uD0C1\uC6D4\uD558\uB2E4."
-        basePrice: 70
-        hpRestore: 40
-        buffAttribute: 0
-        buffMultiplier: 1
-        buffDurationDays: 0
-        goodMultiplier: 1.2
-        perfectMultiplier: 1.5
-        legendaryMultiplier: 2
-        spriteAddress: sprite/food/3003
-      - id: 3004
-        displayName: "\uBC84\uC12F \uAC13 \uAD6C\uC774"
-        description: "\uBC84\uC12F\uC778\uAC04\uC758 \uAC13\uC744 \uB450\uD23C\uD558\uAC8C
+        BasePrice: 70
+        HpRestore: 40
+        BuffAttribute: 0
+        BuffMultiplier: 1
+        BuffDurationDays: 0
+        GoodMultiplier: 1.2
+        PerfectMultiplier: 1.5
+        LegendaryMultiplier: 2
+        SpriteAddress: sprite/food/3003
+      - Id: 3004
+        DisplayName: "\uBC84\uC12F \uAC13 \uAD6C\uC774"
+        Description: "\uBC84\uC12F\uC778\uAC04\uC758 \uAC13\uC744 \uB450\uD23C\uD558\uAC8C
           \uC370\uC5B4 \uAD6C\uC6B4 \uC694\uB9AC. \uBC29\uC5B4\uB825\uC774 \uC624\uB978\uB2E4."
-        basePrice: 90
-        hpRestore: 15
-        buffAttribute: 6
-        buffMultiplier: 1.1
-        buffDurationDays: 1
-        goodMultiplier: 1.2
-        perfectMultiplier: 1.5
-        legendaryMultiplier: 2
-        spriteAddress: sprite/food/3004
-      - id: 3005
-        displayName: "\uADF8\uB9B0 \uC6DC \uC2A4\uD14C\uC774\uD06C"
-        description: "\uADF8\uB9B0 \uC6DC \uACE0\uAE30\uB97C \uB450\uAECD\uAC8C \uC36C
+        BasePrice: 90
+        HpRestore: 15
+        BuffAttribute: 6
+        BuffMultiplier: 1.1
+        BuffDurationDays: 1
+        GoodMultiplier: 1.2
+        PerfectMultiplier: 1.5
+        LegendaryMultiplier: 2
+        SpriteAddress: sprite/food/3004
+      - Id: 3005
+        DisplayName: "\uADF8\uB9B0 \uC6DC \uC2A4\uD14C\uC774\uD06C"
+        Description: "\uADF8\uB9B0 \uC6DC \uACE0\uAE30\uB97C \uB450\uAECD\uAC8C \uC36C
           \uACE0\uAE09 \uC2A4\uD14C\uC774\uD06C. \uBAA8\uB4E0 \uB2A5\uB825\uCE58\uAC00
           \uC0C1\uC2B9\uD55C\uB2E4."
-        basePrice: 250
-        hpRestore: 50
-        buffAttribute: 4
-        buffMultiplier: 1.2
-        buffDurationDays: 2
-        goodMultiplier: 1.2
-        perfectMultiplier: 1.5
-        legendaryMultiplier: 2
-        spriteAddress: sprite/food/3005
+        BasePrice: 250
+        HpRestore: 50
+        BuffAttribute: 4
+        BuffMultiplier: 1.2
+        BuffDurationDays: 2
+        GoodMultiplier: 1.2
+        PerfectMultiplier: 1.5
+        LegendaryMultiplier: 2
+        SpriteAddress: sprite/food/3005
   Recipes:
-    _dict:
-      _keys: a10f0000a20f0000a30f0000a40f0000a50f0000
-      _values:
-      - id: 4001
-        displayName: "\uC2AC\uB77C\uC784 \uC824\uB9AC \uB514\uC800\uD2B8 \uB808\uC2DC\uD53C"
-        description: "\uC2AC\uB77C\uC784 \uC824\uB9AC 2\uAC1C\uB97C \uD2C0\uC5D0
+    m_Dict:
+      m_Keys: a10f0000a20f0000a30f0000a40f0000a50f0000
+      m_Values:
+      - Id: 4001
+        DisplayName: "\uC2AC\uB77C\uC784 \uC824\uB9AC \uB514\uC800\uD2B8 \uB808\uC2DC\uD53C"
+        Description: "\uC2AC\uB77C\uC784 \uC824\uB9AC 2\uAC1C\uB97C \uD2C0\uC5D0
           \uAD73\uD600 \uC644\uC131\uD558\uB294 \uAE30\uBCF8 \uB514\uC800\uD2B8."
-        ingredients:
-        - ingredientId: 2001
-          quantity: 2
-        resultFoodId: 3001
-        cookTimeSeconds: 10
-        unlockDay: 0
-        isUnlockedByDefault: 1
-      - id: 4002
-        displayName: "\uB9E4\uCF64 \uC2AC\uB77C\uC784 \uBCF6\uC74C \uB808\uC2DC\uD53C"
-        description: "\uBD88\uAF43 \uC2AC\uB77C\uC784 \uCF54\uC5B4 1\uAC1C\uC640
+        Ingredients:
+        - IngredientId: 2001
+          Quantity: 2
+        ResultFoodId: 3001
+        CookTimeSeconds: 10
+        UnlockDay: 0
+        IsUnlockedByDefault: 1
+      - Id: 4002
+        DisplayName: "\uB9E4\uCF64 \uC2AC\uB77C\uC784 \uBCF6\uC74C \uB808\uC2DC\uD53C"
+        Description: "\uBD88\uAF43 \uC2AC\uB77C\uC784 \uCF54\uC5B4 1\uAC1C\uC640
           \uC2AC\uB77C\uC784 \uC824\uB9AC 1\uAC1C\uB97C \uBCF6\uB294\uB2E4."
-        ingredients:
-        - ingredientId: 2002
-          quantity: 1
-        - ingredientId: 2001
-          quantity: 1
-        resultFoodId: 3002
-        cookTimeSeconds: 15
-        unlockDay: 0
-        isUnlockedByDefault: 1
-      - id: 4003
-        displayName: "\uACE0\uBE14\uB9B0 \uBF08 \uC721\uC218 \uB808\uC2DC\uD53C"
-        description: "\uACE0\uBE14\uB9B0 \uBF08 3\uAC1C\uB97C \uC624\uB798 \uB053\uC5EC
+        Ingredients:
+        - IngredientId: 2002
+          Quantity: 1
+        - IngredientId: 2001
+          Quantity: 1
+        ResultFoodId: 3002
+        CookTimeSeconds: 15
+        UnlockDay: 0
+        IsUnlockedByDefault: 1
+      - Id: 4003
+        DisplayName: "\uACE0\uBE14\uB9B0 \uBF08 \uC721\uC218 \uB808\uC2DC\uD53C"
+        Description: "\uACE0\uBE14\uB9B0 \uBF08 3\uAC1C\uB97C \uC624\uB798 \uB053\uC5EC
           \uC721\uC218\uB97C \uB0B8\uB2E4."
-        ingredients:
-        - ingredientId: 2003
-          quantity: 3
-        resultFoodId: 3003
-        cookTimeSeconds: 20
-        unlockDay: 1
-        isUnlockedByDefault: 0
-      - id: 4004
-        displayName: "\uBC84\uC12F \uAC13 \uAD6C\uC774 \uB808\uC2DC\uD53C"
-        description: "\uBC84\uC12F\uC778\uAC04 \uAC13 2\uAC1C\uB97C \uD32C\uC5D0
+        Ingredients:
+        - IngredientId: 2003
+          Quantity: 3
+        ResultFoodId: 3003
+        CookTimeSeconds: 20
+        UnlockDay: 1
+        IsUnlockedByDefault: 0
+      - Id: 4004
+        DisplayName: "\uBC84\uC12F \uAC13 \uAD6C\uC774 \uB808\uC2DC\uD53C"
+        Description: "\uBC84\uC12F\uC778\uAC04 \uAC13 2\uAC1C\uB97C \uD32C\uC5D0
           \uAD7D\uB294\uB2E4."
-        ingredients:
-        - ingredientId: 2005
-          quantity: 2
-        resultFoodId: 3004
-        cookTimeSeconds: 12
-        unlockDay: 1
-        isUnlockedByDefault: 0
-      - id: 4005
-        displayName: "\uADF8\uB9B0 \uC6DC \uC2A4\uD14C\uC774\uD06C \uB808\uC2DC\uD53C"
-        description: "\uADF8\uB9B0 \uC6DC \uACE0\uAE30 1\uAC1C\uB97C \uB450\uAECD\uAC8C
+        Ingredients:
+        - IngredientId: 2005
+          Quantity: 2
+        ResultFoodId: 3004
+        CookTimeSeconds: 12
+        UnlockDay: 1
+        IsUnlockedByDefault: 0
+      - Id: 4005
+        DisplayName: "\uADF8\uB9B0 \uC6DC \uC2A4\uD14C\uC774\uD06C \uB808\uC2DC\uD53C"
+        Description: "\uADF8\uB9B0 \uC6DC \uACE0\uAE30 1\uAC1C\uB97C \uB450\uAECD\uAC8C
           \uC370\uC5B4 \uAD7D\uB294 \uACE0\uAE09 \uB808\uC2DC\uD53C."
-        ingredients:
-        - ingredientId: 2007
-          quantity: 1
-        resultFoodId: 3005
-        cookTimeSeconds: 30
-        unlockDay: 3
-        isUnlockedByDefault: 0
+        Ingredients:
+        - IngredientId: 2007
+          Quantity: 1
+        ResultFoodId: 3005
+        CookTimeSeconds: 30
+        UnlockDay: 3
+        IsUnlockedByDefault: 0
   DropTables:
-    _dict:
-      _keys: 891300008a1300008b1300008c1300008d130000
-      _values:
-      - id: 5001
-        entries:
-        - ingredientId: 2001
-          dropChance: 0.8
-          minQuantity: 1
-          maxQuantity: 2
-        - ingredientId: 2003
-          dropChance: 0.1
-          minQuantity: 1
-          maxQuantity: 1
-      - id: 5002
-        entries:
-        - ingredientId: 2002
-          dropChance: 0.75
-          minQuantity: 1
-          maxQuantity: 1
-        - ingredientId: 2001
-          dropChance: 0.3
-          minQuantity: 1
-          maxQuantity: 1
-      - id: 5003
-        entries:
-        - ingredientId: 2003
-          dropChance: 0.6
-          minQuantity: 1
-          maxQuantity: 2
-        - ingredientId: 2004
-          dropChance: 0.5
-          minQuantity: 1
-          maxQuantity: 1
-      - id: 5004
-        entries:
-        - ingredientId: 2005
-          dropChance: 0.7
-          minQuantity: 1
-          maxQuantity: 2
-        - ingredientId: 2006
-          dropChance: 0.4
-          minQuantity: 1
-          maxQuantity: 1
-      - id: 5005
-        entries:
-        - ingredientId: 2007
-          dropChance: 0.5
-          minQuantity: 1
-          maxQuantity: 1
-        - ingredientId: 2008
-          dropChance: 0.4
-          minQuantity: 1
-          maxQuantity: 1
+    m_Dict:
+      m_Keys: 891300008a1300008b1300008c1300008d130000
+      m_Values:
+      - Id: 5001
+        Entries:
+        - IngredientId: 2001
+          DropChance: 0.8
+          MinQuantity: 1
+          MaxQuantity: 2
+        - IngredientId: 2003
+          DropChance: 0.1
+          MinQuantity: 1
+          MaxQuantity: 1
+      - Id: 5002
+        Entries:
+        - IngredientId: 2002
+          DropChance: 0.75
+          MinQuantity: 1
+          MaxQuantity: 1
+        - IngredientId: 2001
+          DropChance: 0.3
+          MinQuantity: 1
+          MaxQuantity: 1
+      - Id: 5003
+        Entries:
+        - IngredientId: 2003
+          DropChance: 0.6
+          MinQuantity: 1
+          MaxQuantity: 2
+        - IngredientId: 2004
+          DropChance: 0.5
+          MinQuantity: 1
+          MaxQuantity: 1
+      - Id: 5004
+        Entries:
+        - IngredientId: 2005
+          DropChance: 0.7
+          MinQuantity: 1
+          MaxQuantity: 2
+        - IngredientId: 2006
+          DropChance: 0.4
+          MinQuantity: 1
+          MaxQuantity: 1
+      - Id: 5005
+        Entries:
+        - IngredientId: 2007
+          DropChance: 0.5
+          MinQuantity: 1
+          MaxQuantity: 1
+        - IngredientId: 2008
+          DropChance: 0.4
+          MinQuantity: 1
+          MaxQuantity: 1
   DungeonSpawnTables:
-    _dict:
-      _keys: 7117000072170000
-      _values:
-      - id: 6001
-        monsters:
-        - monsterId: 1001
-          count: 3
-          spawnRadius: 0.5
-        - monsterId: 1002
-          count: 2
-          spawnRadius: 0.5
-      - id: 6002
-        monsters:
-        - monsterId: 1001
-          count: 2
-          spawnRadius: 0.5
-        - monsterId: 1002
-          count: 3
-          spawnRadius: 0.5
-  Weapons:
-    _dict:
-      _keys: 
-      _values: []
+    m_Dict:
+      m_Keys: 7117000072170000
+      m_Values:
+      - Id: 6001
+        Monsters:
+        - MonsterId: 1001
+          Count: 3
+          SpawnRadius: 0.5
+        - MonsterId: 1002
+          Count: 2
+          SpawnRadius: 0.5
+      - Id: 6002
+        Monsters:
+        - MonsterId: 1001
+          Count: 2
+          SpawnRadius: 0.5
+        - MonsterId: 1002
+          Count: 3
+          SpawnRadius: 0.5
   GatheringTools:
-    _dict:
-      _keys: 
-      _values: []
+    m_Dict:
+      m_Keys: 411f0000421f0000431f0000
+      m_Values:
+      - Id: 8001
+        ToolName: "\uB0A1\uC740 \uB3C4\uB07C"
+        ToolType: 0
+        MaxDurability: 20
+        GatherMultiplier: 1.5
+        SpeedMultiplier: 1
+        CompatibleNodeTypes: 00000000
+      - Id: 8002
+        ToolName: "\uB0A1\uC740 \uACE1\uAD2D\uC774"
+        ToolType: 1
+        MaxDurability: 20
+        GatherMultiplier: 1.5
+        SpeedMultiplier: 1
+        CompatibleNodeTypes: 0100000002000000
+      - Id: 8003
+        ToolName: "\uB9CC\uB2A5 \uB3C4\uAD6C"
+        ToolType: 2
+        MaxDurability: 30
+        GatherMultiplier: 1.2
+        SpeedMultiplier: 1
+        CompatibleNodeTypes: 000000000100000002000000
+  SkillSteps:
+    m_Dict:
+      m_Keys: f92a0000fa2a0000fb2a0000032b0000042b00000d2b00000e2b00000f2b0000102b00005d2b0000c12b0000252c0000262c0000272c0000282c0000292c0000
+      m_Values:
+      - Id: 11001
+        SkillId: SKL_SW1
+        SkillName: "\uAC80 1\uD0C0"
+        Cooltime: 0.4
+        ComboWindow: 1
+        DamageMultiplier: 1
+        SearchRange: 2.5
+        AttackRange: 0.8
+        MaxTargets: 3
+        MissileSpeed: 0
+        MissileMaxRange: 8
+        CcForce: 0
+        CcDuration: 0.25
+        StunDuration: 0
+        AnimTriggerOverride: Attack
+        ProjectilePrefabAddress: prefab/projectile/SKL_SW1
+      - Id: 11002
+        SkillId: SKL_SW2
+        SkillName: "\uAC80 2\uD0C0"
+        Cooltime: 0.35
+        ComboWindow: 1
+        DamageMultiplier: 1.2
+        SearchRange: 2.5
+        AttackRange: 1
+        MaxTargets: 3
+        MissileSpeed: 0
+        MissileMaxRange: 8
+        CcForce: 3
+        CcDuration: 0.2
+        StunDuration: 0
+        AnimTriggerOverride: Attack
+        ProjectilePrefabAddress: prefab/projectile/SKL_SW2
+      - Id: 11003
+        SkillId: SKL_SW3
+        SkillName: "\uAC80 3\uD0C0(\uB9C8\uBB34\uB9AC)"
+        Cooltime: 0.5
+        ComboWindow: 1.5
+        DamageMultiplier: 1.8
+        SearchRange: 2.5
+        AttackRange: 1.2
+        MaxTargets: 5
+        MissileSpeed: 0
+        MissileMaxRange: 8
+        CcForce: 5
+        CcDuration: 0.3
+        StunDuration: 0
+        AnimTriggerOverride: Attack
+        ProjectilePrefabAddress: prefab/projectile/SKL_SW3
+      - Id: 11011
+        SkillId: SKL_AX1
+        SkillName: "\uB3C4\uB07C 1\uD0C0"
+        Cooltime: 0.7
+        ComboWindow: 1.2
+        DamageMultiplier: 1.6
+        SearchRange: 2.2
+        AttackRange: 1
+        MaxTargets: 5
+        MissileSpeed: 0
+        MissileMaxRange: 8
+        CcForce: 6
+        CcDuration: 0.3
+        StunDuration: 0
+        AnimTriggerOverride: Attack
+        ProjectilePrefabAddress: prefab/projectile/SKL_AX1
+      - Id: 11012
+        SkillId: SKL_AX2
+        SkillName: "\uB3C4\uB07C 2\uD0C0(\uB9C8\uBB34\uB9AC)"
+        Cooltime: 0.9
+        ComboWindow: 1.5
+        DamageMultiplier: 2.2
+        SearchRange: 2.2
+        AttackRange: 1.3
+        MaxTargets: 5
+        MissileSpeed: 0
+        MissileMaxRange: 8
+        CcForce: 8
+        CcDuration: 0.4
+        StunDuration: 0.2
+        AnimTriggerOverride: Attack
+        ProjectilePrefabAddress: prefab/projectile/SKL_AX2
+      - Id: 11021
+        SkillId: SKL_DS1
+        SkillName: "\uC30D\uAC80 1\uD0C0"
+        Cooltime: 0.25
+        ComboWindow: 0.8
+        DamageMultiplier: 0.8
+        SearchRange: 2.3
+        AttackRange: 0.7
+        MaxTargets: 2
+        MissileSpeed: 0
+        MissileMaxRange: 8
+        CcForce: 0
+        CcDuration: 0.15
+        StunDuration: 0
+        AnimTriggerOverride: Attack
+        ProjectilePrefabAddress: prefab/projectile/SKL_DS1
+      - Id: 11022
+        SkillId: SKL_DS2
+        SkillName: "\uC30D\uAC80 2\uD0C0"
+        Cooltime: 0.25
+        ComboWindow: 0.8
+        DamageMultiplier: 0.8
+        SearchRange: 2.3
+        AttackRange: 0.7
+        MaxTargets: 2
+        MissileSpeed: 0
+        MissileMaxRange: 8
+        CcForce: 0
+        CcDuration: 0.15
+        StunDuration: 0
+        AnimTriggerOverride: Attack
+        ProjectilePrefabAddress: prefab/projectile/SKL_DS2
+      - Id: 11023
+        SkillId: SKL_DS3
+        SkillName: "\uC30D\uAC80 3\uD0C0"
+        Cooltime: 0.25
+        ComboWindow: 0.8
+        DamageMultiplier: 1
+        SearchRange: 2.3
+        AttackRange: 0.8
+        MaxTargets: 2
+        MissileSpeed: 0
+        MissileMaxRange: 8
+        CcForce: 2
+        CcDuration: 0.2
+        StunDuration: 0
+        AnimTriggerOverride: Attack
+        ProjectilePrefabAddress: prefab/projectile/SKL_DS3
+      - Id: 11024
+        SkillId: SKL_DS4
+        SkillName: "\uC30D\uAC80 4\uD0C0(\uB9C8\uBB34\uB9AC)"
+        Cooltime: 0.5
+        ComboWindow: 1.5
+        DamageMultiplier: 1.5
+        SearchRange: 2.3
+        AttackRange: 1
+        MaxTargets: 3
+        MissileSpeed: 0
+        MissileMaxRange: 8
+        CcForce: 4
+        CcDuration: 0.25
+        StunDuration: 0
+        AnimTriggerOverride: Attack
+        ProjectilePrefabAddress: prefab/projectile/SKL_DS4
+      - Id: 11101
+        SkillId: SKL_S01
+        SkillName: "\uD68C\uC804 \uBCA0\uAE30"
+        Cooltime: 0.6
+        ComboWindow: 0
+        DamageMultiplier: 1.5
+        SearchRange: 3
+        AttackRange: 1.5
+        MaxTargets: 10
+        MissileSpeed: 0
+        MissileMaxRange: 8
+        CcForce: 4
+        CcDuration: 0.2
+        StunDuration: 0
+        AnimTriggerOverride: Attack
+        ProjectilePrefabAddress: prefab/projectile/SKL_S01
+      - Id: 11201
+        SkillId: SKL_U01
+        SkillName: "\uAD81\uADF9\uAE30 \uB300\uBCA0\uAE30"
+        Cooltime: 0.8
+        ComboWindow: 0
+        DamageMultiplier: 3
+        SearchRange: 3.5
+        AttackRange: 2
+        MaxTargets: 10
+        MissileSpeed: 0
+        MissileMaxRange: 8
+        CcForce: 8
+        CcDuration: 0.5
+        StunDuration: 0.3
+        AnimTriggerOverride: Ultimate
+        ProjectilePrefabAddress: prefab/projectile/SKL_U01
+      - Id: 11301
+        SkillId: SKL_M01
+        SkillName: "\uC2AC\uB77C\uC784 \uB36E\uCE58\uAE30"
+        Cooltime: 1.2
+        ComboWindow: 0
+        DamageMultiplier: 1
+        SearchRange: 1.5
+        AttackRange: 0.7
+        MaxTargets: 3
+        MissileSpeed: 0
+        MissileMaxRange: 8
+        CcForce: 3
+        CcDuration: 0.2
+        StunDuration: 0
+        AnimTriggerOverride: Attack
+        ProjectilePrefabAddress: prefab/projectile/SKL_M01
+      - Id: 11302
+        SkillId: SKL_M02
+        SkillName: "\uACE0\uBE14\uB9B0 \uBABD\uB465\uC774"
+        Cooltime: 1
+        ComboWindow: 0
+        DamageMultiplier: 1.2
+        SearchRange: 2
+        AttackRange: 0.9
+        MaxTargets: 1
+        MissileSpeed: 0
+        MissileMaxRange: 8
+        CcForce: 4
+        CcDuration: 0.25
+        StunDuration: 0
+        AnimTriggerOverride: Attack
+        ProjectilePrefabAddress: prefab/projectile/SKL_M02
+      - Id: 11303
+        SkillId: SKL_M03
+        SkillName: "\uD3EC\uC790 \uD22C\uC0AC"
+        Cooltime: 2
+        ComboWindow: 0
+        DamageMultiplier: 0.8
+        SearchRange: 5
+        AttackRange: 0.5
+        MaxTargets: 3
+        MissileSpeed: 4
+        MissileMaxRange: 8
+        CcForce: 0
+        CcDuration: 0.25
+        StunDuration: 0.5
+        AnimTriggerOverride: Attack
+        ProjectilePrefabAddress: prefab/projectile/SKL_M03
+      - Id: 11304
+        SkillId: SKL_M04
+        SkillName: "\uC6DC \uBB3C\uAE30"
+        Cooltime: 1.5
+        ComboWindow: 0
+        DamageMultiplier: 1.5
+        SearchRange: 2
+        AttackRange: 1
+        MaxTargets: 1
+        MissileSpeed: 0
+        MissileMaxRange: 8
+        CcForce: 6
+        CcDuration: 0.3
+        StunDuration: 0
+        AnimTriggerOverride: Attack
+        ProjectilePrefabAddress: prefab/projectile/SKL_M04
+      - Id: 11305
+        SkillId: SKL_M05
+        SkillName: "\uC6DC \uB3CC\uC9C4"
+        Cooltime: 3
+        ComboWindow: 0
+        DamageMultiplier: 2
+        SearchRange: 6
+        AttackRange: 1.2
+        MaxTargets: 3
+        MissileSpeed: 0
+        MissileMaxRange: 8
+        CcForce: 8
+        CcDuration: 0.4
+        StunDuration: 0.3
+        AnimTriggerOverride: Rush
+        ProjectilePrefabAddress: prefab/projectile/SKL_M05
+  SkillGroups:
+    m_Dict:
+      m_Keys: 1127000012270000132700001a270000242700007527000076270000772700007827000079270000
+      m_Values:
+      - Id: 10001
+        SkillGroupId: SGD_001
+        SkillIconAddress: sprite/skill/SGD_001
+        SkillName: "\uAC80 \uD3C9\uD0C0"
+        Description: "\uAE30\uBCF8 \uAC80 3\uD0C0 \uCF64\uBCF4 \uACF5\uACA9."
+        StepIds:
+        - 11001
+        - 11002
+        - 11003
+        SkillChain:
+        - Id: 11001
+          SkillId: SKL_SW1
+          SkillName: "\uAC80 1\uD0C0"
+          Cooltime: 0.4
+          ComboWindow: 1
+          DamageMultiplier: 1
+          SearchRange: 2.5
+          AttackRange: 0.8
+          MaxTargets: 3
+          MissileSpeed: 0
+          MissileMaxRange: 8
+          CcForce: 0
+          CcDuration: 0.25
+          StunDuration: 0
+          AnimTriggerOverride: Attack
+          ProjectilePrefabAddress: prefab/projectile/SKL_SW1
+        - Id: 11002
+          SkillId: SKL_SW2
+          SkillName: "\uAC80 2\uD0C0"
+          Cooltime: 0.35
+          ComboWindow: 1
+          DamageMultiplier: 1.2
+          SearchRange: 2.5
+          AttackRange: 1
+          MaxTargets: 3
+          MissileSpeed: 0
+          MissileMaxRange: 8
+          CcForce: 3
+          CcDuration: 0.2
+          StunDuration: 0
+          AnimTriggerOverride: Attack
+          ProjectilePrefabAddress: prefab/projectile/SKL_SW2
+        - Id: 11003
+          SkillId: SKL_SW3
+          SkillName: "\uAC80 3\uD0C0(\uB9C8\uBB34\uB9AC)"
+          Cooltime: 0.5
+          ComboWindow: 1.5
+          DamageMultiplier: 1.8
+          SearchRange: 2.5
+          AttackRange: 1.2
+          MaxTargets: 5
+          MissileSpeed: 0
+          MissileMaxRange: 8
+          CcForce: 5
+          CcDuration: 0.3
+          StunDuration: 0
+          AnimTriggerOverride: Attack
+          ProjectilePrefabAddress: prefab/projectile/SKL_SW3
+        SkillCooltime: 0
+        AllowedWeaponTypes: 0000000002000000
+      - Id: 10002
+        SkillGroupId: SGD_002
+        SkillIconAddress: sprite/skill/SGD_002
+        SkillName: "\uB3C4\uB07C \uD3C9\uD0C0"
+        Description: "\uB3C4\uB07C 2\uD0C0 \uCF64\uBCF4 \uACF5\uACA9."
+        StepIds:
+        - 11011
+        - 11012
+        SkillChain:
+        - Id: 11011
+          SkillId: SKL_AX1
+          SkillName: "\uB3C4\uB07C 1\uD0C0"
+          Cooltime: 0.7
+          ComboWindow: 1.2
+          DamageMultiplier: 1.6
+          SearchRange: 2.2
+          AttackRange: 1
+          MaxTargets: 5
+          MissileSpeed: 0
+          MissileMaxRange: 8
+          CcForce: 6
+          CcDuration: 0.3
+          StunDuration: 0
+          AnimTriggerOverride: Attack
+          ProjectilePrefabAddress: prefab/projectile/SKL_AX1
+        - Id: 11012
+          SkillId: SKL_AX2
+          SkillName: "\uB3C4\uB07C 2\uD0C0(\uB9C8\uBB34\uB9AC)"
+          Cooltime: 0.9
+          ComboWindow: 1.5
+          DamageMultiplier: 2.2
+          SearchRange: 2.2
+          AttackRange: 1.3
+          MaxTargets: 5
+          MissileSpeed: 0
+          MissileMaxRange: 8
+          CcForce: 8
+          CcDuration: 0.4
+          StunDuration: 0.2
+          AnimTriggerOverride: Attack
+          ProjectilePrefabAddress: prefab/projectile/SKL_AX2
+        SkillCooltime: 0
+        AllowedWeaponTypes: 01000000
+      - Id: 10003
+        SkillGroupId: SGD_003
+        SkillIconAddress: sprite/skill/SGD_003
+        SkillName: "\uC30D\uAC80 \uD3C9\uD0C0"
+        Description: "\uC30D\uAC80 4\uD0C0 \uCF64\uBCF4 \uACF5\uACA9."
+        StepIds:
+        - 11021
+        - 11022
+        - 11023
+        - 11024
+        SkillChain:
+        - Id: 11021
+          SkillId: SKL_DS1
+          SkillName: "\uC30D\uAC80 1\uD0C0"
+          Cooltime: 0.25
+          ComboWindow: 0.8
+          DamageMultiplier: 0.8
+          SearchRange: 2.3
+          AttackRange: 0.7
+          MaxTargets: 2
+          MissileSpeed: 0
+          MissileMaxRange: 8
+          CcForce: 0
+          CcDuration: 0.15
+          StunDuration: 0
+          AnimTriggerOverride: Attack
+          ProjectilePrefabAddress: prefab/projectile/SKL_DS1
+        - Id: 11022
+          SkillId: SKL_DS2
+          SkillName: "\uC30D\uAC80 2\uD0C0"
+          Cooltime: 0.25
+          ComboWindow: 0.8
+          DamageMultiplier: 0.8
+          SearchRange: 2.3
+          AttackRange: 0.7
+          MaxTargets: 2
+          MissileSpeed: 0
+          MissileMaxRange: 8
+          CcForce: 0
+          CcDuration: 0.15
+          StunDuration: 0
+          AnimTriggerOverride: Attack
+          ProjectilePrefabAddress: prefab/projectile/SKL_DS2
+        - Id: 11023
+          SkillId: SKL_DS3
+          SkillName: "\uC30D\uAC80 3\uD0C0"
+          Cooltime: 0.25
+          ComboWindow: 0.8
+          DamageMultiplier: 1
+          SearchRange: 2.3
+          AttackRange: 0.8
+          MaxTargets: 2
+          MissileSpeed: 0
+          MissileMaxRange: 8
+          CcForce: 2
+          CcDuration: 0.2
+          StunDuration: 0
+          AnimTriggerOverride: Attack
+          ProjectilePrefabAddress: prefab/projectile/SKL_DS3
+        - Id: 11024
+          SkillId: SKL_DS4
+          SkillName: "\uC30D\uAC80 4\uD0C0(\uB9C8\uBB34\uB9AC)"
+          Cooltime: 0.5
+          ComboWindow: 1.5
+          DamageMultiplier: 1.5
+          SearchRange: 2.3
+          AttackRange: 1
+          MaxTargets: 3
+          MissileSpeed: 0
+          MissileMaxRange: 8
+          CcForce: 4
+          CcDuration: 0.25
+          StunDuration: 0
+          AnimTriggerOverride: Attack
+          ProjectilePrefabAddress: prefab/projectile/SKL_DS4
+        SkillCooltime: 0
+        AllowedWeaponTypes: 02000000
+      - Id: 10010
+        SkillGroupId: SGD_010
+        SkillIconAddress: sprite/skill/SGD_010
+        SkillName: "\uD68C\uC804 \uBCA0\uAE30"
+        Description: "\uC8FC\uBCC0 \uC801\uC5D0\uAC8C \uD68C\uC804 \uACF5\uACA9\uC744
+          \uAC00\uD55C\uB2E4."
+        StepIds:
+        - 11101
+        SkillChain:
+        - Id: 11101
+          SkillId: SKL_S01
+          SkillName: "\uD68C\uC804 \uBCA0\uAE30"
+          Cooltime: 0.6
+          ComboWindow: 0
+          DamageMultiplier: 1.5
+          SearchRange: 3
+          AttackRange: 1.5
+          MaxTargets: 10
+          MissileSpeed: 0
+          MissileMaxRange: 8
+          CcForce: 4
+          CcDuration: 0.2
+          StunDuration: 0
+          AnimTriggerOverride: Attack
+          ProjectilePrefabAddress: prefab/projectile/SKL_S01
+        SkillCooltime: 4
+        AllowedWeaponTypes: 0000000002000000
+      - Id: 10020
+        SkillGroupId: SGD_020
+        SkillIconAddress: sprite/skill/SGD_020
+        SkillName: "\uAD81\uADF9\uAE30"
+        Description: "\uB9C9\uAC15\uD55C \uBCA0\uAE30\uB85C \uC8FC\uBCC0 \uC801\uC5D0\uAC8C
+          \uD070 \uD53C\uD574\uB97C \uC785\uD78C\uB2E4."
+        StepIds:
+        - 11201
+        SkillChain:
+        - Id: 11201
+          SkillId: SKL_U01
+          SkillName: "\uAD81\uADF9\uAE30 \uB300\uBCA0\uAE30"
+          Cooltime: 0.8
+          ComboWindow: 0
+          DamageMultiplier: 3
+          SearchRange: 3.5
+          AttackRange: 2
+          MaxTargets: 10
+          MissileSpeed: 0
+          MissileMaxRange: 8
+          CcForce: 8
+          CcDuration: 0.5
+          StunDuration: 0.3
+          AnimTriggerOverride: Ultimate
+          ProjectilePrefabAddress: prefab/projectile/SKL_U01
+        SkillCooltime: 0
+        AllowedWeaponTypes: 
+      - Id: 10101
+        SkillGroupId: SGD_101
+        SkillIconAddress: sprite/skill/SGD_101
+        SkillName: "\uC2AC\uB77C\uC784 \uB36E\uCE58\uAE30"
+        Description: 
+        StepIds:
+        - 11301
+        SkillChain:
+        - Id: 11301
+          SkillId: SKL_M01
+          SkillName: "\uC2AC\uB77C\uC784 \uB36E\uCE58\uAE30"
+          Cooltime: 1.2
+          ComboWindow: 0
+          DamageMultiplier: 1
+          SearchRange: 1.5
+          AttackRange: 0.7
+          MaxTargets: 3
+          MissileSpeed: 0
+          MissileMaxRange: 8
+          CcForce: 3
+          CcDuration: 0.2
+          StunDuration: 0
+          AnimTriggerOverride: Attack
+          ProjectilePrefabAddress: prefab/projectile/SKL_M01
+        SkillCooltime: 0
+        AllowedWeaponTypes: 
+      - Id: 10102
+        SkillGroupId: SGD_102
+        SkillIconAddress: sprite/skill/SGD_102
+        SkillName: "\uACE0\uBE14\uB9B0 \uBABD\uB465\uC774\uC9C8"
+        Description: 
+        StepIds:
+        - 11302
+        SkillChain:
+        - Id: 11302
+          SkillId: SKL_M02
+          SkillName: "\uACE0\uBE14\uB9B0 \uBABD\uB465\uC774"
+          Cooltime: 1
+          ComboWindow: 0
+          DamageMultiplier: 1.2
+          SearchRange: 2
+          AttackRange: 0.9
+          MaxTargets: 1
+          MissileSpeed: 0
+          MissileMaxRange: 8
+          CcForce: 4
+          CcDuration: 0.25
+          StunDuration: 0
+          AnimTriggerOverride: Attack
+          ProjectilePrefabAddress: prefab/projectile/SKL_M02
+        SkillCooltime: 0
+        AllowedWeaponTypes: 
+      - Id: 10103
+        SkillGroupId: SGD_103
+        SkillIconAddress: sprite/skill/SGD_103
+        SkillName: "\uBC84\uC12F \uD3EC\uC790 \uD22C\uC0AC"
+        Description: 
+        StepIds:
+        - 11303
+        SkillChain:
+        - Id: 11303
+          SkillId: SKL_M03
+          SkillName: "\uD3EC\uC790 \uD22C\uC0AC"
+          Cooltime: 2
+          ComboWindow: 0
+          DamageMultiplier: 0.8
+          SearchRange: 5
+          AttackRange: 0.5
+          MaxTargets: 3
+          MissileSpeed: 4
+          MissileMaxRange: 8
+          CcForce: 0
+          CcDuration: 0.25
+          StunDuration: 0.5
+          AnimTriggerOverride: Attack
+          ProjectilePrefabAddress: prefab/projectile/SKL_M03
+        SkillCooltime: 0
+        AllowedWeaponTypes: 
+      - Id: 10104
+        SkillGroupId: SGD_104
+        SkillIconAddress: sprite/skill/SGD_104
+        SkillName: "\uC6DC \uBB3C\uAE30"
+        Description: 
+        StepIds:
+        - 11304
+        SkillChain:
+        - Id: 11304
+          SkillId: SKL_M04
+          SkillName: "\uC6DC \uBB3C\uAE30"
+          Cooltime: 1.5
+          ComboWindow: 0
+          DamageMultiplier: 1.5
+          SearchRange: 2
+          AttackRange: 1
+          MaxTargets: 1
+          MissileSpeed: 0
+          MissileMaxRange: 8
+          CcForce: 6
+          CcDuration: 0.3
+          StunDuration: 0
+          AnimTriggerOverride: Attack
+          ProjectilePrefabAddress: prefab/projectile/SKL_M04
+        SkillCooltime: 0
+        AllowedWeaponTypes: 
+      - Id: 10105
+        SkillGroupId: SGD_105
+        SkillIconAddress: sprite/skill/SGD_105
+        SkillName: "\uC6DC \uB3CC\uC9C4"
+        Description: 
+        StepIds:
+        - 11305
+        SkillChain:
+        - Id: 11305
+          SkillId: SKL_M05
+          SkillName: "\uC6DC \uB3CC\uC9C4"
+          Cooltime: 3
+          ComboWindow: 0
+          DamageMultiplier: 2
+          SearchRange: 6
+          AttackRange: 1.2
+          MaxTargets: 3
+          MissileSpeed: 0
+          MissileMaxRange: 8
+          CcForce: 8
+          CcDuration: 0.4
+          StunDuration: 0.3
+          AnimTriggerOverride: Rush
+          ProjectilePrefabAddress: prefab/projectile/SKL_M05
+        SkillCooltime: 0
+        AllowedWeaponTypes: 
+  Weapons:
+    m_Dict:
+      m_Keys: 591b00005a1b00005b1b0000
+      m_Values:
+      - Id: 7001
+        WeaponName: "\uB0A1\uC740 \uAC80"
+        WeaponType: 0
+        Abils:
+        - AbilType: 0
+          Value: 10
+        MaxDurability: 0
+        DecayMode: 0
+        NormalAttackGroupId: SGD_001
+        NormalAttackGroup:
+          Id: 10001
+          SkillGroupId: SGD_001
+          SkillIconAddress: sprite/skill/SGD_001
+          SkillName: "\uAC80 \uD3C9\uD0C0"
+          Description: "\uAE30\uBCF8 \uAC80 3\uD0C0 \uCF64\uBCF4 \uACF5\uACA9."
+          StepIds:
+          - 11001
+          - 11002
+          - 11003
+          SkillChain:
+          - Id: 11001
+            SkillId: SKL_SW1
+            SkillName: "\uAC80 1\uD0C0"
+            Cooltime: 0.4
+            ComboWindow: 1
+            DamageMultiplier: 1
+            SearchRange: 2.5
+            AttackRange: 0.8
+            MaxTargets: 3
+            MissileSpeed: 0
+            MissileMaxRange: 8
+            CcForce: 0
+            CcDuration: 0.25
+            StunDuration: 0
+            AnimTriggerOverride: Attack
+            ProjectilePrefabAddress: prefab/projectile/SKL_SW1
+          - Id: 11002
+            SkillId: SKL_SW2
+            SkillName: "\uAC80 2\uD0C0"
+            Cooltime: 0.35
+            ComboWindow: 1
+            DamageMultiplier: 1.2
+            SearchRange: 2.5
+            AttackRange: 1
+            MaxTargets: 3
+            MissileSpeed: 0
+            MissileMaxRange: 8
+            CcForce: 3
+            CcDuration: 0.2
+            StunDuration: 0
+            AnimTriggerOverride: Attack
+            ProjectilePrefabAddress: prefab/projectile/SKL_SW2
+          - Id: 11003
+            SkillId: SKL_SW3
+            SkillName: "\uAC80 3\uD0C0(\uB9C8\uBB34\uB9AC)"
+            Cooltime: 0.5
+            ComboWindow: 1.5
+            DamageMultiplier: 1.8
+            SearchRange: 2.5
+            AttackRange: 1.2
+            MaxTargets: 5
+            MissileSpeed: 0
+            MissileMaxRange: 8
+            CcForce: 5
+            CcDuration: 0.3
+            StunDuration: 0
+            AnimTriggerOverride: Attack
+            ProjectilePrefabAddress: prefab/projectile/SKL_SW3
+          SkillCooltime: 0
+          AllowedWeaponTypes: 0000000002000000
+        WeaponSpriteAddress: sprite/weapon/7001
+        WeaponAnimAddress: anim/weapon/7001
+      - Id: 7002
+        WeaponName: "\uB2E8\uB2E8\uD55C \uB3C4\uB07C"
+        WeaponType: 1
+        Abils:
+        - AbilType: 0
+          Value: 18
+        - AbilType: 1
+          Value: 3
+        MaxDurability: 0
+        DecayMode: 0
+        NormalAttackGroupId: SGD_002
+        NormalAttackGroup:
+          Id: 10002
+          SkillGroupId: SGD_002
+          SkillIconAddress: sprite/skill/SGD_002
+          SkillName: "\uB3C4\uB07C \uD3C9\uD0C0"
+          Description: "\uB3C4\uB07C 2\uD0C0 \uCF64\uBCF4 \uACF5\uACA9."
+          StepIds:
+          - 11011
+          - 11012
+          SkillChain:
+          - Id: 11011
+            SkillId: SKL_AX1
+            SkillName: "\uB3C4\uB07C 1\uD0C0"
+            Cooltime: 0.7
+            ComboWindow: 1.2
+            DamageMultiplier: 1.6
+            SearchRange: 2.2
+            AttackRange: 1
+            MaxTargets: 5
+            MissileSpeed: 0
+            MissileMaxRange: 8
+            CcForce: 6
+            CcDuration: 0.3
+            StunDuration: 0
+            AnimTriggerOverride: Attack
+            ProjectilePrefabAddress: prefab/projectile/SKL_AX1
+          - Id: 11012
+            SkillId: SKL_AX2
+            SkillName: "\uB3C4\uB07C 2\uD0C0(\uB9C8\uBB34\uB9AC)"
+            Cooltime: 0.9
+            ComboWindow: 1.5
+            DamageMultiplier: 2.2
+            SearchRange: 2.2
+            AttackRange: 1.3
+            MaxTargets: 5
+            MissileSpeed: 0
+            MissileMaxRange: 8
+            CcForce: 8
+            CcDuration: 0.4
+            StunDuration: 0.2
+            AnimTriggerOverride: Attack
+            ProjectilePrefabAddress: prefab/projectile/SKL_AX2
+          SkillCooltime: 0
+          AllowedWeaponTypes: 01000000
+        WeaponSpriteAddress: sprite/weapon/7002
+        WeaponAnimAddress: anim/weapon/7002
+      - Id: 7003
+        WeaponName: "\uC30D\uAC80"
+        WeaponType: 2
+        Abils:
+        - AbilType: 0
+          Value: 8
+        - AbilType: 4
+          Value: 0.2
+        MaxDurability: 0
+        DecayMode: 0
+        NormalAttackGroupId: SGD_003
+        NormalAttackGroup:
+          Id: 10003
+          SkillGroupId: SGD_003
+          SkillIconAddress: sprite/skill/SGD_003
+          SkillName: "\uC30D\uAC80 \uD3C9\uD0C0"
+          Description: "\uC30D\uAC80 4\uD0C0 \uCF64\uBCF4 \uACF5\uACA9."
+          StepIds:
+          - 11021
+          - 11022
+          - 11023
+          - 11024
+          SkillChain:
+          - Id: 11021
+            SkillId: SKL_DS1
+            SkillName: "\uC30D\uAC80 1\uD0C0"
+            Cooltime: 0.25
+            ComboWindow: 0.8
+            DamageMultiplier: 0.8
+            SearchRange: 2.3
+            AttackRange: 0.7
+            MaxTargets: 2
+            MissileSpeed: 0
+            MissileMaxRange: 8
+            CcForce: 0
+            CcDuration: 0.15
+            StunDuration: 0
+            AnimTriggerOverride: Attack
+            ProjectilePrefabAddress: prefab/projectile/SKL_DS1
+          - Id: 11022
+            SkillId: SKL_DS2
+            SkillName: "\uC30D\uAC80 2\uD0C0"
+            Cooltime: 0.25
+            ComboWindow: 0.8
+            DamageMultiplier: 0.8
+            SearchRange: 2.3
+            AttackRange: 0.7
+            MaxTargets: 2
+            MissileSpeed: 0
+            MissileMaxRange: 8
+            CcForce: 0
+            CcDuration: 0.15
+            StunDuration: 0
+            AnimTriggerOverride: Attack
+            ProjectilePrefabAddress: prefab/projectile/SKL_DS2
+          - Id: 11023
+            SkillId: SKL_DS3
+            SkillName: "\uC30D\uAC80 3\uD0C0"
+            Cooltime: 0.25
+            ComboWindow: 0.8
+            DamageMultiplier: 1
+            SearchRange: 2.3
+            AttackRange: 0.8
+            MaxTargets: 2
+            MissileSpeed: 0
+            MissileMaxRange: 8
+            CcForce: 2
+            CcDuration: 0.2
+            StunDuration: 0
+            AnimTriggerOverride: Attack
+            ProjectilePrefabAddress: prefab/projectile/SKL_DS3
+          - Id: 11024
+            SkillId: SKL_DS4
+            SkillName: "\uC30D\uAC80 4\uD0C0(\uB9C8\uBB34\uB9AC)"
+            Cooltime: 0.5
+            ComboWindow: 1.5
+            DamageMultiplier: 1.5
+            SearchRange: 2.3
+            AttackRange: 1
+            MaxTargets: 3
+            MissileSpeed: 0
+            MissileMaxRange: 8
+            CcForce: 4
+            CcDuration: 0.25
+            StunDuration: 0
+            AnimTriggerOverride: Attack
+            ProjectilePrefabAddress: prefab/projectile/SKL_DS4
+          SkillCooltime: 0
+          AllowedWeaponTypes: 02000000
+        WeaponSpriteAddress: sprite/weapon/7003
+        WeaponAnimAddress: anim/weapon/7003
+  Players:
+    m_Dict:
+      m_Keys: 29230000
+      m_Values:
+      - Id: 9001
+        DisplayName: "\uAE30\uBCF8 \uD50C\uB808\uC774\uC5B4"
+        PrefabAddress: prefab/player/9001
+        BtAssetAddress: bt/player/9001
+        BaseMaxHp: 100
+        BaseAttack: 10
+        BaseMoveSpeed: 5
+        BaseDefense: 0
+        AttackAttribute: 0
+        DefaultWeaponId: 7001
+        SkillGroupId1: SGD_010
+        SkillGroupId2: 
+        UltimateSkillGroupId: SGD_020
+        MaxUltimateGauge: 100
+        GaugeOnHit: 15
+        GaugeOnKill: 25

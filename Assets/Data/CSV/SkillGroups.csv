@@ -1,0 +1,27 @@
+; 스킬 그룹 데이터 — UI 노출 단위 (콤보 체인 컨테이너)
+; id: uint (SGD_xxx = 10xxx)
+; skillGroupId: 문자열 ID
+;   - SGD_001~SGD_009: 무기 평타 그룹 (WeaponData.normalAttackGroupId 에서 참조)
+;   - SGD_010~SGD_019: 플레이어 액티브 스킬 (PlayerData.skillGroupId1/2 에서 참조)
+;   - SGD_020~SGD_029: 플레이어 궁극기 (PlayerData.ultimateSkillGroupId 에서 참조)
+;   - SGD_101~SGD_199: 몬스터 전용 스킬
+; stepIds: 파이프 구분 SkillStep uint ID
+;   → DataManagerWindow Sync 시 SkillSteps 테이블에서 조회 후 skillChain 으로 변환됨
+; allowedWeaponTypes: 파이프 구분 WeaponType (빈칸이면 모든 무기 허용)
+; skillCooltime: 체인 전체 완료 후 재사용 대기(초). 평타는 0.
+#TYPE,string,uint,string,string,string,string,float,string,string
+_key,Id,SkillGroupId,SkillName,Description,SkillIconAddress,SkillCooltime,AllowedWeaponTypes,StepIds
+; ─── 무기 평타 그룹 ──────────────────────────────────────────────────────────────────
+SGD_001,10001,SGD_001,검 평타,기본 검 3타 콤보 공격.,,0,Sword|DualSword,11001|11002|11003
+SGD_002,10002,SGD_002,도끼 평타,도끼 2타 콤보 공격.,,0,Axe,11011|11012
+SGD_003,10003,SGD_003,쌍검 평타,쌍검 4타 콤보 공격.,,0,DualSword,11021|11022|11023|11024
+; ─── 플레이어 액티브 스킬 ──────────────────────────────────────────────────────────────
+SGD_010,10010,SGD_010,회전 베기,주변 적에게 회전 공격을 가한다.,sprite/skill/SGD_010,4,Sword|DualSword,11101
+; ─── 플레이어 궁극기 ─────────────────────────────────────────────────────────────────
+SGD_020,10020,SGD_020,궁극기,막강한 베기로 주변 적에게 큰 피해를 입힌다.,sprite/skill/SGD_020,0,,11201
+; ─── 몬스터 스킬 그룹 ──────────────────────────────────────────────────────────────
+SGD_101,10101,SGD_101,슬라임 덮치기,,,0,,11301
+SGD_102,10102,SGD_102,고블린 몽둥이질,,,0,,11302
+SGD_103,10103,SGD_103,버섯 포자 투사,,,0,,11303
+SGD_104,10104,SGD_104,웜 물기,,,0,,11304
+SGD_105,10105,SGD_105,웜 돌진,,,0,,11305

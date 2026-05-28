@@ -66,7 +66,19 @@
       "Bash(git -C \"C:/Users/CHOI/Desktop/Program/Unity/FantasyTycoon\" config --list)",
       "Bash(powershell.exe *)",
       "Bash(git -C \"C:/Users/CHOI/Desktop/Program/Unity/FantasyTycoon\" credential fill)",
-      "Bash(gh repo *)"
+      "Bash(gh repo *)",
+      "Bash(xargs ls *)",
+      "Bash(awk '/1387831861/{found=1} found && /m_Name/{print; found=0}' Assets/Scenes/DungeonScene.unity)",
+      "Bash(env)",
+      "Bash(grep -v \"^$\")",
+      "Read(//c/Users/CHOI/Desktop/Program/Unity/FantasyTycoon/**)",
+      "Bash(grep *)",
+      "Bash(del *)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:api.github.com)",
+      "mcp__UnityMCP__manage_packages",
+      "Bash(find *)"
     ]
   }
 }

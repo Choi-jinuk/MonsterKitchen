@@ -15,32 +15,34 @@ namespace MonsterKitchen.Enemy
     [RequireComponent(typeof(BTRunner))]
     [RequireComponent(typeof(Rigidbody2D))]
     [RequireComponent(typeof(Animator))]
-    public class BTMonsterController : MonsterBase, IBTBlackboardInitializer
+    public class BTMonsterController : MonsterBase, IBTBlackboardInitializer, IMonsterSeparation
     {
         [Header("Movement")]
-        [SerializeField] float moveSpeed        = 2.5f;
-        [SerializeField] float detectRangeBonus = 1.5f;
+        [SerializeField] float m_DetectRangeBonus = 1.5f;
 
         [Header("Separation Steering")]
-        [SerializeField] float     separationRadius = 0.9f;
-        [SerializeField] float     separationWeight = 2.0f;
-        [SerializeField] LayerMask monsterLayer;
+        [SerializeField] float     m_SeparationRadius = 0.9f;
+        [SerializeField] float     m_SeparationWeight = 2.0f;
+        [SerializeField] LayerMask m_MonsterLayer;
 
         [Header("Projectile (원거리 스킬 전용)")]
-        [SerializeField] GameObject _projectilePrefab;
-        [SerializeField] LayerMask  _playerLayer;
+        [SerializeField] LayerMask m_PlayerLayer;
+        // moveSpeed 는 MonsterData.moveSpeed 에서 읽는다 (인스펙터 아님)
+        // 투사체 프리팹은 SkillData.projectilePrefabAddress → AssetLoadManager 에서 로드
 
-        BTRunner    _btRunner;
-        Rigidbody2D _rb;
-        Transform   _playerRef;
+        BTRunner             m_BtRunner;
+        Rigidbody2D          m_Rb;
+        Transform            m_PlayerRef;
+        MonsterMovementBase  m_Movement;
 
-        readonly Collider2D[] _sepBuffer = new Collider2D[12];
+        readonly Collider2D[] m_SepBuffer = new Collider2D[12];
 
-        static readonly int HashDie = Animator.StringToHash("Die");
+        static readonly int s_HashDie = Animator.StringToHash("Die");
 
         // ── 공개 API ────────────────────────────────────────────────────
 
-        public Rigidbody2D Rb => _rb;
+        public Rigidbody2D          Rb       => m_Rb;
+        public MonsterMovementBase  Movement => m_Movement;
 
         // ================================================================
         //  Init — SpawnManager 패턴
@@ -48,12 +50,30 @@ namespace MonsterKitchen.Enemy
 
         public override void Init(MonsterData data, Transform player, Vector3 spawnPos)
         {
-            _rb       = GetComponent<Rigidbody2D>();
-            _btRunner = GetComponent<BTRunner>();
-            _playerRef = player;
+            m_Rb        = GetComponent<Rigidbody2D>();
+            m_BtRunner  = GetComponent<BTRunner>();
+            m_PlayerRef = player;
 
             base.Init(data, player, spawnPos);
-            // BTRunner.Start() 는 SetActive(true) 이후 자동 호출된다.
+
+            // BTAsset 을 데이터 주소에서 로드해 BTRunner 에 연결
+            // BTRunner.Start() 는 SetActive(true) 이후 자동 호출되므로 Init 단계에서 설정해야 함
+            if (data != null && !string.IsNullOrEmpty(data.BtAssetAddress))
+            {
+                var btAsset = MonsterKitchen.Core.AssetLoadManager.Instance?.Load<BTAsset>(data.BtAssetAddress);
+                if (m_BtRunner != null && btAsset != null)
+                    m_BtRunner.SetAsset(btAsset);
+            }
+
+            // 이동 컴포넌트 초기화 (SlimeMovement 등)
+            var anim = GetComponent<Animator>();
+            m_Movement = GetComponent<MonsterMovementBase>();
+            if (m_Movement != null)
+            {
+                m_Movement.Init(m_Rb, anim, this);
+                m_Movement.InitNavAgent();
+                m_Movement.OnSpawned();
+            }
         }
 
         // ================================================================
@@ -62,30 +82,31 @@ namespace MonsterKitchen.Enemy
 
         public void InitializeBlackboard(BTBlackboard bb)
         {
-            bb.Set("Player",   _playerRef != null ? _playerRef : FindPlayer());
-            bb.Set("SpawnPos", (Vector3)transform.position);
-            bb.Set("MoveSpeed", moveSpeed);
+            bb.Set("Player",    m_PlayerRef != null ? m_PlayerRef : FindPlayer());
+            bb.Set("SpawnPos",  (Vector3)transform.position);
+            bb.Set("MoveSpeed", Data != null ? Data.MoveSpeed : 2.5f);
 
-            var skills = Data?.skills;
-            float detectRange  = 5f + detectRangeBonus;
+            var groups = Data?.SkillGroups;
+            float detectRange   = 5f + m_DetectRangeBonus;
             float preferredDist = 1f;
 
-            if (skills != null && skills.Length > 0)
+            if (groups != null && groups.Length > 0)
             {
                 float maxSearch = 0f;
                 float minSearch = float.MaxValue;
-                foreach (var s in skills)
+                foreach (var g in groups)
                 {
+                    var s = g?.GetStep(0);
                     if (s == null) continue;
-                    if (s.searchRange > maxSearch) maxSearch = s.searchRange;
-                    if (s.searchRange < minSearch) minSearch = s.searchRange;
+                    if (s.SearchRange > maxSearch) maxSearch = s.SearchRange;
+                    if (s.SearchRange < minSearch) minSearch = s.SearchRange;
                 }
-                detectRange  = maxSearch + detectRangeBonus;
+                detectRange   = maxSearch + m_DetectRangeBonus;
                 preferredDist = minSearch == float.MaxValue ? 1f : minSearch;
             }
 
-            bb.Set("DetectRange",        detectRange);
-            bb.Set("PreferredDistance",  preferredDist);
+            bb.Set("DetectRange",       detectRange);
+            bb.Set("PreferredDistance", preferredDist);
         }
 
         // ================================================================
@@ -94,10 +115,10 @@ namespace MonsterKitchen.Enemy
 
         protected override void OnDied(AttributeType killAttr)
         {
-            _rb.linearVelocity = Vector2.zero;
-            _btRunner?.AbortTree();
+            m_Rb.linearVelocity = Vector2.zero;
+            m_BtRunner?.AbortTree();
 
-            GetComponent<Animator>()?.SetTrigger(HashDie);
+            GetComponent<Animator>()?.SetTrigger(s_HashDie);
 
             var col = GetComponent<Collider2D>();
             if (col != null) col.enabled = false;
@@ -107,23 +128,23 @@ namespace MonsterKitchen.Enemy
         }
 
         // ================================================================
-        //  Separation Steering (BTTask 에서 호출)
+        //  Separation Steering (BTAction 에서 호출)
         // ================================================================
 
         public Vector2 ApplySeparation(Vector2 desiredDir)
         {
             int count = Physics2D.OverlapCircle(
-                transform.position, separationRadius,
-                new ContactFilter2D { layerMask = monsterLayer, useLayerMask = true },
-                _sepBuffer);
+                transform.position, m_SeparationRadius,
+                new ContactFilter2D { layerMask = m_MonsterLayer, useLayerMask = true },
+                m_SepBuffer);
 
             if (count == 0) return desiredDir;
 
             Vector2 separation = Vector2.zero;
             for (int i = 0; i < count; i++)
             {
-                if (_sepBuffer[i] == null || _sepBuffer[i].gameObject == gameObject) continue;
-                Vector2 away = (Vector2)transform.position - (Vector2)_sepBuffer[i].transform.position;
+                if (m_SepBuffer[i] == null || m_SepBuffer[i].gameObject == gameObject) continue;
+                Vector2 away = (Vector2)transform.position - (Vector2)m_SepBuffer[i].transform.position;
                 float   dist = away.magnitude;
                 if (dist < 0.001f) continue;
                 separation += away.normalized / (dist * dist);
@@ -133,7 +154,7 @@ namespace MonsterKitchen.Enemy
 
             Vector2 perp    = new Vector2(-desiredDir.y, desiredDir.x);
             float   slide   = Vector2.Dot(separation.normalized, perp);
-            Vector2 blended = desiredDir + perp * (slide * separationWeight);
+            Vector2 blended = desiredDir + perp * (slide * m_SeparationWeight);
             return blended.sqrMagnitude > 0.001f ? blended.normalized : desiredDir;
         }
 
@@ -143,16 +164,23 @@ namespace MonsterKitchen.Enemy
 
         public void FireProjectile(SkillData skill, int damage, AttributeType attr, Vector2 direction)
         {
-            if (_projectilePrefab == null)
+            if (string.IsNullOrEmpty(skill.ProjectilePrefabAddress))
             {
-                Debug.LogWarning($"[BTMonsterController] {name}: ProjectilePrefab 이 연결되지 않았습니다.");
+                Debug.LogError($"[BTMonsterController] {name}: SkillData({skill.SkillId}).projectilePrefabAddress 가 비어있습니다.", this);
                 return;
             }
 
-            var go   = Instantiate(_projectilePrefab, transform.position, Quaternion.identity);
+            var prefab = MonsterKitchen.Core.AssetLoadManager.Instance?.Load<GameObject>(skill.ProjectilePrefabAddress);
+            if (prefab == null)
+            {
+                Debug.LogError($"[BTMonsterController] {name}: 투사체 프리팹 로드 실패 — 키: {skill.ProjectilePrefabAddress}", this);
+                return;
+            }
+
+            var go   = Instantiate(prefab, transform.position, Quaternion.identity);
             var proj = go.GetComponent<Projectile>();
             if (proj != null)
-                proj.Init(damage, attr, direction, skill.missileSpeed, skill.missileMaxRange, _playerLayer);
+                proj.Init(damage, attr, direction, skill.MissileSpeed, skill.MissileMaxRange, m_PlayerLayer);
         }
 
         // ================================================================

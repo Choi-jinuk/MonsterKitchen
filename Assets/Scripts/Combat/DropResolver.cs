@@ -11,32 +11,32 @@ namespace MonsterKitchen.Combat
     /// </summary>
     public class DropResolver : MonoBehaviour
     {
-        [SerializeField] GameObject itemDropPrefab;
+        [SerializeField] GameObject m_ItemDropPrefab;
 
-        Health      _health;
-        MonsterBase _monster;
+        Health      m_Health;
+        MonsterBase m_Monster;
 
         void Awake()
         {
-            _health  = GetComponent<Health>();
-            _monster = GetComponent<MonsterBase>();
+            m_Health  = GetComponent<Health>();
+            m_Monster = GetComponent<MonsterBase>();
         }
 
         void OnEnable()
         {
-            if (_health != null)
-                _health.OnDeath += HandleDeath;
+            if (m_Health != null)
+                m_Health.OnDeath += HandleDeath;
         }
 
         void OnDisable()
         {
-            if (_health != null)
-                _health.OnDeath -= HandleDeath;
+            if (m_Health != null)
+                m_Health.OnDeath -= HandleDeath;
         }
 
         void HandleDeath(AttributeType killAttribute)
         {
-            uint dropTableId = _monster?.Data?.dropTableId ?? 0u;
+            uint dropTableId = m_Monster?.Data?.DropTableId ?? 0u;
             if (dropTableId == 0u) return;
 
             var dropTable = DataRegistry.Instance?.GetDropTable(dropTableId);
@@ -52,15 +52,15 @@ namespace MonsterKitchen.Combat
 
         void SpawnDrop(uint ingredientId, int qty)
         {
-            if (itemDropPrefab == null)
+            if (m_ItemDropPrefab == null)
             {
                 // 프리팹 없으면 인벤토리에 직접 추가 (MVP 폴백)
-                Inventory.Instance?.Add(ingredientId, qty);
+                NetworkManager.Instance?.RequestAddIngredient(ingredientId, qty);
                 return;
             }
 
             Vector2 offset = RandomUtil.InCircle(0.4f);
-            var go = Instantiate(itemDropPrefab,
+            var go = Instantiate(m_ItemDropPrefab,
                                  (Vector2)transform.position + offset,
                                  Quaternion.identity);
 

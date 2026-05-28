@@ -1,17 +1,18 @@
 using MonsterKitchen.Core;
+using MonsterKitchen.Data;
 using UnityEngine;
 
 namespace MonsterKitchen.Management
 {
     /// <summary>
     /// 도구 업그레이드 스테이션.
-    /// 플레이어가 Trigger 안에 있는 동안 Interact 키 → ToolManager를 통해 해당 스탯 업그레이드.
+    /// 플레이어가 Trigger 안에 있는 동안 Interact 키 → NetworkManager 를 통해 해당 스탯 업그레이드.
     /// </summary>
     public class ToolUpgradeStation : MonoBehaviour
     {
         public enum UpgradeType { Damage, Range, Cooldown }
 
-        [SerializeField] UpgradeType upgradeType = UpgradeType.Damage;
+        [SerializeField] UpgradeType m_UpgradeType = UpgradeType.Damage;
 
         void OnTriggerEnter2D(Collider2D other)
         {
@@ -35,33 +36,33 @@ namespace MonsterKitchen.Management
 
         void Upgrade()
         {
-            if (ToolManager.Instance == null)
+            if (NetworkManager.Instance == null)
             {
-                Debug.LogWarning("[ToolUpgradeStation] ToolManager 없음.");
+                Debug.LogWarning("[ToolUpgradeStation] NetworkManager 없음.");
                 return;
             }
 
-            bool success;
-            int  cost;
-
-            switch (upgradeType)
+            PlayerUpgradeType type = m_UpgradeType switch
             {
-                case UpgradeType.Damage:
-                    cost    = ToolManager.Instance.DamageUpgradeCost;
-                    success = ToolManager.Instance.UpgradeDamage();
-                    break;
-                case UpgradeType.Range:
-                    cost    = ToolManager.Instance.RangeUpgradeCost;
-                    success = ToolManager.Instance.UpgradeRange();
-                    break;
-                default:
-                    cost    = ToolManager.Instance.CooldownUpgradeCost;
-                    success = ToolManager.Instance.UpgradeCooldown();
-                    break;
-            }
+                UpgradeType.Damage  => PlayerUpgradeType.ToolDamage,
+                UpgradeType.Range   => PlayerUpgradeType.ToolRange,
+                _                   => PlayerUpgradeType.ToolCooldown,
+            };
 
-            if (!success)
-                Debug.Log($"[ToolUpgradeStation] 골드 부족. 필요: {cost}G");
+            // 비용 미리 캡처 (실패 메시지용)
+            var upg = PlayerDataManager.Instance?.Upgrades;
+            int cost = type switch
+            {
+                PlayerUpgradeType.ToolDamage   => upg?.ToolDamageUpgradeCost   ?? 0,
+                PlayerUpgradeType.ToolRange    => upg?.ToolRangeUpgradeCost    ?? 0,
+                _                              => upg?.ToolCooldownUpgradeCost  ?? 0,
+            };
+
+            NetworkManager.Instance.RequestUpgrade(type, success =>
+            {
+                if (!success)
+                    Debug.Log($"[ToolUpgradeStation] 골드 부족. 필요: {cost}G");
+            });
         }
     }
 }
