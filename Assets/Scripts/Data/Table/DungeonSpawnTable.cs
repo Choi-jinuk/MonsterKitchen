@@ -36,4 +36,7 @@ namespace MonsterKitchen.Data
         [UnityEngine.Tooltip("스폰 포인트 중심 랜덤 오프셋 반경")]
         [UnityEngine.Min(0)] public float SpawnRadius = 0.5f;
     }
+
+    [Serializable]
+    public class DungeonSpawnTable : DataTable<DungeonSpawnTableData> { }
 }

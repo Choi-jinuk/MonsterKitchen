@@ -1,5 +1,7 @@
 using TMPro; // C-10
 using MonsterKitchen.Core;
+using MonsterKitchen.Dungeon;
+using MonsterKitchen.UI.Mobile;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -18,7 +20,7 @@ namespace MonsterKitchen.UI
     //        Background        ← Image (반투명 배경)
     //        Label             ← TextMeshProUGUI (프롬프트 전체 텍스트)
     //
-    //    Inspector에서 _promptRoot, _label 을 각 오브젝트에 연결한다.
+    //    Inspector에서 m_PromptRoot, m_Label 을 각 오브젝트에 연결한다.
     //    위치/크기는 씬에서 직접 조정한다.
     //
     //  ▶ 키 표시 자동화
@@ -28,40 +30,48 @@ namespace MonsterKitchen.UI
     //
     //  ▶ 외부 제어
     //    - Show() / Hide() 로 코드에서 직접 표시/숨김 가능.
-    //    - SetActionText(string) 으로 키 뒤에 오는 설명 문자열 변경 가능.
+    //    - SetActionKey(stringId) 로 StringData 키를 변경하면 현재 언어로 갱신.
     // ====================================================================
 
     public class InteractionPrompt : MonoBehaviour
     {
         [Header("씬 오브젝트 참조")]
-        [SerializeField] GameObject      _promptRoot;  // Canvas 루트 오브젝트
-        [SerializeField] TextMeshProUGUI _label;       // 프롬프트 전체 텍스트
+        [SerializeField] GameObject      m_PromptRoot;  // Canvas 루트 오브젝트
+        [SerializeField] TextMeshProUGUI m_Label;       // 프롬프트 전체 텍스트
 
         [Header("설정")]
-        [SerializeField] string _actionText = "상호작용";  // 키 이름 뒤에 붙는 설명
+        [SerializeField] string m_ActionKey = "UI_INTERACT";  // StringData.StringId — LocaleManager 로 조회
 
-        bool _playerInside;
+        bool m_PlayerInside;
 
         // ----------------------------------------------------------------
 
         void Awake()
         {
-            if (_promptRoot != null) _promptRoot.SetActive(false);
+            if (m_PromptRoot != null) m_PromptRoot.SetActive(false);
         }
 
-        void Start()
+        void OnEnable()
         {
-            // InputManager 는 GlobalController 가 초기화하므로 Start 시점에 참조한다.
-            RefreshLabel();
+            LocaleManager.OnLanguageChanged += RefreshLabel;
+            // 이미 데이터가 로드된 상태라면 즉시 갱신
+            if (LocaleManager.Instance != null && LocaleManager.Instance.IsReady)
+                RefreshLabel();
+        }
+
+        void OnDisable()
+        {
+            LocaleManager.OnLanguageChanged -= RefreshLabel;
         }
 
         // 현재 Interact 바인딩 키 이름을 읽어 레이블을 갱신한다.
         void RefreshLabel()
         {
-            if (_label == null) return;
+            if (m_Label == null) return;
 
-            string keyName = GetInteractKeyName();
-            _label.text = keyName != null ? $"[{keyName}] {_actionText}" : _actionText;
+            string keyName    = GetInteractKeyName();
+            string actionText = LocaleManager.Get(m_ActionKey);
+            m_Label.text = keyName != null ? $"[{keyName}] {actionText}" : actionText;
         }
 
         // InputManager 가 보유한 Interact 액션에서 키 이름을 읽는다.
@@ -98,15 +108,19 @@ namespace MonsterKitchen.UI
         void OnTriggerEnter2D(Collider2D other)
         {
             if (!other.CompareTag("Player")) return;
-            _playerInside = true;
-            _promptRoot?.SetActive(true);
+            m_PlayerInside = true;
+            m_PromptRoot?.SetActive(true);
+            MobileHUD.Instance?.SetContext(MobileContext.DungeonInteract);
         }
 
         void OnTriggerExit2D(Collider2D other)
         {
             if (!other.CompareTag("Player")) return;
-            _playerInside = false;
-            _promptRoot?.SetActive(false);
+            m_PlayerInside = false;
+            m_PromptRoot?.SetActive(false);
+            // 던전씬에서만 Dungeon 컨텍스트로 복귀 (다른 씬은 각 컨트롤러가 관리)
+            if (DungeonMapController.Instance != null)
+                MobileHUD.Instance?.SetContext(MobileContext.Dungeon);
         }
 
         // ----------------------------------------------------------------
@@ -116,16 +130,16 @@ namespace MonsterKitchen.UI
         /// <summary>플레이어가 범위 안에 있을 때만 표시한다.</summary>
         public void Show()
         {
-            if (_playerInside) _promptRoot?.SetActive(true);
+            if (m_PlayerInside) m_PromptRoot?.SetActive(true);
         }
 
         /// <summary>강제로 숨긴다 (요리 중, 컷씬 등).</summary>
-        public void Hide() => _promptRoot?.SetActive(false);
+        public void Hide() => m_PromptRoot?.SetActive(false);
 
-        /// <summary>키 이름 뒤에 오는 설명 텍스트를 변경하고 레이블을 즉시 갱신한다.</summary>
-        public void SetActionText(string text)
+        /// <summary>StringData.StringId 를 변경하고 레이블을 즉시 갱신한다.</summary>
+        public void SetActionKey(string stringId)
         {
-            _actionText = text;
+            m_ActionKey = stringId;
             RefreshLabel();
         }
     }

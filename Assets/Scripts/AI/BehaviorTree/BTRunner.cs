@@ -1,3 +1,4 @@
+using MonsterKitchen.Core;
 using UnityEngine;
 
 namespace MonsterKitchen.AI.BehaviorTree
@@ -15,9 +16,13 @@ namespace MonsterKitchen.AI.BehaviorTree
     {
         [SerializeField] BTAsset m_Asset;
 
+        [Tooltip("BT 틱 최소 간격(초). 0 = 매 프레임. 0.05~0.1 권장 (20~10fps 틱).")]
+        [SerializeField] float m_TickInterval = 0f;
+
         BTNode    m_Root;
         BTContext m_Ctx;
         bool      m_Aborted;
+        float     m_TickTimer;
 
         // ================================================================
         //  Unity lifecycle
@@ -27,7 +32,7 @@ namespace MonsterKitchen.AI.BehaviorTree
         {
             if (m_Asset == null || m_Asset.Root == null)
             {
-                Debug.LogWarning($"[BTRunner] {name}: BTAsset 또는 루트 노드가 없습니다.");
+                DebugUtil.LogWarning($"[BTRunner] {name}: BTAsset 또는 루트 노드가 없습니다.");
                 return;
             }
 
@@ -62,7 +67,16 @@ namespace MonsterKitchen.AI.BehaviorTree
         void Update()
         {
             if (m_Aborted || m_Root == null) return;
-            m_Ctx.SetDeltaTime(Time.deltaTime);
+
+            float dt = Time.deltaTime;
+            if (m_TickInterval > 0f)
+            {
+                m_TickTimer -= dt;
+                if (m_TickTimer > 0f) return;
+                m_TickTimer = m_TickInterval;
+            }
+
+            m_Ctx.SetDeltaTime(dt);
             m_Root.Tick(m_Ctx);
         }
 

@@ -1,3 +1,4 @@
+using MonsterKitchen.Core;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -42,12 +43,12 @@ namespace MonsterKitchen.Core
                 if (string.IsNullOrWhiteSpace(e.Key) || e.Asset == null)
                 {
                     if (!string.IsNullOrWhiteSpace(e.Key))
-                        Debug.LogWarning($"[AssetManifest] 키 '{e.Key}' 에 에셋이 없습니다.");
+                        DebugUtil.LogWarning($"[AssetManifest] 키 '{e.Key}' 에 에셋이 없습니다.");
                     continue;
                 }
 
                 if (!dict.TryAdd(e.Key, e.Asset))
-                    Debug.LogWarning($"[AssetManifest] 중복 키 감지: '{e.Key}' — 첫 번째 항목을 사용합니다.");
+                    DebugUtil.LogWarning($"[AssetManifest] 중복 키 감지: '{e.Key}' — 첫 번째 항목을 사용합니다.");
             }
             return dict;
         }

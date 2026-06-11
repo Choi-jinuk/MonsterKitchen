@@ -54,5 +54,12 @@ namespace MonsterKitchen.Combat
             CurrentHp = Mathf.Min(MaxHp, CurrentHp + amount);
             OnHpChanged?.Invoke(CurrentHp, MaxHp);
         }
+
+        /// <summary>사망 상태에서 체력을 완전 회복한다 (씬 복귀 시 등).</summary>
+        public void Revive()
+        {
+            CurrentHp = MaxHp;
+            OnHpChanged?.Invoke(CurrentHp, MaxHp);
+        }
     }
 }

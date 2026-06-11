@@ -11,23 +11,23 @@ namespace MonsterKitchen.Restaurant
     /// </summary>
     public class RestaurantSetup : MonoBehaviour
     {
-        [SerializeField] Transform         guestSpawnPoint;
-        [SerializeField] RestaurantTable[] tables;
+        [SerializeField] Transform         m_GuestSpawnPoint;
+        [SerializeField] RestaurantTable[] m_Tables;
 
         void Awake()
         {
             if (DayManager.Instance == null)
             {
-                Debug.LogWarning("[RestaurantSetup] DayManager 인스턴스 없음 — ManagementScene부터 시작하세요.");
+                DebugUtil.LogWarning("[RestaurantSetup] DayManager 인스턴스 없음 — ManagementScene부터 시작하세요.");
                 return;
             }
 
             var customerPrefab = AssetLoadManager.Instance?.Load<CustomerAI>(AssetKeys.PREFAB_CUSTOMER);
             if (customerPrefab == null)
-                Debug.LogError("[RestaurantSetup] Customer 프리팹을 AssetManifest에서 찾을 수 없습니다. 키: " + AssetKeys.PREFAB_CUSTOMER);
+                DebugUtil.LogError("[RestaurantSetup] Customer 프리팹을 AssetManifest에서 찾을 수 없습니다. 키: " + AssetKeys.PREFAB_CUSTOMER);
 
-            DayManager.Instance.SetRestaurantConfig(guestSpawnPoint, customerPrefab, tables);
-            Debug.Log("[RestaurantSetup] DayManager 레퍼런스 주입 완료.");
+            DayManager.Instance.SetRestaurantConfig(m_GuestSpawnPoint, customerPrefab, m_Tables);
+            DebugUtil.Log("[RestaurantSetup] DayManager 레퍼런스 주입 완료.");
         }
     }
 }

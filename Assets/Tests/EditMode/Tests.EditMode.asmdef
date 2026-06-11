@@ -1,0 +1,21 @@
+{
+    "name": "Tests.EditMode",
+    "rootNamespace": "MonsterKitchen.Tests.EditMode",
+    "references": [
+        "MonsterKitchen"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": false,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false,
+    "optionalUnityReferences": [
+        "TestAssemblies"
+    ]
+}

@@ -1,4 +1,4 @@
-; 몬스터 데이터 — 에버그린 숲 (Evergreen Forest)
+﻿; 몬스터 데이터 — 에버그린 숲 (Evergreen Forest)
 ; attribute: None/Fire/Water/Wind/Earth/Magic/Poison
 ; rarity: Common/Uncommon/Rare/Epic/Legendary
 ; id: uint (MON_001=1001 ~ MON_005=1005)
@@ -9,10 +9,11 @@
 ; prefabAddress: AssetManifest 등록 키 (형식: prefab/monster/{id})
 ; spriteAddress: AssetManifest 등록 키 (형식: sprite/monster/{id})
 ; btAssetAddress: BehaviorTree 에셋 AssetManifest 키 (형식: bt/monster/{id})
+; nameKey/descKey: 비워두면 _key + _NAME/_DESC 로 자동 생성 (StringData 참조)
 #TYPE,string,uint,string,string,int,int,int,float,AttributeType,RarityType,uint,string,bool,bool,bool,string,string,string
-_key,Id,DisplayName,Description,Hp,Attack,Defense,MoveSpeed,Attribute,Rarity,DropTableId,SkillGroupIds,ImmuneToKnockback,ImmuneToStun,ImmuneToPullIn,PrefabAddress,SpriteAddress,BtAssetAddress
-MON_001,1001,초록 슬라임,에버그린 숲에 가장 흔히 출몰하는 젤리형 몬스터. 독성 점액을 분비한다.,30,5,2,5.0,Poison,Common,5001,SGD_101,false,false,false,prefab/monster/1001,sprite/monster/1001,bt/monster/1001
-MON_002,1002,불꽃 슬라임,용암 지대에서 흘러온 슬라임. 몸체가 뜨겁게 달아올라 있다.,35,8,2,2.0,Fire,Common,5002,SGD_101,false,false,false,prefab/monster/1002,sprite/monster/1002,bt/monster/1002
-MON_003,1003,숲 고블린,에버그린 숲을 근거지로 삼는 소형 인간형 몬스터. 뼈 몽둥이를 휘두른다.,45,10,5,3.0,None,Uncommon,5003,SGD_102,false,false,false,prefab/monster/1003,sprite/monster/1003,bt/monster/1003
-MON_004,1004,거대 버섯인간,숲 깊은 곳의 균류에서 태어난 몬스터. 포자를 뿜어 시야를 흐린다.,60,8,8,1.5,Poison,Uncommon,5004,SGD_103,false,false,false,prefab/monster/1004,sprite/monster/1004,bt/monster/1004
-MON_005,1005,숲 보스 — 그린 웜,에버그린 숲 지하에 서식하는 대형 지렁이 몬스터. 땅을 파고들어 기습한다.,200,18,10,2.5,Earth,Rare,5005,SGD_104|SGD_105,false,true,false,prefab/monster/1005,sprite/monster/1005,bt/monster/1005
+_key,Id,NameKey,DescKey,Hp,Attack,Defense,MoveSpeed,Attribute,Rarity,DropTableId,SkillGroupIds,ImmuneToKnockback,ImmuneToStun,ImmuneToPullIn,PrefabAddress,SpriteAddress,BtAssetAddress
+MON_001,1001,,,30,5,2,10,Poison,Common,5001,SGD_101,false,false,false,prefab/monster/1001,sprite/monster/1001,bt/monster/1001
+MON_002,1002,,,35,8,2,10,Fire,Common,5002,SGD_101,false,false,false,prefab/monster/1002,sprite/monster/1002,bt/monster/1002
+MON_003,1003,,,45,10,5,10,None,Uncommon,5003,SGD_102,false,false,false,prefab/monster/1003,sprite/monster/1003,bt/monster/1003
+MON_004,1004,,,60,8,8,10,Poison,Uncommon,5004,SGD_103,false,false,false,prefab/monster/1004,sprite/monster/1004,bt/monster/1004
+MON_005,1005,,,200,18,10,10,Earth,Rare,5005,SGD_104|SGD_105,false,true,false,prefab/monster/1005,sprite/monster/1005,bt/monster/1005

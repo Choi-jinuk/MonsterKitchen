@@ -13,94 +13,95 @@ namespace MonsterKitchen.UI
     /// - ✕ / 배경 클릭: UIManager.Close
     /// - 인벤토리 변경: Inventory.OnItemChanged / FoodInventory.OnFoodChanged
     ///
-    /// 아이템 데이터는 DataRegistry 경유 조회 (Inspector SO 배열 제거).
-    /// DataRegistry.IsReady 가 true 여야 아이콘·이름이 정상 표시됩니다.
+    /// 아이템 데이터는 DataRegistry 경유 조회.
     /// </summary>
     public class InventoryUI : UIPanel
     {
+        VisualElement m_IngGrid;
+        VisualElement m_FoodGrid;
 
-        VisualElement _ingGrid;
-        VisualElement _foodGrid;
+        // ── UIPanel 훅 ────────────────────────────────────────────────
 
-        // ── Unity 생명주기 ────────────────────────────────────────────
-
-        protected override void Awake()
+        protected override void OnFirstOpen()
         {
-            base.Awake(); // Document, Root 캐싱 + sortingOrder = UILayer.Panel(20)
-        }
+            m_IngGrid  = Root?.Q<VisualElement>("ing-grid");
+            m_FoodGrid = Root?.Q<VisualElement>("food-grid");
 
-        protected override void Start()
-        {
-            base.Start(); // UIManager.Register(this)
-
-            _ingGrid  = Root?.Q<VisualElement>("ing-grid");
-            _foodGrid = Root?.Q<VisualElement>("food-grid");
-
-            // ✕ 버튼
             Root?.Q<Label>("inv-close-btn")
                 ?.RegisterCallback<ClickEvent>(_ => UIManager.Instance?.Close(PanelId));
 
-            // 배경 클릭 닫기
             Root?.Q<VisualElement>("inv-overlay")
                 ?.RegisterCallback<ClickEvent>(evt =>
                 {
                     if (evt.target is VisualElement ve && ve.name == "inv-overlay")
                         UIManager.Instance?.Close(PanelId);
                 });
-
-            // 인벤토리 변경 → 열려있을 때만 갱신
-            if (PlayerDataManager.Instance?.Inventory != null)
-            {
-                PlayerDataManager.Instance.Inventory.OnIngredientChanged += (_, _) => { if (IsOpen) BuildIngredients(); };
-                PlayerDataManager.Instance.Inventory.OnFoodChanged       += (_, _) => { if (IsOpen) BuildFoods(); };
-            }
         }
 
-        // ── UIPanel 생명주기 override ────────────────────────────────
-        // Update() 없음 — 키 입력은 UIPanel._toggleKey → InputManager 가 처리
+        // ── UIPanel override ─────────────────────────────────────────
 
         public override void OnOpen()
         {
-            base.OnOpen(); // SetVisible(true)
+            base.OnOpen();
+            var inv = PlayerDataManager.Instance?.Inventory;
+            if (inv != null)
+            {
+                inv.OnIngredientChanged += HandleIngredientChanged;
+                inv.OnFoodChanged       += HandleFoodChanged;
+            }
             BuildIngredients();
             BuildFoods();
         }
 
-        // OnClose() 는 base(SetVisible(false)) 만으로 충분
+        public override void OnClose()
+        {
+            var inv = PlayerDataManager.Instance?.Inventory;
+            if (inv != null)
+            {
+                inv.OnIngredientChanged -= HandleIngredientChanged;
+                inv.OnFoodChanged       -= HandleFoodChanged;
+            }
+            base.OnClose();
+        }
+
+        void HandleIngredientChanged(uint id, int qty) => BuildIngredients();
+        void HandleFoodChanged(uint id, int qty)       => BuildFoods();
 
         // ── 그리드 빌드 ──────────────────────────────────────────────
 
         void BuildIngredients()
         {
-            if (_ingGrid == null) return;
-            _ingGrid.Clear();
+            if (m_IngGrid == null) return;
+            m_IngGrid.Clear();
 
             var all = PlayerDataManager.Instance?.Inventory.AllIngredients;
             if (all == null || all.Count == 0)
             {
-                _ingGrid.Add(EmptyMsg("재료가 없습니다."));
+                m_IngGrid.Add(EmptyMsg("재료가 없습니다."));
                 return;
             }
 
+            var inv      = PlayerDataManager.Instance.Inventory;
             var registry = DataRegistry.Instance;
             var loader   = AssetLoadManager.Instance;
             foreach (var kv in all)
             {
-                var d      = registry?.GetIngredient(kv.Key);
-                var sprite = loader?.Load<Sprite>(d?.SpriteAddress);
-                _ingGrid.Add(Slot(sprite, kv.Value.ToString(), d?.DisplayName ?? CommonString.Unknown));
+                var d       = registry?.Ingredients?.Get(kv.Key);
+                var sprite  = loader?.Load<Sprite>(d?.SpriteAddress);
+                var quality = inv.GetBestQuality(kv.Key);
+                m_IngGrid.Add(IngredientSlot(sprite, kv.Value.ToString(), d?.DisplayName ?? CommonString.Unknown, quality));
             }
         }
 
         void BuildFoods()
         {
-            if (_foodGrid == null) return;
-            _foodGrid.Clear();
+            if (m_FoodGrid == null) return;
+            m_FoodGrid.Clear();
 
             var all = PlayerDataManager.Instance?.Inventory.AllFoods;
             if (all == null || all.Count == 0)
             {
-                _foodGrid.Add(EmptyMsg("요리가 없습니다."));
+                m_FoodGrid.Add(EmptyMsg("요리가 없습니다."));
                 return;
             }
 
@@ -108,13 +109,54 @@ namespace MonsterKitchen.UI
             var loader   = AssetLoadManager.Instance;
             foreach (var kv in all)
             {
-                var d      = registry?.GetFood(kv.Key);
+                var d      = registry?.Foods?.Get(kv.Key);
                 var sprite = loader?.Load<Sprite>(d?.SpriteAddress);
-                _foodGrid.Add(Slot(sprite, kv.Value.ToString(), d?.DisplayName ?? CommonString.Unknown));
+                m_FoodGrid.Add(Slot(sprite, kv.Value.ToString(), d?.DisplayName ?? CommonString.Unknown));
             }
         }
 
         // ── UI 요소 빌더 ─────────────────────────────────────────────
+
+        static VisualElement IngredientSlot(Sprite sprite, string count, string name, IngredientQuality quality)
+        {
+            var wrap = new VisualElement();
+            wrap.style.alignItems = Align.Center;
+
+            var slot = new VisualElement();
+            slot.AddToClassList("inv-slot");
+
+            var icon = new VisualElement();
+            icon.AddToClassList("inv-slot-icon");
+            if (sprite != null) icon.style.backgroundImage = Background.FromSprite(sprite);
+            slot.Add(icon);
+
+            var countLbl = new Label(count);
+            countLbl.AddToClassList("inv-slot-count");
+            slot.Add(countLbl);
+
+            // 품질 배지
+            var badge = new Label(quality switch
+            {
+                IngredientQuality.III => "III",
+                IngredientQuality.II  => "II",
+                _                     => "I",
+            });
+            badge.AddToClassList("inv-quality-badge");
+            badge.style.color = quality switch
+            {
+                IngredientQuality.III => new Color(1f,  0.84f, 0f),    // 금색
+                IngredientQuality.II  => new Color(0.4f, 0.6f, 1f),   // 파란색
+                _                     => new Color(0.6f, 0.6f, 0.6f), // 회색
+            };
+            slot.Add(badge);
+
+            var nameLbl = new Label(name);
+            nameLbl.AddToClassList("inv-slot-name");
+
+            wrap.Add(slot);
+            wrap.Add(nameLbl);
+            return wrap;
+        }
 
         static VisualElement Slot(Sprite sprite, string count, string name)
         {

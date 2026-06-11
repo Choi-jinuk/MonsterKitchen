@@ -1,13 +1,17 @@
 using MonsterKitchen.Core;
 using MonsterKitchen.Data;
+using MonsterKitchen.UI;
 using UnityEngine;
 
 namespace MonsterKitchen.Management
 {
-    /// <summary>
-    /// 도구 업그레이드 스테이션.
-    /// 플레이어가 Trigger 안에 있는 동안 Interact 키 → NetworkManager 를 통해 해당 스탯 업그레이드.
-    /// </summary>
+    // ====================================================================
+    //  ToolUpgradeStation — 도구 업그레이드 스테이션
+    //
+    //  ▶ 동작
+    //    플레이어 Trigger 진입 → 현재 레벨·비용 HUD 알림 표시
+    //    Interact 키(E) → NetworkManager.RequestUpgrade → 성공/실패 HUD 알림
+    // ====================================================================
     public class ToolUpgradeStation : MonoBehaviour
     {
         public enum UpgradeType { Damage, Range, Cooldown }
@@ -17,6 +21,7 @@ namespace MonsterKitchen.Management
         void OnTriggerEnter2D(Collider2D other)
         {
             if (!other.CompareTag("Player")) return;
+            ShowCostHint();
             if (InputManager.Instance != null)
                 InputManager.Instance.OnInteract += Upgrade;
         }
@@ -34,34 +39,71 @@ namespace MonsterKitchen.Management
                 InputManager.Instance.OnInteract -= Upgrade;
         }
 
+        // ================================================================
+        //  내부
+        // ================================================================
+
+        void ShowCostHint()
+        {
+            var upg = PlayerDataManager.Instance?.Upgrades;
+            if (upg == null) return;
+
+            (string label, int level, int cost) = m_UpgradeType switch
+            {
+                UpgradeType.Damage   => ("공격력", upg.ToolDamageLevel,   upg.ToolDamageUpgradeCost),
+                UpgradeType.Range    => ("범위",   upg.ToolRangeLevel,    upg.ToolRangeUpgradeCost),
+                _                    => ("쿨다운", upg.ToolCooldownLevel, upg.ToolCooldownUpgradeCost),
+            };
+
+            GameHUD.Instance?.ShowNotification($"[도구 {label}] Lv{level} → Lv{level + 1}  비용: {cost}G  (E 업그레이드)", 3f);
+        }
+
         void Upgrade()
         {
             if (NetworkManager.Instance == null)
             {
-                Debug.LogWarning("[ToolUpgradeStation] NetworkManager 없음.");
+                DebugUtil.LogWarning("[ToolUpgradeStation] NetworkManager 없음.");
                 return;
             }
 
+            var upg = PlayerDataManager.Instance?.Upgrades;
             PlayerUpgradeType type = m_UpgradeType switch
             {
-                UpgradeType.Damage  => PlayerUpgradeType.ToolDamage,
-                UpgradeType.Range   => PlayerUpgradeType.ToolRange,
-                _                   => PlayerUpgradeType.ToolCooldown,
+                UpgradeType.Damage => PlayerUpgradeType.ToolDamage,
+                UpgradeType.Range  => PlayerUpgradeType.ToolRange,
+                _                  => PlayerUpgradeType.ToolCooldown,
             };
 
-            // 비용 미리 캡처 (실패 메시지용)
-            var upg = PlayerDataManager.Instance?.Upgrades;
-            int cost = type switch
+            int cost = m_UpgradeType switch
             {
-                PlayerUpgradeType.ToolDamage   => upg?.ToolDamageUpgradeCost   ?? 0,
-                PlayerUpgradeType.ToolRange    => upg?.ToolRangeUpgradeCost    ?? 0,
-                _                              => upg?.ToolCooldownUpgradeCost  ?? 0,
+                UpgradeType.Damage => upg?.ToolDamageUpgradeCost   ?? 0,
+                UpgradeType.Range  => upg?.ToolRangeUpgradeCost    ?? 0,
+                _                  => upg?.ToolCooldownUpgradeCost ?? 0,
+            };
+
+            string label = m_UpgradeType switch
+            {
+                UpgradeType.Damage => "공격력",
+                UpgradeType.Range  => "범위",
+                _                  => "쿨다운",
             };
 
             NetworkManager.Instance.RequestUpgrade(type, success =>
             {
-                if (!success)
-                    Debug.Log($"[ToolUpgradeStation] 골드 부족. 필요: {cost}G");
+                if (success)
+                {
+                    int newLevel = m_UpgradeType switch
+                    {
+                        UpgradeType.Damage => upg?.ToolDamageLevel   ?? 0,
+                        UpgradeType.Range  => upg?.ToolRangeLevel    ?? 0,
+                        _                  => upg?.ToolCooldownLevel ?? 0,
+                    };
+                    GameHUD.Instance?.ShowNotification($"[도구 {label}] Lv{newLevel} 업그레이드 완료!", 2f);
+                }
+                else
+                {
+                    GameHUD.Instance?.ShowNotification($"골드 부족 — {cost}G 필요합니다.", 2f);
+                }
             });
         }
     }

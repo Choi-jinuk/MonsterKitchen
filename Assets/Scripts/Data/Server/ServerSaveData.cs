@@ -32,16 +32,23 @@ namespace MonsterKitchen.Data
         // ── 경제 ──────────────────────────────────────────────────────
         public int Gold;
 
+        // ── 명성 ──────────────────────────────────────────────────────
+        public int TotalFame;
+
         // ── 업그레이드 레벨 ────────────────────────────────────────────
         public int ToolDamageLevel;
         public int ToolRangeLevel;
         public int ToolCooldownLevel;
         public int ShopSeatLevel;
         public int ShopTipLevel;
+        public int BagCapacityLevel;
 
         // ── 인벤토리 (List 직렬화) ────────────────────────────────────
         public List<InventoryEntry> Ingredients = new();
         public List<FoodEntry>      Foods       = new();
+
+        // ── 요리 마스터리 (List 직렬화 — JsonUtility는 Dictionary 불가) ──
+        public List<CookCountEntry> RecipeCookCounts = new();
     }
 
     [Serializable]
@@ -57,5 +64,12 @@ namespace MonsterKitchen.Data
         public uint Id;
         public int  Qty;
         // FoodGrade Queue 는 직렬화 불가 → 로드 시 Normal 등급으로 복원
+    }
+
+    [Serializable]
+    public class CookCountEntry
+    {
+        public uint RecipeId;
+        public int  Count;
     }
 }

@@ -1,3 +1,4 @@
+using MonsterKitchen.Core;
 using UnityEngine;
 
 namespace MonsterKitchen.Core
@@ -21,7 +22,7 @@ namespace MonsterKitchen.Core
         public static bool Chance(float probability)
         {
             if (probability < 0f || probability > 1f)
-                Debug.LogError($"[RandomUtil] Chance의 probability 값이 유효 범위(0~1)를 벗어났습니다: {probability}");
+                DebugUtil.LogError($"[RandomUtil] Chance의 probability 값이 유효 범위(0~1)를 벗어났습니다: {probability}");
             return Random.value <= probability;
         }
 

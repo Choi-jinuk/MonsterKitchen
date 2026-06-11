@@ -2,8 +2,9 @@
 ; id: uint (WPN_001=7001 ~)
 ; abils: "AbilType:value|..." 형식 (예: Attack:10.0|CritRate:0.05)
 ; normalAttackGroupId: SkillGroupData.skillGroupId (string)
-#TYPE,string,uint,string,string,string,int,string,string,string,string
-_key,Id,WeaponName,WeaponType,Abils,MaxDurability,DecayMode,NormalAttackGroupId,WeaponSpriteAddress,WeaponAnimAddress
-WPN_001,7001,낡은 검,Sword,Attack:10,0,None,SGD_001,,
-WPN_002,7002,단단한 도끼,Axe,Attack:18|Defense:3,0,None,SGD_002,,
-WPN_003,7003,쌍검,DualSword,Attack:8|AttackSpeed:0.2,0,None,SGD_003,,
+; tier: int (1=기본, 2=중급, 3=고급, 4=희귀, 5=전설)
+#TYPE,string,uint,string,string,string,int,string,string,string,string,int
+_key,Id,WeaponName,WeaponType,Abils,MaxDurability,DecayMode,NormalAttackGroupId,WeaponSpriteAddress,WeaponAnimAddress,Tier
+WPN_001,7001,낡은 검,Sword,Attack:10,0,None,SGD_001,,,1
+WPN_002,7002,단단한 도끼,Axe,Attack:18|Defense:3,0,None,SGD_002,,,2
+WPN_003,7003,쌍검,DualSword,Attack:8|AttackSpeed:0.2,0,None,SGD_003,,,2

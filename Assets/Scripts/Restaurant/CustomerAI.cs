@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using MonsterKitchen.Core;
 using MonsterKitchen.Data;
+using MonsterKitchen.UI;
 using UnityEngine;
 
 namespace MonsterKitchen.Restaurant
@@ -14,47 +15,50 @@ namespace MonsterKitchen.Restaurant
     public class CustomerAI : MonoBehaviour
     {
         [Header("Settings")]
-        [SerializeField] float moveSpeed    = 2.5f;
-        [SerializeField] float patience     = 20f;    // 음식 대기 허용 시간(초)
-        [SerializeField] float eatDuration  = 3f;     // 식사 시간
+        [SerializeField] float m_MoveSpeed   = 2.5f;
+        [SerializeField] float m_Patience    = 20f;
+        [SerializeField] float m_EatDuration = 3f;
 
         [Header("Order")]
-        [SerializeField] uint[] possibleOrderIds;   // 주문 가능 음식 ID 목록 (FoodData.id)
+        [SerializeField] uint[] m_PossibleOrderIds;
 
-        public FoodData    OrderedFood  { get; private set; }
-        public bool        IsWaiting    => _state == State.Waiting;
+        public FoodData OrderedFood  { get; private set; }
+        public bool     IsWaiting    => m_State == State.Waiting;
+        public int      Satisfaction => m_Satisfaction;
 
         public event Action OnGuestFinished;
 
         enum State { Entering, Seated, Waiting, Served, Leaving, Done }
 
-        State            _state = State.Entering;
-        RestaurantTable  _table;
-        Rigidbody2D      _rb;
-        Animator         _anim;
-        float            _patienceTimer;
-        Vector3          _exitPoint;
+        State           m_State = State.Entering;
+        RestaurantTable m_Table;
+        Rigidbody2D     m_Rb;
+        Animator        m_Anim;
+        float           m_PatienceTimer;
+        float           m_PatienceDecayMult = 1.0f;
+        int             m_Satisfaction      = 50;
+        Vector3         m_ExitPoint;
 
-        static readonly int HashSpeed  = Animator.StringToHash("Speed");
-        static readonly int HashEat    = Animator.StringToHash("Eat");
-        static readonly int HashLeave  = Animator.StringToHash("Leave");
+        static readonly int s_HashSpeed = Animator.StringToHash("Speed");
+        static readonly int s_HashEat   = Animator.StringToHash("Eat");
+        static readonly int s_HashLeave = Animator.StringToHash("Leave");
 
         public void Init(RestaurantTable table)
         {
-            _table = table;
-            _table.Occupy(this);
-            _exitPoint = transform.position;   // 스폰 위치 = 퇴장 위치
+            m_Table    = table;
+            m_Table.Occupy(this);
+            m_ExitPoint = transform.position;
         }
 
         void Awake()
         {
-            _rb   = GetComponent<Rigidbody2D>();
-            _anim = GetComponent<Animator>();
+            m_Rb   = GetComponent<Rigidbody2D>();
+            m_Anim = GetComponent<Animator>();
         }
 
         void Update()
         {
-            switch (_state)
+            switch (m_State)
             {
                 case State.Entering: TickEntering(); break;
                 case State.Waiting:  TickWaiting();  break;
@@ -62,27 +66,37 @@ namespace MonsterKitchen.Restaurant
         }
 
         // ── Entering ──────────────────────────────────────────────
+
         void TickEntering()
         {
-            Vector2 target = _table.SeatPoint.position;
+            Vector2 target = m_Table.SeatPoint.position;
             Vector2 dir    = (target - (Vector2)transform.position);
 
             if (dir.magnitude < 0.1f)
             {
-                _rb.linearVelocity = Vector2.zero;
-                transform.position = target;
+                m_Rb.linearVelocity = Vector2.zero;
+                transform.position  = target;
                 EnterSeated();
                 return;
             }
 
-            _rb.linearVelocity = dir.normalized * moveSpeed;
-            _anim.SetFloat(HashSpeed, moveSpeed);
+            m_Rb.linearVelocity = dir.normalized * m_MoveSpeed;
+            m_Anim.SetFloat(s_HashSpeed, m_MoveSpeed);
         }
 
         void EnterSeated()
         {
-            _state = State.Seated;
-            _anim.SetFloat(HashSpeed, 0f);
+            m_State = State.Seated;
+            m_Anim.SetFloat(s_HashSpeed, 0f);
+
+            // 더러운 테이블 착석 페널티
+            if (m_Table != null && m_Table.IsDirty)
+            {
+                AddSatisfaction(-5);
+                m_PatienceDecayMult = 1.5f;
+                DebugUtil.Log("[Customer] 더러운 테이블 착석 — 만족도 -5, 인내심 감소 1.5×");
+            }
+
             StartCoroutine(SitAndOrder());
         }
 
@@ -90,68 +104,97 @@ namespace MonsterKitchen.Restaurant
         {
             yield return new WaitForSeconds(0.5f);
 
-            // 주문할 음식 결정 — FoodInventory 에 있는 것 우선
             OrderedFood = PickOrder();
             if (OrderedFood == null)
             {
-                Debug.Log("[Customer] 메뉴 없음 — 자리 이탈");
+                DebugUtil.Log("[Customer] 메뉴 없음 — 자리 이탈");
                 StartCoroutine(LeaveRoutine(paid: false));
                 yield break;
             }
 
-            Debug.Log($"[Customer] 주문: {OrderedFood.DisplayName}");
-            _patienceTimer = patience;
-            _state         = State.Waiting;
+            DebugUtil.Log($"[Customer] 주문: {OrderedFood.DisplayName}");
+            m_PatienceTimer = m_Patience;
+            m_State         = State.Waiting;
         }
 
         FoodData PickOrder()
         {
-            if (possibleOrderIds == null || possibleOrderIds.Length == 0) return null;
+            if (m_PossibleOrderIds == null || m_PossibleOrderIds.Length == 0) return null;
 
             var inv      = PlayerDataManager.Instance?.Inventory;
+            var menu     = PlayerDataManager.Instance?.DailyMenu;
             var registry = DataRegistry.Instance;
-            foreach (var foodId in possibleOrderIds)
+
+            foreach (var foodId in m_PossibleOrderIds)
             {
                 if (foodId == 0u) continue;
-                if (inv != null && inv.GetFoodCount(foodId) > 0)
-                    return registry?.GetFood(foodId);
+                bool onMenu = menu == null || !menu.HasAnyItem() || menu.IsOnMenu(foodId);
+                if (onMenu && inv != null && inv.GetFoodCount(foodId) > 0)
+                    return registry?.Foods?.Get(foodId);
             }
-            // FoodInventory에 없어도 첫 번째 메뉴로 주문 (MVP 폴백)
-            return registry?.GetFood(possibleOrderIds[0]);
+            return registry?.Foods?.Get(m_PossibleOrderIds[0]);
         }
 
         // ── Waiting ───────────────────────────────────────────────
+
         void TickWaiting()
         {
-            _patienceTimer -= Time.deltaTime;
-            if (_patienceTimer <= 0f)
+            m_PatienceTimer -= Time.deltaTime * m_PatienceDecayMult;
+            if (m_PatienceTimer <= 0f)
             {
-                Debug.Log("[Customer] 인내심 소진 — 퇴장");
+                DebugUtil.Log("[Customer] 인내심 소진 — 퇴장");
                 StartCoroutine(LeaveRoutine(paid: false));
             }
         }
 
         // ── Served (외부 호출) ────────────────────────────────────
+
         /// <summary>ServingSystem이 등급과 함께 호출한다.</summary>
         public void Serve(FoodData food, FoodGrade grade)
         {
-            if (_state != State.Waiting) return;
+            if (food == null)
+            {
+                Debug.LogError("[CustomerAI] Serve() — food is null", this);
+                return;
+            }
+            if (OrderedFood == null)
+            {
+                Debug.LogError("[CustomerAI] Serve() — OrderedFood is null", this);
+                return;
+            }
+            if (m_State != State.Waiting) return;
             if (food.Id != OrderedFood.Id)
             {
-                Debug.Log($"[Customer] 잘못된 음식: {food.DisplayName}");
+                DebugUtil.Log($"[Customer] 잘못된 음식: {food.DisplayName}");
                 return;
             }
 
-            _state = State.Served;
+            // 서빙 타이밍 보너스/패널티
+            float patienceRatio = m_PatienceTimer / m_Patience;
+            if (patienceRatio >= 0.5f)
+                AddSatisfaction(+10);
+            else
+                AddSatisfaction(-10);
+
+            // 음식 등급 보너스
+            switch (grade)
+            {
+                case FoodGrade.Perfect:   AddSatisfaction(+10); break;
+                case FoodGrade.Legendary: AddSatisfaction(+15); break;
+            }
+
+            // 정확한 음식 서빙 기본 보너스
+            AddSatisfaction(+20);
+
+            m_State = State.Served;
             StartCoroutine(EatAndPay(food, grade));
         }
 
         IEnumerator EatAndPay(FoodData food, FoodGrade grade)
         {
-            _anim.SetTrigger(HashEat);
-            yield return new WaitForSeconds(eatDuration);
+            m_Anim.SetTrigger(s_HashEat);
+            yield return new WaitForSeconds(m_EatDuration);
 
-            // 등급 배율 적용
             float gradeMult = grade switch
             {
                 FoodGrade.Good      => food.GoodMultiplier,
@@ -160,40 +203,73 @@ namespace MonsterKitchen.Restaurant
                 _                   => 1f,
             };
 
-            float shopMult = PlayerDataManager.Instance?.Upgrades.ShopTipMultiplier ?? 1f;
-            int   pay      = Mathf.RoundToInt(food.BasePrice * gradeMult * shopMult);
+            float shopMult    = PlayerDataManager.Instance?.Upgrades.ShopTipMultiplier ?? 1f;
+            var   recipe      = DataRegistry.Instance?.GetRecipeByFoodId(food.Id);
+            float masteryMult = recipe != null
+                ? (PlayerDataManager.Instance?.Mastery?.GetPriceMultiplier(recipe.Id) ?? 1f)
+                : 1f;
+            int pay = Mathf.RoundToInt(food.BasePrice * gradeMult * shopMult * masteryMult);
             NetworkManager.Instance?.RequestEarnGold(pay);
-            Debug.Log($"[Customer] {food.DisplayName} [{grade}] 식사 완료. 지불: {pay}G " +
-                      $"(base {food.BasePrice} × grade {gradeMult:F2} × shop {shopMult:F2})");
+
+            // 만족도 기반 팁
+            int tip = CalculateTip(pay);
+            if (tip > 0)
+            {
+                NetworkManager.Instance?.RequestEarnGold(tip);
+                if (m_Satisfaction >= 100)
+                    GameHUD.Instance?.ShowNotification("완벽한 서비스!", 2f);
+            }
+
+            DebugUtil.Log($"[Customer] {food.DisplayName} [{grade}] 식사 완료. 지불:{pay}G 팁:{tip}G 만족도:{m_Satisfaction}");
+
+            DayManager.Instance?.RecordServing(pay, tip, m_Satisfaction);
 
             StartCoroutine(LeaveRoutine(paid: true));
         }
 
+        int CalculateTip(int basePayment)
+        {
+            if (m_Satisfaction < 70)  return 0;
+            if (m_Satisfaction < 85)  return Mathf.RoundToInt(basePayment * 0.10f);
+            return Mathf.RoundToInt(basePayment * 0.20f);
+        }
+
+        void AddSatisfaction(int delta)
+            => m_Satisfaction = Mathf.Clamp(m_Satisfaction + delta, 0, 100);
+
         IEnumerator LeaveRoutine(bool paid)
         {
-            _state = State.Leaving;
-            _table.Vacate();
-            _anim.SetTrigger(HashLeave);
+            if (!paid)
+            {
+                AddSatisfaction(-30);
+                DayManager.Instance?.RecordServing(0, 0, m_Satisfaction);
+                DebugUtil.Log($"[Customer] 인내심 만료 퇴장. 만족도:{m_Satisfaction}");
+            }
 
-            Vector2 exit = _exitPoint;
+            m_State = State.Leaving;
+            m_Table.Vacate();
+            m_Table.SetDirty(true);
+            m_Anim.SetTrigger(s_HashLeave);
+
+            Vector2 exit = m_ExitPoint;
             while (Vector2.Distance(transform.position, exit) > 0.15f)
             {
                 Vector2 dir = (exit - (Vector2)transform.position).normalized;
-                _rb.linearVelocity = dir * moveSpeed;
-                _anim.SetFloat(HashSpeed, moveSpeed);
+                m_Rb.linearVelocity = dir * m_MoveSpeed;
+                m_Anim.SetFloat(s_HashSpeed, m_MoveSpeed);
                 yield return null;
             }
 
-            _state = State.Done;
+            m_State = State.Done;
             OnGuestFinished?.Invoke();
             Destroy(gameObject);
         }
 
         void OnDrawGizmosSelected()
         {
-            if (_table == null) return;
+            if (m_Table == null) return;
             Gizmos.color = Color.cyan;
-            Gizmos.DrawLine(transform.position, _table.SeatPoint.position);
+            Gizmos.DrawLine(transform.position, m_Table.SeatPoint.position);
         }
     }
 }

@@ -1,6 +1,6 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!1 &3059656286549923377
+--- !u!1 &1910995880711838303
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -8,23 +8,23 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 1216297518109082448}
-  - component: {fileID: 2184660995949829308}
-  - component: {fileID: 4865083614438124198}
+  - component: {fileID: 7180227191165333746}
+  - component: {fileID: 3706981921786212089}
+  - component: {fileID: 1577594738988816736}
   m_Layer: 0
-  m_Name: CookingUI
+  m_Name: MenuSetupUI
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &1216297518109082448
+--- !u!4 &7180227191165333746
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3059656286549923377}
+  m_GameObject: {fileID: 1910995880711838303}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
@@ -33,13 +33,13 @@ Transform:
   m_Children: []
   m_Father: {fileID: 4852504051836772368}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &2184660995949829308
+--- !u!114 &3706981921786212089
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3059656286549923377}
+  m_GameObject: {fileID: 1910995880711838303}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 19102, guid: 0000000000000000e000000000000000, type: 0}
@@ -47,8 +47,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: UnityEngine.dll::UnityEngine.UIElements.UIDocument
   m_PanelSettings: {fileID: 11400000, guid: 809134cccc8c0ed40ad6bc4171280fff, type: 2}
   m_ParentUI: {fileID: 6303272766552774769}
-  sourceAsset: {fileID: 9197481963319205126, guid: 4256f74e7b7972347a97d042ecd00f3a, type: 3}
-  m_SortingOrder: 2
+  sourceAsset: {fileID: 9197481963319205126, guid: ecde96116c7251d4b8851e4ad4e7acee, type: 3}
+  m_SortingOrder: 0
   m_Position: 0
   m_WorldSpaceSizeMode: 1
   m_WorldSpaceWidth: 1920
@@ -56,20 +56,91 @@ MonoBehaviour:
   m_PivotReferenceSize: 0
   m_Pivot: 0
   m_WorldSpaceCollider: {fileID: 0}
---- !u!114 &4865083614438124198
+--- !u!114 &1577594738988816736
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3059656286549923377}
+  m_GameObject: {fileID: 1910995880711838303}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c051b5886eeecd14f879298e1d490a2e, type: 3}
+  m_Script: {fileID: 11500000, guid: 5d5f5b168feb1334196fc4b7952d10b3, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::MonsterKitchen.Cooking.CookingUI
+  m_EditorClassIdentifier: MonsterKitchen::MonsterKitchen.UI.MenuSetupUI
   m_Layer: 20
-  m_IsPopup: 1
+  m_IsPopup: 0
+  m_ToggleKey: 0
+--- !u!1 &4430191405786851756
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 3804736780688823057}
+  - component: {fileID: 8093309122285274859}
+  - component: {fileID: 7363799730045826458}
+  m_Layer: 0
+  m_Name: SettlementUI
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &3804736780688823057
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4430191405786851756}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 4852504051836772368}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &8093309122285274859
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4430191405786851756}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 19102, guid: 0000000000000000e000000000000000, type: 0}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.dll::UnityEngine.UIElements.UIDocument
+  m_PanelSettings: {fileID: 11400000, guid: 809134cccc8c0ed40ad6bc4171280fff, type: 2}
+  m_ParentUI: {fileID: 6303272766552774769}
+  sourceAsset: {fileID: 9197481963319205126, guid: d3f050dd74aa22e4589abbd89a06b94a, type: 3}
+  m_SortingOrder: 0
+  m_Position: 0
+  m_WorldSpaceSizeMode: 1
+  m_WorldSpaceWidth: 1920
+  m_WorldSpaceHeight: 1080
+  m_PivotReferenceSize: 0
+  m_Pivot: 0
+  m_WorldSpaceCollider: {fileID: 0}
+--- !u!114 &7363799730045826458
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4430191405786851756}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c2caa0a0e46dfe94f99827cb7531abea, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: MonsterKitchen::MonsterKitchen.UI.SettlementUI
+  m_Layer: 20
+  m_IsPopup: 0
   m_ToggleKey: 0
 --- !u!1 &8047966772451013677
 GameObject:
@@ -102,8 +173,8 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 7680975222951823335}
-  - {fileID: 1216297518109082448}
+  - {fileID: 7180227191165333746}
+  - {fileID: 3804736780688823057}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &6303272766552774769
@@ -141,74 +212,3 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 26a9061216884394cb085d9b5821032e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MonsterKitchen.UI.GameHUD
---- !u!1 &9091133204539914463
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 7680975222951823335}
-  - component: {fileID: 2562705309896654987}
-  - component: {fileID: 7216830543650621368}
-  m_Layer: 0
-  m_Name: InventoryUI
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &7680975222951823335
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 9091133204539914463}
-  serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 4852504051836772368}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &2562705309896654987
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 9091133204539914463}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 19102, guid: 0000000000000000e000000000000000, type: 0}
-  m_Name: 
-  m_EditorClassIdentifier: UnityEngine.dll::UnityEngine.UIElements.UIDocument
-  m_PanelSettings: {fileID: 11400000, guid: 809134cccc8c0ed40ad6bc4171280fff, type: 2}
-  m_ParentUI: {fileID: 6303272766552774769}
-  sourceAsset: {fileID: 9197481963319205126, guid: 7a01ec0aed657c145a859e7c20f2a5d1, type: 3}
-  m_SortingOrder: 1
-  m_Position: 0
-  m_WorldSpaceSizeMode: 1
-  m_WorldSpaceWidth: 1920
-  m_WorldSpaceHeight: 1080
-  m_PivotReferenceSize: 0
-  m_Pivot: 0
-  m_WorldSpaceCollider: {fileID: 0}
---- !u!114 &7216830543650621368
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 9091133204539914463}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: bbf1664260bb81940a3ee788d5a6a07c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::MonsterKitchen.UI.InventoryUI
-  m_Layer: 20
-  m_IsPopup: 0
-  m_ToggleKey: 23

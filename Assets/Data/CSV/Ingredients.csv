@@ -2,13 +2,14 @@
 ; id: uint (ING_001=2001 ~ ING_008=2008)
 ; sourceMonsterIds: 파이프(|) 구분 uint MON id
 ; spriteAddress → DataManagerWindow Sync 시 자동 생성
-#TYPE,string,uint,string,string,AttributeType,RarityType,IngredientState,string
-_key,Id,DisplayName,Description,Attribute,Rarity,DefaultState,SourceMonsterIds
-ING_001,2001,슬라임 젤리,초록 슬라임에서 채취한 투명한 젤리. 탄력이 있고 달콤하다.,Poison,Common,Raw,1001
-ING_002,2002,불꽃 슬라임 코어,불꽃 슬라임의 핵심 부위. 식히면 매콤한 향이 난다.,Fire,Common,Raw,1002
-ING_003,2003,고블린 뼈,숲 고블린의 단단한 소형 뼈. 육수 재료로 활용된다.,None,Common,Raw,1003
-ING_004,2004,고블린 고기,숲 고블린의 살코기. 잡내가 있어 손질이 필요하다.,None,Uncommon,Raw,1003
-ING_005,2005,버섯인간 갓,거대 버섯인간의 우산 부위. 풍미가 깊고 두툼하다.,Poison,Uncommon,Raw,1004
-ING_006,2006,버섯인간 포자,버섯인간이 분비하는 포자. 소량이면 향신료로 쓸 수 있다.,Poison,Uncommon,Raw,1004
-ING_007,2007,그린 웜 고기,그린 웜의 대형 살코기. 쫄깃하고 영양이 풍부하다.,Earth,Rare,Raw,1005
-ING_008,2008,그린 웜 껍질,그린 웜의 두꺼운 외피. 오래 끓이면 국물이 진해진다.,Earth,Rare,Raw,1005
+; nameKey/descKey: 비워두면 _key + _NAME/_DESC 로 자동 생성 (StringData 참조)
+#TYPE,string,uint,string,string,AttributeType,RarityType,IngredientState,string,int
+_key,Id,NameKey,DescKey,Attribute,Rarity,DefaultState,SourceMonsterIds,Weight
+ING_001,2001,,,Poison,Common,Raw,1001,1
+ING_002,2002,,,Fire,Common,Raw,1002,1
+ING_003,2003,,,None,Common,Raw,1003,1
+ING_004,2004,,,None,Uncommon,Raw,1003,2
+ING_005,2005,,,Poison,Uncommon,Raw,1004,2
+ING_006,2006,,,Poison,Uncommon,Raw,1004,2
+ING_007,2007,,,Earth,Rare,Raw,1005,3
+ING_008,2008,,,Earth,Rare,Raw,1005,3

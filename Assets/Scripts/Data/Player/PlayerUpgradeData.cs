@@ -1,3 +1,4 @@
+using MonsterKitchen.Core;
 using System;
 using UnityEngine;
 
@@ -11,6 +12,7 @@ namespace MonsterKitchen.Data
     {
         ToolDamage, ToolRange, ToolCooldown,
         ShopSeats,  ShopTip,
+        BagCapacity,
     }
 
     // ====================================================================
@@ -40,6 +42,7 @@ namespace MonsterKitchen.Data
         const int   COOLDOWN_UPGRADE_COST_BASE = 70;
         const int   SEAT_UPGRADE_COST_BASE    = 100;
         const int   TIP_UPGRADE_COST_BASE     = 80;
+        const int   BAG_UPGRADE_COST_BASE     = 90;
 
         // ── 레벨 상태 ─────────────────────────────────────────────────
         int m_ToolDamageLevel;
@@ -47,10 +50,12 @@ namespace MonsterKitchen.Data
         int m_ToolCooldownLevel;
         int m_ShopSeatLevel;
         int m_ShopTipLevel;
+        int m_BagCapacityLevel;
 
         // ── 이벤트 ───────────────────────────────────────────────────
         public event Action OnToolUpgraded;
         public event Action OnShopUpgraded;
+        public event Action OnBagUpgraded;
 
         // ── 생명주기 ─────────────────────────────────────────────────
 
@@ -80,6 +85,10 @@ namespace MonsterKitchen.Data
         public int ShopSeatUpgradeCost => (m_ShopSeatLevel + 1) * SEAT_UPGRADE_COST_BASE;
         public int ShopTipUpgradeCost  => (m_ShopTipLevel  + 1) * TIP_UPGRADE_COST_BASE;
 
+        public int   BagCapacityLevel   => m_BagCapacityLevel;
+        public int   BagCurrentCapacity => 10 + m_BagCapacityLevel * 5;   // Lv0=10, Lv1=15, ..., Lv4=30
+        public int   BagUpgradeCost     => (m_BagCapacityLevel + 1) * BAG_UPGRADE_COST_BASE;
+
         // ── Apply 메서드 — PlayerDataManager 만 호출 ─────────────────
 
         /// <summary>NetworkManager 콜백 → PlayerDataManager.ApplyUpgradeLevel() 가 호출한다.</summary>
@@ -90,27 +99,32 @@ namespace MonsterKitchen.Data
                 case PlayerUpgradeType.ToolDamage:
                     m_ToolDamageLevel   = newLevel;
                     OnToolUpgraded?.Invoke();
-                    Debug.Log($"[ToolUpgrade] 공격력 Lv{newLevel} → {ToolCurrentDamage}");
+                    DebugUtil.Log($"[ToolUpgrade] 공격력 Lv{newLevel} → {ToolCurrentDamage}");
                     break;
                 case PlayerUpgradeType.ToolRange:
                     m_ToolRangeLevel    = newLevel;
                     OnToolUpgraded?.Invoke();
-                    Debug.Log($"[ToolUpgrade] 범위 Lv{newLevel} → {ToolCurrentRange:F2}");
+                    DebugUtil.Log($"[ToolUpgrade] 범위 Lv{newLevel} → {ToolCurrentRange:F2}");
                     break;
                 case PlayerUpgradeType.ToolCooldown:
                     m_ToolCooldownLevel = newLevel;
                     OnToolUpgraded?.Invoke();
-                    Debug.Log($"[ToolUpgrade] 쿨다운 Lv{newLevel} → {ToolCurrentCooldown:F2}s");
+                    DebugUtil.Log($"[ToolUpgrade] 쿨다운 Lv{newLevel} → {ToolCurrentCooldown:F2}s");
                     break;
                 case PlayerUpgradeType.ShopSeats:
                     m_ShopSeatLevel     = newLevel;
                     OnShopUpgraded?.Invoke();
-                    Debug.Log($"[ShopUpgrade] 좌석 Lv{newLevel} → {ShopTotalSeats}석");
+                    DebugUtil.Log($"[ShopUpgrade] 좌석 Lv{newLevel} → {ShopTotalSeats}석");
                     break;
                 case PlayerUpgradeType.ShopTip:
                     m_ShopTipLevel      = newLevel;
                     OnShopUpgraded?.Invoke();
-                    Debug.Log($"[ShopUpgrade] 팁 Lv{newLevel} → {ShopTipMultiplier:P0}");
+                    DebugUtil.Log($"[ShopUpgrade] 팁 Lv{newLevel} → {ShopTipMultiplier:P0}");
+                    break;
+                case PlayerUpgradeType.BagCapacity:
+                    m_BagCapacityLevel  = newLevel;
+                    OnBagUpgraded?.Invoke();
+                    DebugUtil.Log($"[BagUpgrade] 가방 Lv{newLevel} → {BagCurrentCapacity}kg");
                     break;
             }
         }
@@ -119,13 +133,14 @@ namespace MonsterKitchen.Data
 
         /// <summary>저장 데이터 복원 시 ServerDBManager 가 호출.</summary>
         public void LoadLevels(int toolDamage, int toolRange, int toolCooldown,
-                               int shopSeat, int shopTip)
+                               int shopSeat, int shopTip, int bagCapacity = 0)
         {
             m_ToolDamageLevel   = toolDamage;
             m_ToolRangeLevel    = toolRange;
             m_ToolCooldownLevel = toolCooldown;
             m_ShopSeatLevel     = shopSeat;
             m_ShopTipLevel      = shopTip;
+            m_BagCapacityLevel  = bagCapacity;
         }
     }
 }

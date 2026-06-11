@@ -1,3 +1,4 @@
+using MonsterKitchen.Core;
 using MonsterKitchen.Data;
 using UnityEngine;
 
@@ -14,7 +15,8 @@ namespace MonsterKitchen.Core
     //
     //  ▶ 초기화 흐름
     //    Awake  : CreateManagers → InitManagers  (Instance 등록, 이벤트 연결)
-    //    Start  : StartCoroutine(Startup.Run()) → OnStartupComplete → Player.Start
+    //    Start  : StartCoroutine(Startup.Run()) — StartScene 에서 모든 Phase 완료
+    //    Player.Start() 는 ManagementSceneController.OnInit() 에서 호출
     //
     //  ▶ 시작 프로세스 (GameStartup)
     //    Phase 1 SdkInit       — 3rd-party SDK
@@ -29,7 +31,7 @@ namespace MonsterKitchen.Core
     //    OnDestroy          → Player.Dispose
     //
     //  ▶ 배치
-    //    ManagementScene GlobalController GameObject 단독 배치.
+    //    StartScene GlobalController GameObject 단독 배치.
     //    DontDestroyOnLoad — 씬 전환 후에도 유지.
     // ====================================================================
 
@@ -42,6 +44,7 @@ namespace MonsterKitchen.Core
         // 유일한 Inspector 슬롯 — 코드로 생성 불가한 에셋 참조만
         [Header("Assets")]
         [SerializeField] AssetManifest m_Manifest;
+        [SerializeField] GameObject    m_MobileHUDPrefab;
 
         // ── 매니저 프로퍼티 ───────────────────────────────────────────────
         public AssetLoadManager  AssetLoad    { get; private set; }
@@ -53,7 +56,9 @@ namespace MonsterKitchen.Core
         public InputManager      Input        { get; private set; }
         public PlayerManager     Player       { get; private set; }
         public ServerDBManager   ServerDB     { get; private set; }
+        public SaveScheduler     SaveSched    { get; private set; }
         public DataRegistry      Registry     { get; private set; }
+        public LocaleManager     Locale       { get; private set; }
         public GameStartup       Startup      { get; private set; }
 
         // ── 편의 접근자 ───────────────────────────────────────────────────
@@ -68,26 +73,38 @@ namespace MonsterKitchen.Core
             if (Instance != null && Instance != this) { Destroy(gameObject); return; }
             Instance = this;
             DontDestroyOnLoad(gameObject);
+            SpawnMobileHUD();
             CreateManagers();
             InitManagers();
         }
 
         void Start()
         {
-            Startup.OnComplete += OnStartupComplete;
             StartCoroutine(Startup.Run());
-        }
-
-        void OnStartupComplete()
-        {
-            Startup.OnComplete -= OnStartupComplete;
-            Player.Start();
+            SaveSched.StartAutoSaveCycle(this);
         }
 
         void OnEnable()  => Input?.OnEnable();
         void OnDisable() => Input?.OnDisable();
         void Update()    => Input?.Update();
+        void OnApplicationPause(bool pauseStatus)
+        {
+            if (pauseStatus) SaveSched?.ForceSave();
+        }
+
+        void OnApplicationQuit() => SaveSched?.ForceSave();
+
         void OnDestroy() => Player?.Dispose();
+
+        // ================================================================
+        //  모바일 HUD 스폰
+        // ================================================================
+
+        void SpawnMobileHUD()
+        {
+            if (m_MobileHUDPrefab == null) return;
+            Instantiate(m_MobileHUDPrefab);  // MobileHUD.Awake 에서 DontDestroyOnLoad 처리
+        }
 
         // ================================================================
         //  생성 — 의존 주입 (this = 코루틴 러너)
@@ -104,7 +121,9 @@ namespace MonsterKitchen.Core
             Input       = new InputManager();
             Player      = new PlayerManager();
             ServerDB    = new ServerDBManager();
+            SaveSched   = new SaveScheduler();
             Registry    = new DataRegistry();
+            Locale      = new LocaleManager();
             Startup     = new GameStartup();
         }
 
@@ -124,13 +143,15 @@ namespace MonsterKitchen.Core
             Input.Init();        // InputSystem_Actions 생성
             Player.Init();       // Instance 설정 (Start 에서 스폰)
             ServerDB.Init();     // Instance 설정
+            SaveSched.Init();    // Instance 설정
             Registry.Init();     // Instance 설정 (Load 는 GameStartup Phase 2)
+            Locale.Init();       // Instance 설정 (Load 는 DataRegistry.Load 이후)
         }
 
 #if UNITY_EDITOR
         void OnValidate()
         {
-            if (m_Manifest == null) Debug.LogWarning("[GlobalController] AssetManifest 미연결");
+            if (m_Manifest == null) DebugUtil.LogWarning("[GlobalController] AssetManifest 미연결");
         }
 #endif
     }

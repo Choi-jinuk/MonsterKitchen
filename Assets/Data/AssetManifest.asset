@@ -45,3 +45,13 @@ MonoBehaviour:
     Asset: {fileID: 11400000, guid: 83770707d836a2849a8924867c84900f, type: 2}
   - Key: bt/player/9001
     Asset: {fileID: 11400000, guid: d38dfc3098a907142a45f4f23a34d1a8, type: 2}
+  - Key: prefab/ui/cookingui
+    Asset: {fileID: 2012490842877849844, guid: 19cb9d0beaf932b4b911239bd1a4ba43, type: 3}
+  - Key: prefab/ui/inventoryui
+    Asset: {fileID: 6216457961801149796, guid: 9c85ff4836a2f8540a2ffa69b76ea5da, type: 3}
+  - Key: prefab/ui/rewardpopup
+    Asset: {fileID: 7357481077413515986, guid: bdf72bb03256720448d7dc4884558e74, type: 3}
+  - Key: prefab/ui/dungeonbagui
+    Asset: {fileID: 746618591605813280, guid: fbf2b1f655b05cf4bb9de20510668c97, type: 3}
+  - Key: prefab/ui/recipebookui
+    Asset: {fileID: 4821569037241985632, guid: c9f3b2a1d4e8f501b26739a0c15482e3, type: 3}

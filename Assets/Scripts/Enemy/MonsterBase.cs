@@ -25,8 +25,8 @@ namespace MonsterKitchen.Enemy
 
         public MonsterData Data => m_MonsterData;
 
-        protected Health       HP;
-        protected DropResolver Dropper;
+        protected Health       m_Health;
+        protected DropResolver m_Dropper;
         protected bool         m_Initialized;
 
         // ----------------------------------------------------------------
@@ -39,12 +39,12 @@ namespace MonsterKitchen.Enemy
         /// </summary>
         public virtual void Init(MonsterData data, Transform player, Vector3 spawnPos)
         {
-            HP      = GetComponent<Health>();
-            Dropper = GetComponent<DropResolver>();
+            m_Health  = GetComponent<Health>();
+            m_Dropper = GetComponent<DropResolver>();
 
             m_MonsterData = data;
             if (data != null)
-                HP.SetMaxHp(data.Hp);
+                m_Health.SetMaxHp(data.Hp);
 
             m_Initialized = true;
         }
@@ -56,13 +56,13 @@ namespace MonsterKitchen.Enemy
         protected virtual void OnEnable()
         {
             // 안전망: Init 전에 OnEnable 이 실행된 경우(씬 직접 배치 등)에도 동작
-            HP ??= GetComponent<Health>();
-            if (HP != null) HP.OnDeath += OnDied;
+            m_Health ??= GetComponent<Health>();
+            if (m_Health != null) m_Health.OnDeath += OnDied;
         }
 
         protected virtual void OnDisable()
         {
-            if (HP != null) HP.OnDeath -= OnDied;
+            if (m_Health != null) m_Health.OnDeath -= OnDied;
         }
 
         // ----------------------------------------------------------------

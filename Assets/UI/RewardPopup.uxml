@@ -1,0 +1,31 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:mk="MonsterKitchen.UI" editor-extension-mode="False">
+    <ui:Style src="project://database/Assets/UI/RewardPopup.uss" />
+
+    <!-- 배경 오버레이 (클릭 시 닫기) -->
+    <ui:VisualElement name="reward-overlay" class="reward-overlay">
+
+        <!-- 패널 본체 -->
+        <ui:VisualElement name="reward-panel" class="reward-panel">
+
+            <!-- 제목 (코드에서 동적으로 설정) -->
+            <ui:Label name="reward-title" text="" class="reward-title" />
+
+            <!-- 구분선 -->
+            <ui:VisualElement class="reward-divider" />
+
+            <!-- 보상 목록 (코드에서 동적 생성) -->
+            <ui:ScrollView name="reward-scroll" class="reward-scroll"
+                           horizontal-scroller-visibility="Hidden"
+                           vertical-scroller-visibility="Auto">
+                <ui:VisualElement name="reward-list" class="reward-list" />
+            </ui:ScrollView>
+
+            <!-- 구분선 -->
+            <ui:VisualElement class="reward-divider" />
+
+            <!-- 확인 버튼 -->
+            <mk:LocalizedLabel name="reward-confirm-btn" string-id="UI_CONFIRM" class="reward-confirm-btn" />
+
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

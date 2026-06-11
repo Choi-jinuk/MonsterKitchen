@@ -1,3 +1,4 @@
+using MonsterKitchen.Core;
 using UnityEngine;
 
 namespace MonsterKitchen.Core
@@ -41,7 +42,7 @@ namespace MonsterKitchen.Core
             {
                 var go = GameObject.FindGameObjectWithTag("Player");
                 if (go != null) m_Target = go.transform;
-                else Debug.LogWarning("[CameraFollow] 'Player' 태그 오브젝트를 찾을 수 없습니다.", this);
+                else DebugUtil.LogWarning("[CameraFollow] 'Player' 태그 오브젝트를 찾을 수 없습니다.", this);
             }
         }
 

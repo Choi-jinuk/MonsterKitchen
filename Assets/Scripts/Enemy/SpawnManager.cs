@@ -10,7 +10,7 @@ namespace MonsterKitchen.Enemy
     //  DungeonSceneController 가 new SpawnManager(spawnTableData, spawnPoints) 로
     //  생성하고 Init() → SpawnAll() 순으로 호출한다.
     //
-    //  스폰 항목의 monsterId 로 DataRegistry.GetMonster() 를 조회한 뒤
+    //  스폰 항목의 monsterId 로 DataRegistry.Monsters.Get() 를 조회한 뒤
     //  MonsterData.prefabAddress 키로 AssetLoadManager 에서 프리팹을 로드해 인스턴스화한다.
     // ====================================================================
 
@@ -47,7 +47,7 @@ namespace MonsterKitchen.Enemy
         {
             if (m_SpawnTable == null)
             {
-                Debug.LogWarning("[SpawnManager] DungeonSpawnTableData 가 연결되지 않았습니다.");
+                DebugUtil.LogWarning("[SpawnManager] DungeonSpawnTableData 가 연결되지 않았습니다.");
                 return;
             }
 
@@ -56,10 +56,10 @@ namespace MonsterKitchen.Enemy
             int pointIndex = 0;
             foreach (var entry in m_SpawnTable.Monsters)
             {
-                var data = DataRegistry.Instance?.GetMonster(entry.MonsterId);
+                var data = DataRegistry.Instance?.Monsters?.Get(entry.MonsterId);
                 if (data == null || string.IsNullOrEmpty(data.PrefabAddress))
                 {
-                    Debug.LogWarning($"[SpawnManager] monsterId={entry.MonsterId} 의 MonsterData 또는 prefabAddress 가 없습니다. 건너뜁니다.");
+                    DebugUtil.LogWarning($"[SpawnManager] monsterId={entry.MonsterId} 의 MonsterData 또는 prefabAddress 가 없습니다. 건너뜁니다.");
                     continue;
                 }
 
@@ -71,7 +71,7 @@ namespace MonsterKitchen.Enemy
             }
         }
 
-        /// <summary>단일 몬스터를 지정 위치에 스폰한다. MonsterRespawnManager 에서도 호출.</summary>
+        /// <summary>단일 몬스터를 지정 위치에 스폰한다.</summary>
         public MonsterBase SpawnSingle(MonsterData data, Vector3 position)
         {
             Transform playerTf = Player != null ? Player.transform : FindPlayerTransform();
@@ -87,15 +87,13 @@ namespace MonsterKitchen.Enemy
             var prefab = AssetLoadManager.Instance?.Load<MonsterBase>(data.PrefabAddress);
             if (prefab == null)
             {
-                Debug.LogWarning($"[SpawnManager] prefabAddress='{data.PrefabAddress}' 프리팹 로드 실패.");
+                DebugUtil.LogWarning($"[SpawnManager] prefabAddress='{data.PrefabAddress}' 프리팹 로드 실패.");
                 return null;
             }
 
             var monster = InstantiateDisabled(prefab, position);
             monster.Init(data, playerTf, position);
             monster.gameObject.SetActive(true);
-
-            MonsterRespawnManager.Instance?.Track(monster, data, position);
 
             return monster;
         }
@@ -130,11 +128,11 @@ namespace MonsterKitchen.Enemy
                 if (playerLayer >= 0)
                     Physics2D.IgnoreLayerCollision(playerLayer, enemyLayer, true);
                 else
-                    Debug.LogWarning($"[SpawnManager] 레이어 '{PLAYER_LAYER_NAME}' 를 찾을 수 없습니다.");
+                    DebugUtil.LogWarning($"[SpawnManager] 레이어 '{PLAYER_LAYER_NAME}' 를 찾을 수 없습니다.");
             }
             else
             {
-                Debug.LogWarning($"[SpawnManager] 레이어 '{MONSTER_LAYER_NAME}' 를 찾을 수 없습니다.");
+                DebugUtil.LogWarning($"[SpawnManager] 레이어 '{MONSTER_LAYER_NAME}' 를 찾을 수 없습니다.");
             }
         }
 

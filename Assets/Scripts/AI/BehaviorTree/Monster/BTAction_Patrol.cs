@@ -30,6 +30,7 @@ namespace MonsterKitchen.AI.BehaviorTree.Monster
         {
             public BTMonsterController Ctrl;
             public Animator            Anim;
+            public MonsterMovementBase Movement;
             public bool    Initialized;
             public bool    Moving;
             public Vector2 Target;
@@ -45,6 +46,7 @@ namespace MonsterKitchen.AI.BehaviorTree.Monster
 
             s.Ctrl        = ctx.Owner.GetComponent<BTMonsterController>();
             s.Anim        = ctx.Owner.GetComponent<Animator>();
+            s.Movement    = s.Ctrl != null ? s.Ctrl.Movement : null;
             s.WaitTimer   = m_PatrolWait;
             s.Initialized = true;
         }
@@ -61,17 +63,14 @@ namespace MonsterKitchen.AI.BehaviorTree.Monster
 
         protected override void OnExit(BTContext ctx)
         {
-            var s = ctx.GetOrCreateState<State>(this);
-            if (s.Ctrl?.Rb != null) s.Ctrl.Rb.linearVelocity = Vector2.zero;
-            SetMoveAnim(s, Vector2.zero);
+            StopMovement(ctx.GetOrCreateState<State>(this));
         }
 
         // ── 대기 / 이동 ──────────────────────────────────────────────────
 
         void TickWait(BTContext ctx, State s)
         {
-            if (s.Ctrl != null) s.Ctrl.Rb.linearVelocity = Vector2.zero;
-            SetMoveAnim(s, Vector2.zero);
+            StopMovement(s);
 
             s.WaitTimer -= ctx.DeltaTime;
             if (s.WaitTimer <= 0f)
@@ -86,13 +85,20 @@ namespace MonsterKitchen.AI.BehaviorTree.Monster
             Vector2 toTarget = s.Target - (Vector2)ctx.Owner.transform.position;
             if (toTarget.magnitude < 0.2f)
             {
-                if (s.Ctrl != null) s.Ctrl.Rb.linearVelocity = Vector2.zero;
-                SetMoveAnim(s, Vector2.zero);
+                StopMovement(s);
                 s.WaitTimer = m_PatrolWait;
                 s.Moving    = false;
                 return;
             }
 
+            // MonsterMovementBase 위임 (SlimeMovement 등 WindUp/Dash 사이클 포함)
+            if (s.Movement != null)
+            {
+                s.Movement.TickChase(ctx.DeltaTime, (Vector3)s.Target, 0.2f);
+                return;
+            }
+
+            // 폴백: 직선 이동
             float   moveSpeed = ctx.Blackboard.Get<float>("MoveSpeed");
             Vector2 dir       = toTarget.normalized;
             Vector2 velocity  = (s.Ctrl != null ? s.Ctrl.ApplySeparation(dir) : dir)
@@ -102,11 +108,21 @@ namespace MonsterKitchen.AI.BehaviorTree.Monster
             SetMoveAnim(s, velocity);
         }
 
+        static void StopMovement(State s)
+        {
+            if (s.Movement != null)
+            {
+                s.Movement.ResetMovement();
+                return;
+            }
+            if (s.Ctrl?.Rb != null) s.Ctrl.Rb.linearVelocity = Vector2.zero;
+            SetMoveAnim(s, Vector2.zero);
+        }
+
         void PickTarget(BTContext ctx, State s)
         {
-            Vector3 spawnPos = ctx.Blackboard.Get<Vector3>("SpawnPos");
-            Vector2 offset   = RandomUtil.InCircle(m_PatrolRadius);
-            s.Target = (Vector2)spawnPos + offset;
+            Vector2 offset = RandomUtil.InCircle(m_PatrolRadius);
+            s.Target = (Vector2)ctx.Owner.transform.position + offset;
         }
 
         static void SetMoveAnim(State s, Vector2 v)

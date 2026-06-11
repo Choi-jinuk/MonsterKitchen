@@ -1,0 +1,9 @@
+; 채집 노드 데이터
+; NodeType: Tree / Rock / Ore
+; DropIngredientId: IngredientData.Id 참조
+; NodeSpriteAddress: AssetManifest 키 (예: sprite/node/rno_001)
+#TYPE,string,uint,string,string,ResourceNodeType,uint,int,int,int,float,string
+_key,Id,NameKey,DisplayName,NodeType,DropIngredientId,DropMin,DropMax,MaxHp,RespawnSeconds,NodeSpriteAddress
+RNO_001,7001,,바위,Rock,2003,1,2,30,120,
+RNO_002,7002,,나무,Tree,2001,1,2,20,90,
+RNO_003,7003,,광석,Ore,2002,1,2,50,180,

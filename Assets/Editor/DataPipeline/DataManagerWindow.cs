@@ -27,24 +27,25 @@ namespace MonsterKitchen.Editor
         //   Monsters 의 skillGroups 는 SyncAllSO 의 ResolveAllReferences() 에서 해결된다.
         static readonly string[] TABLE_LABELS = {
             "Monsters", "Ingredients", "Recipes", "Foods", "Drop Tables", "Dungeon Spawn Tables",
-            "Skill Steps", "Skill Groups", "Weapons", "Gathering Tools", "Players"
+            "Skill Steps", "Skill Groups", "Weapons", "Gathering Tools", "Resource Nodes", "Players", "UI Panels", "Strings"
         };
         static readonly string[] TABLE_FILES  = {
             "Monsters.csv", "Ingredients.csv", "Recipes.csv", "Foods.csv",
             "DropTables.csv", "DungeonSpawnTables.csv",
-            "SkillSteps.csv", "SkillGroups.csv", "Weapons.csv", "GatheringTools.csv", "Players.csv"
+            "SkillSteps.csv", "SkillGroups.csv", "Weapons.csv", "GatheringTools.csv", "ResourceNodes.csv", "Players.csv",
+            "UIData.csv", "StringData.csv"
         };
 
         static readonly string[][] DEFAULT_HEADERS =
         {
             // 0: Monsters
-            new[] { "_key","Id","DisplayName","Description","Hp","Attack","Defense","MoveSpeed","Attribute","Rarity","DropTableId","SkillGroupIds","ImmuneToKnockback","ImmuneToStun","ImmuneToPullIn","PrefabAddress","SpriteAddress","BtAssetAddress" },
+            new[] { "_key","Id","NameKey","DescKey","Hp","Attack","Defense","MoveSpeed","Attribute","Rarity","DropTableId","SkillGroupIds","ImmuneToKnockback","ImmuneToStun","ImmuneToPullIn","PrefabAddress","SpriteAddress","BtAssetAddress" },
             // 1: Ingredients
-            new[] { "_key","Id","DisplayName","Description","Attribute","Rarity","DefaultState","SourceMonsterIds" },
+            new[] { "_key","Id","NameKey","DescKey","Attribute","Rarity","DefaultState","SourceMonsterIds" },
             // 2: Recipes
-            new[] { "_key","Id","DisplayName","Description","Ingredients","ResultFoodId","CookTimeSeconds","UnlockDay","IsUnlockedByDefault" },
+            new[] { "_key","Id","NameKey","DescKey","Ingredients","ResultFoodId","CookTimeSeconds","UnlockDay","IsUnlockedByDefault" },
             // 3: Foods
-            new[] { "_key","Id","DisplayName","Description","BasePrice","HpRestore","BuffAttribute","BuffMultiplier","BuffDurationDays" },
+            new[] { "_key","Id","NameKey","DescKey","BasePrice","HpRestore","BuffAttribute","BuffMultiplier","BuffDurationDays" },
             // 4: Drop Tables
             new[] { "_key","Id","Entries" },
             // 5: Dungeon Spawn Tables
@@ -57,8 +58,14 @@ namespace MonsterKitchen.Editor
             new[] { "_key","Id","WeaponName","WeaponType","Abils","MaxDurability","DecayMode","NormalAttackGroupId","WeaponSpriteAddress","WeaponAnimAddress" },
             // 9: Gathering Tools
             new[] { "_key","Id","ToolName","ToolType","MaxDurability","GatherMultiplier","SpeedMultiplier","CompatibleNodeTypes" },
-            // 10: Players
+            // 10: Resource Nodes
+            new[] { "_key","Id","NameKey","DisplayName","NodeType","DropIngredientId","DropMin","DropMax","MaxHp","RespawnSeconds","NodeSpriteAddress" },
+            // 11: Players
             new[] { "_key","Id","DisplayName","PrefabAddress","BaseMaxHp","BaseAttack","BaseMoveSpeed","BaseDefense","AttackAttribute","DefaultWeaponId","SkillGroupId1","SkillGroupId2","UltimateSkillGroupId","MaxUltimateGauge","GaugeOnHit","GaugeOnKill" },
+            // 12: UI Panels
+            new[] { "_key","Id","PanelId","DisplayName","PrefabAddress","ToggleKey" },
+            // 12: Strings
+            new[] { "_key","Id","StringId","Ko","En" },
         };
 
         // ── 창 상태 ──────────────────────────────────────────────────
@@ -113,7 +120,16 @@ namespace MonsterKitchen.Editor
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
             Debug.Log($"[DataManager] Sync All 완료 — 총 {total}개 항목");
-            EditorUtility.DisplayDialog("Sync All SO", $"전체 동기화 완료\n총 {total}개 항목", "OK");
+
+            // ── 유효성 검사 ──────────────────────────────────────────────
+            var issues = ValidateAll(GetOrCreateTableData());
+            ReportIssues(issues, "전체");
+
+            int errors = issues.Count(i => i.Severity == IssueSeverity.Error);
+            if (errors > 0)
+                Debug.LogWarning($"[DataManager] Sync All 완료 — 유효성 오류 {errors}개 (Console 확인)");
+            else
+                Debug.Log($"[DataManager] Sync All 완료 — 항목 {total}개, 유효성 검사 통과 ✓");
         }
 
         /// <summary>
@@ -227,7 +243,10 @@ namespace MonsterKitchen.Editor
                 7 => ScriptableObjectSync.Sync<SkillGroupData>        (parsed, td.SkillGroups,        td, (d, row) => SkillGroupMapper(d, row, td)),
                 8 => ScriptableObjectSync.Sync<WeaponData>            (parsed, td.Weapons,            td, (d, row) => WeaponMapper(d, row, td)),
                 9 => ScriptableObjectSync.Sync<GatheringToolData>     (parsed, td.GatheringTools,     td, GatheringToolMapper),
-               10 => ScriptableObjectSync.Sync<PlayerCharData>         (parsed, td.Players,            td, PlayerMapper),
+               10 => ScriptableObjectSync.Sync<ResourceNodeData>      (parsed, td.ResourceNodes,      td, ResourceNodeMapper),
+               11 => ScriptableObjectSync.Sync<PlayerCharData>        (parsed, td.PlayersChar,        td, PlayerMapper),
+               12 => ScriptableObjectSync.Sync<UIData>                (parsed, td.UIPanels,           td, UIDataMapper),
+               13 => ScriptableObjectSync.Sync<StringData>            (parsed, td.Strings,            td, StringDataMapper),
                 _ => 0,
             };
         }
@@ -237,6 +256,12 @@ namespace MonsterKitchen.Editor
         /// <summary>MonsterData: prefabAddress / spriteAddress / btAssetAddress 자동 생성 + skillGroupIds 파싱</summary>
         static void MonsterMapper(MonsterData d, Dictionary<string, string> row)
         {
+            // NameKey / DescKey 자동 생성 (_key 기반, 예: MON_001 → MON_001_NAME)
+            if (string.IsNullOrEmpty(d.NameKey) && row.TryGetValue("_key", out string key))
+                d.NameKey = key + "_NAME";
+            if (string.IsNullOrEmpty(d.DescKey) && row.TryGetValue("_key", out string key2))
+                d.DescKey = key2 + "_DESC";
+
             // CSV 값이 비어있을 때만 id 기반으로 자동 생성 (CSV에 명시된 값 우선)
             if (string.IsNullOrEmpty(d.PrefabAddress))
                 d.PrefabAddress  = AssetKeys.MonsterPrefab(d.Id);
@@ -260,23 +285,36 @@ namespace MonsterKitchen.Editor
             // skillGroups 는 ResolveAllReferences() 에서 해결됨
         }
 
-        /// <summary>IngredientData: spriteAddress 자동 생성</summary>
-        static void IngredientMapper(IngredientData d, Dictionary<string, string> _)
+        /// <summary>IngredientData: spriteAddress 자동 생성, NameKey/DescKey 자동 생성</summary>
+        static void IngredientMapper(IngredientData d, Dictionary<string, string> row)
         {
+            if (string.IsNullOrEmpty(d.NameKey) && row.TryGetValue("_key", out string key))
+                d.NameKey = key + "_NAME";
+            if (string.IsNullOrEmpty(d.DescKey) && row.TryGetValue("_key", out string key2))
+                d.DescKey = key2 + "_DESC";
             // CSV에 주소 컬럼이 없으므로 항상 id 기반으로 재생성
             d.SpriteAddress = AssetKeys.IngredientSprite(d.Id);
         }
 
-        /// <summary>FoodData: spriteAddress 자동 생성</summary>
-        static void FoodMapper(FoodData d, Dictionary<string, string> _)
+        /// <summary>FoodData: spriteAddress 자동 생성, NameKey/DescKey 자동 생성</summary>
+        static void FoodMapper(FoodData d, Dictionary<string, string> row)
         {
+            if (string.IsNullOrEmpty(d.NameKey) && row.TryGetValue("_key", out string key))
+                d.NameKey = key + "_NAME";
+            if (string.IsNullOrEmpty(d.DescKey) && row.TryGetValue("_key", out string key2))
+                d.DescKey = key2 + "_DESC";
             // CSV에 주소 컬럼이 없으므로 항상 id 기반으로 재생성
             d.SpriteAddress = AssetKeys.FoodSprite(d.Id);
         }
 
-        /// <summary>RecipeData: ingredients 배열 파싱 ("2001:2|2002:1" 형식)</summary>
+        /// <summary>RecipeData: ingredients 배열 파싱 ("2001:2|2002:1" 형식), NameKey/DescKey 자동 생성</summary>
         static void RecipeMapper(RecipeData d, Dictionary<string, string> row)
         {
+            if (string.IsNullOrEmpty(d.NameKey) && row.TryGetValue("_key", out string key))
+                d.NameKey = key + "_NAME";
+            if (string.IsNullOrEmpty(d.DescKey) && row.TryGetValue("_key", out string key2))
+                d.DescKey = key2 + "_DESC";
+
             if (!row.TryGetValue("Ingredients", out string raw) || string.IsNullOrWhiteSpace(raw))
                 return;
 
@@ -402,6 +440,20 @@ namespace MonsterKitchen.Editor
                 d.PrefabAddress = AssetKeys.PlayerCharPrefab(d.Id);
         }
 
+        /// <summary>UIData: prefabAddress 자동 생성 (비어 있는 경우)</summary>
+        static void UIDataMapper(UIData d, Dictionary<string, string> _)
+        {
+            if (string.IsNullOrEmpty(d.PrefabAddress) && !string.IsNullOrEmpty(d.PanelId))
+                d.PrefabAddress = AssetKeys.UIPanelPrefab(d.PanelId);
+        }
+
+        static void StringDataMapper(StringData d, Dictionary<string, string> row)
+        {
+            // StringId 비어있으면 _key 에서 자동 생성
+            if (string.IsNullOrEmpty(d.StringId) && row.TryGetValue("_key", out string key))
+                d.StringId = key;
+        }
+
         /// <summary>GatheringToolData: compatibleNodeTypes 배열 파싱 ("Tree|Rock|Ore" 형식)</summary>
         static void GatheringToolMapper(GatheringToolData d, Dictionary<string, string> row)
         {
@@ -415,6 +467,13 @@ namespace MonsterKitchen.Editor
                     list.Add(nodeType);
             }
             d.CompatibleNodeTypes = list.ToArray();
+        }
+
+        /// <summary>ResourceNodeData: NameKey 자동 생성 (_key 기반, 예: RNO_001 → RNO_001_NAME)</summary>
+        static void ResourceNodeMapper(ResourceNodeData d, Dictionary<string, string> row)
+        {
+            if (string.IsNullOrEmpty(d.NameKey) && row.TryGetValue("_key", out string key))
+                d.NameKey = key + "_NAME";
         }
 
         /// <summary>DungeonSpawnTableData: monsters 배열 파싱 ("1001:2:0.5|..." 형식)</summary>
@@ -474,6 +533,132 @@ namespace MonsterKitchen.Editor
         }
 
         // ================================================================
+        //  유효성 검사
+        // ================================================================
+
+        enum IssueSeverity { Warning, Error }
+
+        struct ValidationIssue
+        {
+            public IssueSeverity Severity;
+            public string        Message;
+        }
+
+        /// <summary>모든 테이블 유효성 검사.</summary>
+        static List<ValidationIssue> ValidateAll(TableData td)
+        {
+            var issues = new List<ValidationIssue>();
+            issues.AddRange(ValidateUITable(td.UIPanels));
+            return issues;
+        }
+
+        /// <summary>테이블 인덱스별 유효성 검사.</summary>
+        static List<ValidationIssue> ValidateTableAtIndex(int idx, TableData td) => idx switch
+        {
+            12 => ValidateUITable(td.UIPanels),
+            _  => new List<ValidationIssue>(),
+        };
+
+        /// <summary>
+        /// UITable 유효성 검사.
+        ///  · PanelId 공백 여부
+        ///  · ToggleKey 가 Key 열거형에 존재하는지
+        ///  · ToggleKey 중복 여부
+        /// </summary>
+        static List<ValidationIssue> ValidateUITable(UITable table)
+        {
+            var issues  = new List<ValidationIssue>();
+            var seenKeys = new Dictionary<string, string>(); // normalizedKey → PanelId
+
+            foreach (var data in table.All)
+            {
+                if (string.IsNullOrEmpty(data.PanelId))
+                {
+                    issues.Add(new ValidationIssue
+                    {
+                        Severity = IssueSeverity.Error,
+                        Message  = $"[UITable] Id={data.Id} PanelId 가 비어 있습니다.",
+                    });
+                }
+
+                if (string.IsNullOrEmpty(data.ToggleKey)) continue;
+
+                // Key 열거형 파싱 가능 여부
+                if (!System.Enum.TryParse<UnityEngine.InputSystem.Key>(
+                        data.ToggleKey, ignoreCase: true, out var parsedKey)
+                    || parsedKey == UnityEngine.InputSystem.Key.None)
+                {
+                    issues.Add(new ValidationIssue
+                    {
+                        Severity = IssueSeverity.Error,
+                        Message  = $"[UITable] '{data.PanelId}' ToggleKey='{data.ToggleKey}' 는 " +
+                                   $"UnityEngine.InputSystem.Key 열거형에 없는 값입니다.",
+                    });
+                    continue;
+                }
+
+                // 중복 ToggleKey
+                string norm = data.ToggleKey.ToUpperInvariant();
+                if (seenKeys.TryGetValue(norm, out string existing))
+                {
+                    issues.Add(new ValidationIssue
+                    {
+                        Severity = IssueSeverity.Error,
+                        Message  = $"[UITable] ToggleKey='{data.ToggleKey}' 중복 — " +
+                                   $"'{existing}' 과 '{data.PanelId}' 에 동시 등록되어 있습니다.",
+                    });
+                }
+                else
+                {
+                    seenKeys[norm] = data.PanelId;
+                }
+            }
+
+            return issues;
+        }
+
+        static void ReportIssues(List<ValidationIssue> issues, string context)
+        {
+            if (issues.Count == 0)
+            {
+                Debug.Log($"[DataManager] [{context}] 유효성 검사 통과 ✓");
+                return;
+            }
+
+            foreach (var issue in issues)
+            {
+                if (issue.Severity == IssueSeverity.Error)
+                    Debug.LogError(issue.Message);
+                else
+                    Debug.LogWarning(issue.Message);
+            }
+
+            int errors   = issues.Count(i => i.Severity == IssueSeverity.Error);
+            int warnings = issues.Count(i => i.Severity == IssueSeverity.Warning);
+            Debug.LogWarning($"[DataManager] [{context}] 유효성 검사 완료 — 오류 {errors}개, 경고 {warnings}개");
+        }
+
+        void DoValidateAll()
+        {
+            var td = AssetDatabase.LoadAssetAtPath<TableData>(TABLE_DATA_PATH);
+            if (td == null)
+            {
+                EditorUtility.DisplayDialog("Validate", "TableData SO 가 없습니다. 먼저 Sync All 을 실행하세요.", "OK");
+                return;
+            }
+
+            var issues = ValidateAll(td);
+            ReportIssues(issues, "전체");
+
+            int errors   = issues.Count(i => i.Severity == IssueSeverity.Error);
+            int warnings = issues.Count(i => i.Severity == IssueSeverity.Warning);
+            if (issues.Count == 0)
+                Debug.Log("[DataManager] 유효성 검사 통과 ✓ 모든 테이블 정상");
+            else
+                Debug.LogWarning($"[DataManager] 유효성 검사 — 오류 {errors}개 / 경고 {warnings}개 (Console 확인)");
+        }
+
+        // ================================================================
         //  Manifest 누락 키 검사
         // ================================================================
 
@@ -502,11 +687,14 @@ namespace MonsterKitchen.Editor
                 if (!string.IsNullOrEmpty(d.SpriteAddress))  Check(d.SpriteAddress,  d.DisplayName);
             foreach (var d in td.Foods.All)
                 if (!string.IsNullOrEmpty(d.SpriteAddress))  Check(d.SpriteAddress,  d.DisplayName);
-            foreach (var d in td.Players.All)
+            foreach (var d in td.PlayersChar.All)
                 if (!string.IsNullOrEmpty(d.PrefabAddress))  Check(d.PrefabAddress,  d.DisplayName);
             foreach (var d in td.SkillSteps.All)
                 if (!string.IsNullOrEmpty(d.ProjectilePrefabAddress) && d.MissileSpeed > 0f)
                     Check(d.ProjectilePrefabAddress, d.SkillName + " Projectile");
+            foreach (var d in td.UIPanels.All)
+                if (!string.IsNullOrEmpty(d.PrefabAddress))
+                    Check(d.PrefabAddress, d.DisplayName + " UI");
 
             return missing;
         }
@@ -561,6 +749,7 @@ namespace MonsterKitchen.Editor
             GUI.enabled = true;
             if (GUILayout.Button("Sync SO",  EditorStyles.toolbarButton, GUILayout.Width(62)))  DoSyncSO();
             if (GUILayout.Button("Sync All", EditorStyles.toolbarButton, GUILayout.Width(66)))  SyncAllSO();
+            if (GUILayout.Button("Validate", EditorStyles.toolbarButton, GUILayout.Width(62)))  DoValidateAll();
             if (GUILayout.Button("Reload",   EditorStyles.toolbarButton, GUILayout.Width(56)))  DoReload();
 
             bool wasShow = _showManifest;
@@ -769,9 +958,17 @@ namespace MonsterKitchen.Editor
                 case 7:  ScriptableObjectSync.Sync<SkillGroupData>        (_parsed, td.SkillGroups,        td, (d, row) => SkillGroupMapper(d, row, td));    break;
                 case 8:  ScriptableObjectSync.Sync<WeaponData>            (_parsed, td.Weapons,            td, (d, row) => WeaponMapper(d, row, td));        break;
                 case 9:  ScriptableObjectSync.Sync<GatheringToolData>     (_parsed, td.GatheringTools,     td, GatheringToolMapper);                         break;
-                case 10: ScriptableObjectSync.Sync<PlayerCharData>         (_parsed, td.Players,            td, PlayerMapper);                                break;
+                case 10: ScriptableObjectSync.Sync<ResourceNodeData>      (_parsed, td.ResourceNodes,      td, ResourceNodeMapper);                             break;
+                case 11: ScriptableObjectSync.Sync<PlayerCharData>        (_parsed, td.PlayersChar,        td, PlayerMapper);                                   break;
+                case 12: ScriptableObjectSync.Sync<UIData>                (_parsed, td.UIPanels,           td, UIDataMapper);                                   break;
+                case 13: ScriptableObjectSync.Sync<StringData>            (_parsed, td.Strings,            td, StringDataMapper);                               break;
             }
             AssetDatabase.SaveAssets();
+
+            // ── 유효성 검사 ──────────────────────────────────────────────
+            var issues = ValidateTableAtIndex(_tableIdx, td);
+            ReportIssues(issues, TABLE_LABELS[_tableIdx]);
+
             if (_showManifest) RefreshManifestCheck();
         }
 

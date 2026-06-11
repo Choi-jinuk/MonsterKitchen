@@ -1,68 +1,63 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements" editor-extension-mode="False">
-    <ui:Style src="project://database/Assets/UI/HUD.uss" />
-
-    <!-- 상단 HUD: HP · Day · Gold -->
+    <Style src="project://database/Assets/UI/HUD.uss?fileID=7433441132597879392&amp;guid=a3e9acf6d8431424ca701ce9e7520989&amp;type=3#HUD"/>
     <ui:VisualElement name="hud-root" class="hud-root">
-        <!-- 왼쪽: HP 바 -->
         <ui:VisualElement name="hp-chip" class="hud-chip hp-chip">
-            <ui:Label name="hp-icon" text="♥" class="hp-icon" />
+            <ui:Label name="hp-icon" text="♥" class="hp-icon" style="-unity-font-definition: url(&quot;project://database/Assets/TextMesh%20Pro/Fonts/GowunDodum-Regular.ttf?fileID=12800000&amp;guid=35231759caa53a64da6b9ef68c3011d2&amp;type=3#GowunDodum-Regular&quot;);"/>
             <ui:VisualElement name="hp-bar-bg" class="hp-bar-bg">
-                <ui:VisualElement name="hp-bar-fill" class="hp-bar-fill" />
+                <ui:VisualElement name="hp-bar-fill" class="hp-bar-fill"/>
             </ui:VisualElement>
-            <ui:Label name="hp-text" text="--/--" class="hp-text" />
+            <ui:Label name="hp-text" text="--/--" class="hp-text" style="-unity-font-definition: url(&quot;project://database/Assets/TextMesh%20Pro/Fonts/GowunDodum-Regular.ttf?fileID=12800000&amp;guid=35231759caa53a64da6b9ef68c3011d2&amp;type=3#GowunDodum-Regular&quot;);"/>
         </ui:VisualElement>
-        <!-- 중앙: Day -->
         <ui:VisualElement class="hud-chip">
-            <ui:Label name="day-label" text="Day 1" class="hud-label hud-label--day" />
+            <ui:Label name="day-label" text="Day 1" class="hud-label hud-label--day" style="-unity-font-definition: url(&quot;project://database/Assets/TextMesh%20Pro/Fonts/GowunDodum-Regular.ttf?fileID=12800000&amp;guid=35231759caa53a64da6b9ef68c3011d2&amp;type=3#GowunDodum-Regular&quot;);"/>
         </ui:VisualElement>
-        <!-- 오른쪽: 골드 -->
         <ui:VisualElement class="hud-chip">
-            <ui:Label name="gold-label" text="Gold: 0 G" class="hud-label hud-label--gold" />
+            <ui:Label name="gold-label" text="Gold: 0 G" class="hud-label hud-label--gold" style="-unity-font-definition: url(&quot;project://database/Assets/TextMesh%20Pro/Fonts/GowunDodum-Regular.ttf?fileID=12800000&amp;guid=35231759caa53a64da6b9ef68c3011d2&amp;type=3#GowunDodum-Regular&quot;);"/>
+        </ui:VisualElement>
+        <ui:VisualElement name="save-indicator" class="hud-chip save-indicator" style="display: none;">
+            <ui:Label name="save-label" text="저장 중..." class="hud-label save-indicator-label" style="-unity-font-definition: url(&quot;project://database/Assets/TextMesh%20Pro/Fonts/GowunDodum-Regular.ttf?fileID=12800000&amp;guid=35231759caa53a64da6b9ef68c3011d2&amp;type=3#GowunDodum-Regular&quot;);"/>
         </ui:VisualElement>
     </ui:VisualElement>
-
-    <!-- 하단 HUD: 무기 · 스킬1·2 · 궁극기 -->
     <ui:VisualElement name="skill-bar" class="skill-bar">
-
-        <!-- 무기 슬롯 -->
         <ui:VisualElement name="weapon-slot" class="combat-slot">
-            <ui:VisualElement name="weapon-icon-bg" class="slot-icon-bg weapon-icon-bg" />
-            <ui:Label text="WPN" class="slot-badge" />
+            <ui:VisualElement name="weapon-icon-bg" class="slot-icon-bg weapon-icon-bg"/>
+            <ui:Label text="WPN" class="slot-badge" style="-unity-font-definition: url(&quot;project://database/Assets/TextMesh%20Pro/Fonts/GowunDodum-Regular.ttf?fileID=12800000&amp;guid=35231759caa53a64da6b9ef68c3011d2&amp;type=3#GowunDodum-Regular&quot;);"/>
         </ui:VisualElement>
-
-        <ui:VisualElement class="slot-divider" />
-
-        <!-- 스킬 슬롯 1 (Q) -->
+        <ui:VisualElement class="slot-divider"/>
         <ui:VisualElement name="skill1-slot" class="combat-slot">
-            <ui:VisualElement name="skill1-icon-bg" class="slot-icon-bg skill-icon-bg" />
-            <ui:VisualElement name="skill1-cool-fill" class="cool-fill" />
-            <ui:Label name="skill1-cool-text" text="" class="cool-text" />
-            <ui:Label text="Q" class="slot-badge" />
+            <ui:VisualElement name="skill1-icon-bg" class="slot-icon-bg skill-icon-bg"/>
+            <ui:VisualElement name="skill1-cool-fill" class="cool-fill"/>
+            <ui:Label name="skill1-cool-text" text="" class="cool-text" style="-unity-font-definition: url(&quot;project://database/Assets/TextMesh%20Pro/Fonts/GowunDodum-Regular.ttf?fileID=12800000&amp;guid=35231759caa53a64da6b9ef68c3011d2&amp;type=3#GowunDodum-Regular&quot;);"/>
+            <ui:Label text="Q" class="slot-badge" style="-unity-font-definition: url(&quot;project://database/Assets/TextMesh%20Pro/Fonts/GowunDodum-Regular.ttf?fileID=12800000&amp;guid=35231759caa53a64da6b9ef68c3011d2&amp;type=3#GowunDodum-Regular&quot;);"/>
         </ui:VisualElement>
-
-        <!-- 스킬 슬롯 2 (R) -->
         <ui:VisualElement name="skill2-slot" class="combat-slot">
-            <ui:VisualElement name="skill2-icon-bg" class="slot-icon-bg skill-icon-bg" />
-            <ui:VisualElement name="skill2-cool-fill" class="cool-fill" />
-            <ui:Label name="skill2-cool-text" text="" class="cool-text" />
-            <ui:Label text="R" class="slot-badge" />
+            <ui:VisualElement name="skill2-icon-bg" class="slot-icon-bg skill-icon-bg"/>
+            <ui:VisualElement name="skill2-cool-fill" class="cool-fill"/>
+            <ui:Label name="skill2-cool-text" text="" class="cool-text" style="-unity-font-definition: url(&quot;project://database/Assets/TextMesh%20Pro/Fonts/GowunDodum-Regular.ttf?fileID=12800000&amp;guid=35231759caa53a64da6b9ef68c3011d2&amp;type=3#GowunDodum-Regular&quot;);"/>
+            <ui:Label text="R" class="slot-badge" style="-unity-font-definition: url(&quot;project://database/Assets/TextMesh%20Pro/Fonts/GowunDodum-Regular.ttf?fileID=12800000&amp;guid=35231759caa53a64da6b9ef68c3011d2&amp;type=3#GowunDodum-Regular&quot;);"/>
         </ui:VisualElement>
-
-        <ui:VisualElement class="slot-divider" />
-
-        <!-- 궁극기 슬롯 (F) + 게이지 바 -->
+        <ui:VisualElement class="slot-divider"/>
         <ui:VisualElement name="ult-container" class="ult-container">
             <ui:VisualElement name="ult-slot" class="combat-slot">
-                <ui:VisualElement name="ult-icon-bg" class="slot-icon-bg ult-icon-bg" />
-                <ui:VisualElement name="ult-cool-fill" class="cool-fill" />
-                <ui:Label text="F" class="slot-badge ult-badge" />
-                <ui:Label name="ult-ready-label" text="" class="ult-ready-label" />
+                <ui:VisualElement name="ult-icon-bg" class="slot-icon-bg ult-icon-bg"/>
+                <ui:VisualElement name="ult-cool-fill" class="cool-fill"/>
+                <ui:Label text="F" class="slot-badge ult-badge" style="-unity-font-definition: url(&quot;project://database/Assets/TextMesh%20Pro/Fonts/GowunDodum-Regular.ttf?fileID=12800000&amp;guid=35231759caa53a64da6b9ef68c3011d2&amp;type=3#GowunDodum-Regular&quot;);"/>
+                <ui:Label name="ult-ready-label" text="" class="ult-ready-label" style="-unity-font-definition: url(&quot;project://database/Assets/TextMesh%20Pro/Fonts/GowunDodum-Regular.ttf?fileID=12800000&amp;guid=35231759caa53a64da6b9ef68c3011d2&amp;type=3#GowunDodum-Regular&quot;);"/>
             </ui:VisualElement>
-            <!-- 궁극기 게이지 바 -->
             <ui:VisualElement name="ult-gauge-bg" class="ult-gauge-bg">
-                <ui:VisualElement name="ult-gauge-fill" class="ult-gauge-fill" />
+                <ui:VisualElement name="ult-gauge-fill" class="ult-gauge-fill"/>
             </ui:VisualElement>
         </ui:VisualElement>
-
     </ui:VisualElement>
+    <ui:VisualElement name="minimap-root" class="minimap-root" style="display: none;">
+        <ui:VisualElement name="minimap-bg" class="minimap-bg"/>
+        <ui:VisualElement name="minimap-player-dot" class="minimap-player-dot"/>
+    </ui:VisualElement>
+    <ui:VisualElement name="bag-weight-bar" class="bag-weight-bar" style="display: none;">
+        <ui:Label name="bag-weight-label" text="0/10" class="bag-weight-label"/>
+        <ui:VisualElement name="bag-weight-fill-bg" class="bag-weight-fill-bg">
+            <ui:VisualElement name="bag-weight-fill" class="bag-weight-fill"/>
+        </ui:VisualElement>
+    </ui:VisualElement>
+    <ui:Label name="notification-label" text="" class="notification-label" style="display: none;"/>
 </ui:UXML>

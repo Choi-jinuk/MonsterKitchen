@@ -20,7 +20,7 @@ namespace MonsterKitchen.UI
         const int InitialPoolSize = 10;
         const int MaxPoolSize     = 30;
 
-        ObjectPool<DamagePopup> _pool;
+        ObjectPool<DamagePopup> m_Pool;
 
         void Awake()
         {
@@ -34,10 +34,10 @@ namespace MonsterKitchen.UI
             var prefab = AssetLoadManager.Instance?.Load<DamagePopup>(AssetKeys.PREFAB_DAMAGE_POPUP);
             if (prefab == null)
             {
-                Debug.LogError("[DamagePopupManager] DamagePopup 프리팹을 AssetManifest에서 찾을 수 없습니다. 키: " + AssetKeys.PREFAB_DAMAGE_POPUP);
+                DebugUtil.LogError("[DamagePopupManager] DamagePopup 프리팹을 AssetManifest에서 찾을 수 없습니다. 키: " + AssetKeys.PREFAB_DAMAGE_POPUP);
                 return;
             }
-            _pool = new ObjectPool<DamagePopup>(prefab, transform, InitialPoolSize, MaxPoolSize);
+            m_Pool = new ObjectPool<DamagePopup>(prefab, transform, InitialPoolSize, MaxPoolSize);
         }
 
         /// <summary>지정 위치에 데미지 팝업을 생성한다.</summary>
@@ -46,22 +46,22 @@ namespace MonsterKitchen.UI
         /// <param name="isCrit">크리티컬 여부 (주황색, 큰 글씨)</param>
         public void ShowPopup(Vector3 worldPos, int amount, bool isCrit = false)
         {
-            if (_pool == null)
+            if (m_Pool == null)
             {
-                Debug.LogWarning("[DamagePopupManager] 풀이 초기화되지 않았습니다.");
+                DebugUtil.LogWarning("[DamagePopupManager] 풀이 초기화되지 않았습니다.");
                 return;
             }
 
             // 살짝 랜덤 오프셋으로 겹침 방지
             Vector3 offset = new Vector3(RandomUtil.Range(-0.2f, 0.2f), 0.3f, 0f);
-            var popup = _pool.Get(worldPos + offset);
+            var popup = m_Pool.Get(worldPos + offset);
             popup.Show(amount, isCrit, this);
         }
 
         /// <summary>DamagePopup 이 애니메이션 완료 후 호출한다.</summary>
         public void ReturnToPool(DamagePopup popup)
         {
-            _pool.Return(popup);
+            m_Pool.Return(popup);
         }
     }
 }

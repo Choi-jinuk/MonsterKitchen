@@ -1,7 +1,5 @@
-using System.Collections.Generic;
 using MonsterKitchen.Core;
 using UnityEngine;
-// StringUtil lives in MonsterKitchen.Core — already imported above
 
 namespace MonsterKitchen.Data
 {
@@ -10,6 +8,7 @@ namespace MonsterKitchen.Data
     //
     //  ▶ 역할
     //    TableData SO 를 보유하고 편의 조회 API 를 제공한다.
+    //    역방향 캐시(문자열 ID 조회 등)는 각 특화 Table 클래스가 소유.
     //    순수 C# 클래스. GlobalController 가 생성·관리한다.
     //
     //  ▶ 초기화 순서
@@ -17,9 +16,11 @@ namespace MonsterKitchen.Data
     //    GameStartup.StepDataLoad()      → Registry.Load()  (TableData SO 로드)
     //
     //  ▶ 사용법
-    //    DataRegistry.Instance.GetMonster(id)
-    //    DataRegistry.Instance.Table.Monsters.All
-    //    GlobalController.Instance.Registry.IsReady  (로드 완료 여부 확인)
+    //    DataRegistry.Instance.Monsters.Get(id)
+    //    DataRegistry.Instance.SkillGroups.FindByStringId("SGD_001")
+    //    DataRegistry.Instance.UIPanels.FindUIByPanelId("CookingUI")
+    //    DataRegistry.Instance.Strings.FindByStringId("MON_001_NAME")
+    //    GlobalController.Instance.Registry.IsReady
     // ====================================================================
 
     public class DataRegistry
@@ -34,9 +35,39 @@ namespace MonsterKitchen.Data
         /// <summary>TableData 로드 완료 여부. GameStartup.StepDataLoad 이후 true.</summary>
         public bool IsReady => m_Table != null;
 
+        // ── 특화 테이블 직접 접근 ─────────────────────────────────────────
+        public MonsterTable       Monsters           => m_Table?.Monsters;
+        public IngredientTable    Ingredients        => m_Table?.Ingredients;
+        public FoodTable          Foods              => m_Table?.Foods;
+        public RecipeTable        Recipes            => m_Table?.Recipes;
+        public DropTable          DropTables         => m_Table?.DropTables;
+        public DungeonSpawnTable  DungeonSpawnTables => m_Table?.DungeonSpawnTables;
+        public GatheringToolTable GatheringTools     => m_Table?.GatheringTools;
+        public ResourceNodeTable  ResourceNodes      => m_Table?.ResourceNodes;
+        public UITable            UIPanels           => m_Table?.UIPanels;
+        public SkillStepTable     SkillSteps         => m_Table?.SkillSteps;
+        public SkillGroupTable    SkillGroups        => m_Table?.SkillGroups;
+        public WeaponTable        Weapons            => m_Table?.Weapons;
+        public PlayerCharTable    PlayerChars        => m_Table?.PlayersChar;
+        public StringTable        Strings            => m_Table?.Strings;
+
         // ================================================================
         //  초기화
         // ================================================================
+
+        /// <summary>
+        /// foodId 를 결과물로 갖는 레시피를 반환한다.
+        /// 레시피 수가 적어 선형 탐색(O(n)) 허용. 없으면 null.
+        /// </summary>
+        public RecipeData GetRecipeByFoodId(uint foodId)
+        {
+            if (m_Table?.Recipes == null) return null;
+            foreach (var recipe in m_Table.Recipes.All)
+            {
+                if (recipe.ResultFoodId == foodId) return recipe;
+            }
+            return null;
+        }
 
         public void Init() => Instance = this;
 
@@ -48,60 +79,33 @@ namespace MonsterKitchen.Data
         {
             m_Table = AssetLoadManager.Instance?.Load<TableData>(AssetKeys.DATA_TABLE_DATA);
             if (m_Table == null)
-                Debug.LogError("[DataRegistry] TableData 로드 실패 — AssetManifest 에 'data/table_data' 키 등록 여부 확인.", null);
-            else
-                Debug.Log(StringUtil.Format("[DataRegistry] TableData 로드 완료 (Monsters:{0} Ingredients:{1} Recipes:{2})",
-                    m_Table.Monsters?.Count ?? 0,
-                    m_Table.Ingredients?.Count ?? 0,
-                    m_Table.Recipes?.Count ?? 0));
-        }
-
-        // ── 캐시 — 문자열 ID 역방향 조회 ────────────────────────────────
-        Dictionary<string, SkillGroupData> m_SkillGroupsByStringId;
-
-        // ================================================================
-        //  편의 조회 API
-        // ================================================================
-
-        public MonsterData            GetMonster         (uint id) => m_Table?.Monsters.Get(id);
-        public IngredientData         GetIngredient      (uint id) => m_Table?.Ingredients.Get(id);
-        public RecipeData             GetRecipe          (uint id) => m_Table?.Recipes.Get(id);
-        public FoodData               GetFood            (uint id) => m_Table?.Foods.Get(id);
-        public DropTableData          GetDropTable       (uint id) => m_Table?.DropTables.Get(id);
-        public WeaponData             GetWeapon          (uint id) => m_Table?.Weapons.Get(id);
-        public GatheringToolData      GetGatheringTool   (uint id) => m_Table?.GatheringTools.Get(id);
-        public SkillData              GetSkillStep       (uint id) => m_Table?.SkillSteps.Get(id);
-        public SkillGroupData         GetSkillGroup      (uint id) => m_Table?.SkillGroups.Get(id);
-        public PlayerCharData         GetPlayer          (uint id) => m_Table?.Players.Get(id);
-        public DungeonSpawnTableData  GetDungeonSpawnTable(uint id) => m_Table?.DungeonSpawnTables.Get(id);
-
-        /// <summary>
-        /// skillGroupId 문자열(예: "SGD_001")로 SkillGroupData 를 조회한다.
-        /// 첫 호출 시 역방향 캐시를 빌드하고 이후 O(1) 조회.
-        /// </summary>
-        public SkillGroupData FindSkillGroupByStringId(string skillGroupId)
-        {
-            if (string.IsNullOrEmpty(skillGroupId) || m_Table == null) return null;
-
-            if (m_SkillGroupsByStringId == null)
             {
-                m_SkillGroupsByStringId = new Dictionary<string, SkillGroupData>();
-                foreach (var sg in m_Table.SkillGroups.All)
-                    if (!string.IsNullOrEmpty(sg.SkillGroupId))
-                        m_SkillGroupsByStringId[sg.SkillGroupId] = sg;
+                DebugUtil.LogError("[DataRegistry] TableData 로드 실패 — AssetManifest 에 'data/table_data' 키 등록 여부 확인.", null);
+                return;
             }
 
-            return m_SkillGroupsByStringId.GetValueOrDefault(skillGroupId);
-        }
+            // 역방향 캐시 빌드 — 모든 테이블 RuntimeSetData 일괄 호출
+            foreach (var table in m_Table.AllTables())
+                table.RuntimeSetData();
 
-        // ── IEnumerable 접근자 ───────────────────────────────────────────
-        public IEnumerable<MonsterData>           AllMonsters           => m_Table?.Monsters.All;
-        public IEnumerable<IngredientData>        AllIngredients        => m_Table?.Ingredients.All;
-        public IEnumerable<RecipeData>            AllRecipes            => m_Table?.Recipes.All;
-        public IEnumerable<FoodData>              AllFoods              => m_Table?.Foods.All;
-        public IEnumerable<WeaponData>            AllWeapons            => m_Table?.Weapons.All;
-        public IEnumerable<DungeonSpawnTableData> AllDungeonSpawnTables => m_Table?.DungeonSpawnTables.All;
-        public IEnumerable<SkillGroupData>        AllSkillGroups        => m_Table?.SkillGroups.All;
-        public IEnumerable<PlayerCharData>        AllPlayers            => m_Table?.Players.All;
+            // 재료 Weight 검증 — 0 이하 시 1 로 보정
+            if (m_Table.Ingredients != null)
+            {
+                foreach (var ing in m_Table.Ingredients.All)
+                {
+                    if (ing.Weight <= 0)
+                    {
+                        DebugUtil.LogWarning($"[DataRegistry] 재료 ID:{ing.Id} Weight={ing.Weight} — 1 로 보정.");
+                        ing.Weight = 1;
+                    }
+                }
+            }
+
+            DebugUtil.Log(
+                $"[DataRegistry] TableData 로드 완료 | Monsters:{m_Table.Monsters.Count} Ingredients:{m_Table.Ingredients.Count} Foods:{m_Table.Foods.Count} Recipes:{m_Table.Recipes.Count} DropTables:{m_Table.DropTables.Count} DungeonSpawns:{m_Table.DungeonSpawnTables.Count} GatheringTools:{m_Table.GatheringTools.Count} UIPanels:{m_Table.UIPanels.Count} SkillSteps:{m_Table.SkillSteps.Count} SkillGroups:{m_Table.SkillGroups.Count} Weapons:{m_Table.Weapons.Count} Players:{m_Table.PlayersChar.Count} Strings:{m_Table.Strings.Count}");
+
+            // LocaleManager 초기화 (StringTable 캐시 빌드 이후)
+            LocaleManager.Instance?.OnDataLoaded();
+        }
     }
 }

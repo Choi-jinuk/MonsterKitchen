@@ -1,3 +1,4 @@
+using MonsterKitchen.Core;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -29,12 +30,12 @@ namespace MonsterKitchen.Core
             if (m_Manifest != null)
             {
                 m_Loader = new ManifestLoader(m_Manifest);
-                Debug.Log("[AssetLoadManager] ManifestLoader 초기화.");
+                DebugUtil.Log("[AssetLoadManager] ManifestLoader 초기화.");
             }
             else
             {
                 m_Loader = new NullLoader();
-                Debug.LogError("[AssetLoadManager] AssetManifest 가 없습니다! GlobalController Inspector 를 확인하세요.");
+                DebugUtil.LogError("[AssetLoadManager] AssetManifest 가 없습니다! GlobalController Inspector 를 확인하세요.");
             }
         }
 
@@ -42,7 +43,7 @@ namespace MonsterKitchen.Core
         {
             var asset = m_Loader.Load<T>(key);
             if (asset == null)
-                Debug.LogWarning(StringUtil.Format("[AssetLoadManager] 키 '{0}' (타입: {1}) 를 찾을 수 없습니다.", key, typeof(T).Name));
+                DebugUtil.LogWarning(StringUtil.Format("[AssetLoadManager] 키 '{0}' (타입: {1}) 를 찾을 수 없습니다.", key, typeof(T).Name));
             return asset;
         }
 

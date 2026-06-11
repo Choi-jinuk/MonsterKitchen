@@ -1,3 +1,4 @@
+using MonsterKitchen.Core;
 using System;
 using UnityEngine;
 
@@ -52,7 +53,7 @@ namespace MonsterKitchen.Core
         {
             CurrentPhase = phase;
             OnPhaseChanged?.Invoke(phase);
-            Debug.Log($"[PhaseManager] Phase → {phase}");
+            DebugUtil.Log($"[PhaseManager] Phase → {phase}");
         }
     }
 }

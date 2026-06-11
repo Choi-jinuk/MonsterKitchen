@@ -13,21 +13,21 @@ namespace MonsterKitchen.UI
     [RequireComponent(typeof(Health))]
     public class DamagePopupTrigger : MonoBehaviour
     {
-        Health _health;
+        Health m_Health;
 
         void Awake()
         {
-            _health = GetComponent<Health>();
+            m_Health = GetComponent<Health>();
         }
 
         void OnEnable()
         {
-            if (_health != null) _health.OnDamaged += OnDamaged;
+            if (m_Health != null) m_Health.OnDamaged += OnDamaged;
         }
 
         void OnDisable()
         {
-            if (_health != null) _health.OnDamaged -= OnDamaged;
+            if (m_Health != null) m_Health.OnDamaged -= OnDamaged;
         }
 
         void OnDamaged(int amount, AttributeType attr)

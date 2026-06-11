@@ -1,4 +1,4 @@
-<ui:UXML xmlns:ui="UnityEngine.UIElements" editor-extension-mode="False">
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:mk="MonsterKitchen.UI" editor-extension-mode="False">
     <ui:Style src="project://database/Assets/UI/InventoryPanel.uss" />
 
     <!-- 배경 오버레이 (클릭 시 닫기) -->
@@ -9,12 +9,12 @@
 
             <!-- 헤더 -->
             <ui:VisualElement class="inv-header">
-                <ui:Label text="인벤토리" class="inv-title" />
+                <mk:LocalizedLabel string-id="UI_INVENTORY" class="inv-title" />
                 <ui:Label name="inv-close-btn" text="✕" class="inv-close-btn" />
             </ui:VisualElement>
 
             <!-- 재료 섹션 -->
-            <ui:Label text="재료" class="inv-section-title" />
+            <mk:LocalizedLabel string-id="UI_INGREDIENTS" class="inv-section-title" />
             <ui:ScrollView name="ing-scroll" class="inv-scroll" horizontal-scroller-visibility="Hidden">
                 <ui:VisualElement name="ing-grid" class="inv-grid" />
             </ui:ScrollView>
@@ -23,7 +23,7 @@
             <ui:VisualElement class="inv-divider" />
 
             <!-- 음식 섹션 -->
-            <ui:Label text="요리" class="inv-section-title" />
+            <mk:LocalizedLabel string-id="UI_FOOD" class="inv-section-title" />
             <ui:ScrollView name="food-scroll" class="inv-scroll" horizontal-scroller-visibility="Hidden">
                 <ui:VisualElement name="food-grid" class="inv-grid" />
             </ui:ScrollView>

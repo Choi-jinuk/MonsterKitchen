@@ -1,3 +1,4 @@
+using MonsterKitchen.Core;
 using System;
 using System.Collections.Generic;
 using MonsterKitchen.Data;
@@ -32,7 +33,7 @@ namespace MonsterKitchen.Core
     //    GlobalController.InitManagers() → Init()  (PlayerDataManager.Init 이후)
     // ====================================================================
 
-    public class NetworkManager
+    public class NetworkManager : INetworkManager
     {
         public static NetworkManager Instance { get; private set; }
 
@@ -59,7 +60,8 @@ namespace MonsterKitchen.Core
             // ── [SERVER STUB END] ────────────────────────────────────
 
             PlayerDataManager.Instance.ApplyGold(newGold);
-            Debug.Log(StringUtil.Format("[Network] EarnGold +{0}G → 총 {1}G", amount, newGold));
+            DebugUtil.Log(StringUtil.Format("[Network] EarnGold +{0}G → 총 {1}G", amount, newGold));
+            GlobalController.Instance?.SaveSched.ForceSave();
             onResult?.Invoke(newGold);
         }
 
@@ -75,7 +77,7 @@ namespace MonsterKitchen.Core
             // ── [SERVER STUB START] ──────────────────────────────────
             if (amount <= 0 || current < amount)
             {
-                Debug.Log(StringUtil.Format("[Network] SpendGold 실패 — 잔액 부족 ({0}G / {1}G 필요)", current, amount));
+                DebugUtil.Log(StringUtil.Format("[Network] SpendGold 실패 — 잔액 부족 ({0}G / {1}G 필요)", current, amount));
                 onResult?.Invoke(false, current);
                 return;
             }
@@ -83,7 +85,8 @@ namespace MonsterKitchen.Core
             // ── [SERVER STUB END] ────────────────────────────────────
 
             PlayerDataManager.Instance.ApplyGold(newGold);
-            Debug.Log(StringUtil.Format("[Network] SpendGold -{0}G → 총 {1}G", amount, newGold));
+            DebugUtil.Log(StringUtil.Format("[Network] SpendGold -{0}G → 총 {1}G", amount, newGold));
+            GlobalController.Instance?.SaveSched.ForceSave();
             onResult?.Invoke(true, newGold);
         }
 
@@ -106,6 +109,28 @@ namespace MonsterKitchen.Core
             // ── [SERVER STUB END] ────────────────────────────────────
 
             PlayerDataManager.Instance.ApplyIngredient(ingredientId, newQty);
+            GlobalController.Instance?.SaveSched.MarkDirty();
+            onResult?.Invoke(ingredientId, newQty);
+        }
+
+        /// <summary>
+        /// 품질 포함 재료 추가를 서버에 요청한다.
+        /// 총 수량 업데이트 + 품질 카운트 업데이트.
+        /// 성공 시 onResult(ingredientId, newQty) 호출.
+        /// </summary>
+        public void RequestAddIngredient(uint ingredientId, int qty, IngredientQuality quality,
+                                         Action<uint, int> onResult = null)
+        {
+            if (qty <= 0) return;
+
+            // ── [SERVER STUB START] ──────────────────────────────────
+            int cur    = PlayerDataManager.Instance.Inventory.GetIngredientCount(ingredientId);
+            int newQty = cur + qty;
+            // ── [SERVER STUB END] ────────────────────────────────────
+
+            // AddIngredientWithQuality 는 총 수량과 품질 카운트를 모두 갱신한다.
+            PlayerDataManager.Instance.Inventory.AddIngredientWithQuality(ingredientId, qty, quality);
+            GlobalController.Instance?.SaveSched.MarkDirty();
             onResult?.Invoke(ingredientId, newQty);
         }
 
@@ -137,7 +162,7 @@ namespace MonsterKitchen.Core
             {
                 if (inv.GetIngredientCount(kv.Key) < kv.Value)
                 {
-                    Debug.LogWarning(StringUtil.Format("[Network] RequestCook 실패 — 재료 부족 (id:{0} 필요:{1})", kv.Key, kv.Value));
+                    DebugUtil.LogWarning(StringUtil.Format("[Network] RequestCook 실패 — 재료 부족 (id:{0} 필요:{1})", kv.Key, kv.Value));
                     onResult?.Invoke(false, null);
                     return;
                 }
@@ -154,11 +179,15 @@ namespace MonsterKitchen.Core
             foreach (var kv in ingredientChanges)
                 PlayerDataManager.Instance.ApplyIngredient(kv.Key, kv.Value);
 
+            foreach (var kv in reqCounts)
+                PlayerDataManager.Instance.Inventory.ConsumeIngredientQuality(kv.Key, kv.Value);
+
             PlayerDataManager.Instance.ApplyFoodAdd(recipe.ResultFoodId, grade);
 
-            FoodData food = DataRegistry.Instance?.GetFood(recipe.ResultFoodId);
-            Debug.Log(StringUtil.Format("[Network] Cook 완료 → {0} [{1}]",
+            FoodData food = DataRegistry.Instance?.Foods?.Get(recipe.ResultFoodId);
+            DebugUtil.Log(StringUtil.Format("[Network] Cook 완료 → {0} [{1}]",
                 food?.DisplayName ?? recipe.ResultFoodId.ToString(), grade));
+            GlobalController.Instance?.SaveSched.ForceSave();
             onResult?.Invoke(true, food);
         }
 
@@ -175,14 +204,15 @@ namespace MonsterKitchen.Core
             // ── [SERVER STUB START] ──────────────────────────────────
             if (PlayerDataManager.Instance.Inventory.GetFoodCount(foodId) <= 0)
             {
-                Debug.Log(StringUtil.Format("[Network] RequestServeFood 실패 — 재고 없음 (id:{0})", foodId));
+                DebugUtil.Log(StringUtil.Format("[Network] RequestServeFood 실패 — 재고 없음 (id:{0})", foodId));
                 onResult?.Invoke(false, FoodGrade.Normal, 0);
                 return;
             }
             // ── [SERVER STUB END] ────────────────────────────────────
 
             var (grade, remaining) = PlayerDataManager.Instance.ApplyFoodConsume(foodId);
-            Debug.Log(StringUtil.Format("[Network] ServeFood id:{0} [{1}] 잔여:{2}", foodId, grade, remaining));
+            DebugUtil.Log(StringUtil.Format("[Network] ServeFood id:{0} [{1}] 잔여:{2}", foodId, grade, remaining));
+            GlobalController.Instance?.SaveSched.ForceSave();
             onResult?.Invoke(true, grade, remaining);
         }
 
@@ -207,12 +237,13 @@ namespace MonsterKitchen.Core
                 PlayerUpgradeType.ToolCooldown => upg.ToolCooldownUpgradeCost,
                 PlayerUpgradeType.ShopSeats    => upg.ShopSeatUpgradeCost,
                 PlayerUpgradeType.ShopTip      => upg.ShopTipUpgradeCost,
+                PlayerUpgradeType.BagCapacity  => upg.BagUpgradeCost,
                 _                              => int.MaxValue,
             };
 
             if (coin.Gold < cost)
             {
-                Debug.Log(StringUtil.Format("[Network] Upgrade 실패 — 골드 부족 ({0}G / {1}G 필요)", coin.Gold, cost));
+                DebugUtil.Log(StringUtil.Format("[Network] Upgrade 실패 — 골드 부족 ({0}G / {1}G 필요)", coin.Gold, cost));
                 onResult?.Invoke(false);
                 return;
             }
@@ -225,13 +256,15 @@ namespace MonsterKitchen.Core
                 PlayerUpgradeType.ToolCooldown => upg.ToolCooldownLevel + 1,
                 PlayerUpgradeType.ShopSeats    => upg.ShopSeatLevel     + 1,
                 PlayerUpgradeType.ShopTip      => upg.ShopTipLevel      + 1,
+                PlayerUpgradeType.BagCapacity  => upg.BagCapacityLevel  + 1,
                 _                              => 0,
             };
             // ── [SERVER STUB END] ────────────────────────────────────
 
             PlayerDataManager.Instance.ApplyGold(newGold);
             PlayerDataManager.Instance.ApplyUpgradeLevel(type, newLevel);
-            Debug.Log(StringUtil.Format("[Network] Upgrade {0} Lv{1} 완료 (골드: {2}G)", type, newLevel, newGold));
+            DebugUtil.Log(StringUtil.Format("[Network] Upgrade {0} Lv{1} 완료 (골드: {2}G)", type, newLevel, newGold));
+            GlobalController.Instance?.SaveSched.ForceSave();
             onResult?.Invoke(true);
         }
     }

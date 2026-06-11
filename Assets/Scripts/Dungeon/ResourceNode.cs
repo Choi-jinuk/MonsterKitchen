@@ -34,11 +34,13 @@ namespace MonsterKitchen.Dungeon
     public class ResourceNode : MonoBehaviour
     {
         [Header("Data")]
-        [SerializeField] ResourceNodeData m_Data;
+        [SerializeField] uint  m_NodeDataId;
+        [SerializeField] Color m_NodeTint = Color.white;  // NodeTint — Color는 CSV 비직렬화
 
         // ── 런타임 상태 ─────────────────────────────────────────────────
-        int  m_CurrentHp;
-        bool m_Depleted;
+        ResourceNodeData m_Data;
+        int              m_CurrentHp;
+        bool             m_Depleted;
 
         // 스프라이트가 없을 때 공유하는 플레이스홀더 (1×1 흰 텍스처)
         static Sprite s_Placeholder;
@@ -49,10 +51,15 @@ namespace MonsterKitchen.Dungeon
 
         void Awake()
         {
+            // DataRegistry 에서 데이터 조회
+            m_Data = DataRegistry.Instance?.ResourceNodes?.Get(m_NodeDataId);
+            if (m_Data == null)
+                DebugUtil.LogError($"[ResourceNode] {name}: NodeDataId={m_NodeDataId} 데이터가 없습니다. DataRegistry 확인.");
+
             // "ResourceNode" 레이어 자동 배정 — Inspector 수동 설정 불필요
             int layer = LayerMask.NameToLayer("ResourceNode");
             if (layer < 0)
-                Debug.LogWarning("[ResourceNode] 'ResourceNode' 레이어가 없습니다. " +
+                DebugUtil.LogWarning("[ResourceNode] 'ResourceNode' 레이어가 없습니다. " +
                                  "Project Settings → Tags & Layers 에서 추가하세요.");
             else
                 gameObject.layer = layer;
@@ -67,7 +74,7 @@ namespace MonsterKitchen.Dungeon
                         ? AssetLoadManager.Instance?.Load<Sprite>(m_Data.NodeSpriteAddress)
                         : null;
                     sr.sprite = loadedSprite != null ? loadedSprite : GetPlaceholder();
-                    sr.color  = m_Data.NodeTint;
+                    sr.color  = m_NodeTint;
                 }
             }
         }
@@ -76,7 +83,7 @@ namespace MonsterKitchen.Dungeon
         {
             if (m_Data == null)
             {
-                Debug.LogWarning($"[ResourceNode] {name}: ResourceNodeData 가 연결되지 않았습니다.");
+                DebugUtil.LogWarning($"[ResourceNode] {name}: ResourceNodeData 가 연결되지 않았습니다.");
                 return;
             }
             m_CurrentHp = m_Data.MaxHp;
@@ -121,7 +128,7 @@ namespace MonsterKitchen.Dungeon
 
             if (m_Data.DropIngredientId == 0u)
             {
-                Debug.LogWarning($"[ResourceNode] {name}: dropIngredientId 가 설정되지 않았습니다.");
+                DebugUtil.LogWarning($"[ResourceNode] {name}: dropIngredientId 가 설정되지 않았습니다.");
             }
             else
             {
@@ -132,9 +139,9 @@ namespace MonsterKitchen.Dungeon
 
                 NetworkManager.Instance?.RequestAddIngredient(m_Data.DropIngredientId, count);
 
-                var ingredientData = DataRegistry.Instance?.GetIngredient(m_Data.DropIngredientId);
+                var ingredientData = DataRegistry.Instance?.Ingredients?.Get(m_Data.DropIngredientId);
                 string ingName = ingredientData != null ? ingredientData.DisplayName : m_Data.DropIngredientId.ToString();
-                Debug.Log($"[ResourceNode] '{m_Data.DisplayName}' 채집 완료 → {ingName} ×{count}");
+                DebugUtil.Log($"[ResourceNode] '{m_Data.DisplayName}' 채집 완료 → {ingName} ×{count}");
             }
 
             // 채집 도구 내구도 소모
@@ -207,9 +214,10 @@ namespace MonsterKitchen.Dungeon
         //  프로퍼티
         // ================================================================
 
-        public ResourceNodeData Data      => m_Data;
-        public int              CurrentHp => m_CurrentHp;
-        public bool             Depleted  => m_Depleted;
+        public ResourceNodeData Data       => m_Data;
+        public uint             NodeDataId => m_NodeDataId;
+        public int              CurrentHp  => m_CurrentHp;
+        public bool             Depleted   => m_Depleted;
 
         // ================================================================
         //  플레이스홀더 스프라이트 (스프라이트 미설정 시 사용)

@@ -1,3 +1,4 @@
+using MonsterKitchen.Core;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -91,6 +92,16 @@ namespace MonsterKitchen.Core
         void HandleDashPerformed(InputAction.CallbackContext ctx)    => OnDash?.Invoke();
         void HandleInteractPerformed(InputAction.CallbackContext ctx) => OnInteract?.Invoke();
 
+        // ── 모바일 입력 주입 ──────────────────────────────────────────────
+        // VirtualJoystick / MobileButton 이 InputManager 이벤트를 직접 발화할 때 사용.
+
+        public void InjectMove(Vector2 dir)  => OnMove?.Invoke(dir);
+        public void InjectDash()             => OnDash?.Invoke();
+        public void InjectSkill1()           => OnSkill1?.Invoke();
+        public void InjectSkill2()           => OnSkill2?.Invoke();
+        public void InjectInteract()         => OnInteract?.Invoke();
+        public void InjectUltimate()         => OnUltimate?.Invoke();
+
         // ── UI 토글 등록 / 해제 ─────────────────────────────────────────
 
         public void RegisterUIToggle(string panelId, Key key)
@@ -98,7 +109,7 @@ namespace MonsterKitchen.Core
             if (key == Key.None || string.IsNullOrEmpty(panelId)) return;
 
             if (m_UiToggleMap.TryGetValue(key, out var existing) && existing != panelId)
-                Debug.LogWarning($"[InputManager] Key.{key} 가 '{existing}' 에 이미 등록됨 → '{panelId}' 로 덮어씁니다.");
+                DebugUtil.LogWarning($"[InputManager] Key.{key} 가 '{existing}' 에 이미 등록됨 → '{panelId}' 로 덮어씁니다.");
 
             m_UiToggleMap[key] = panelId;
         }

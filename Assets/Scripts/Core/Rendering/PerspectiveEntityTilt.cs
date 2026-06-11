@@ -52,9 +52,15 @@ namespace MonsterKitchen.Core
 
         public void Apply()
         {
+            float tilt = PerspectiveManager.TiltAngleDeg;
             var e = transform.eulerAngles;
-            e.x = PerspectiveManager.TiltAngleDeg;
+            if (Mathf.Approximately(e.x, tilt)) return;
+            e.x = tilt;
             transform.eulerAngles = e;
+#if UNITY_EDITOR
+            if (!Application.isPlaying)
+                UnityEditor.EditorUtility.SetDirty(this);
+#endif
         }
     }
 }

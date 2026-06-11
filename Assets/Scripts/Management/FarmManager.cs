@@ -40,7 +40,7 @@ namespace MonsterKitchen.Management
 
         void PrintStatus()
         {
-            Debug.Log($"[FarmManager] 수확가능:{ReadyCount}  성장중:{PlantedCount}  빈칸:{EmptyCount}");
+            DebugUtil.Log($"[FarmManager] 수확가능:{ReadyCount}  성장중:{PlantedCount}  빈칸:{EmptyCount}");
         }
     }
 }

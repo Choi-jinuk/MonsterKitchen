@@ -1,3 +1,4 @@
+using MonsterKitchen.Core;
 using MonsterKitchen.AI.BehaviorTree;
 using MonsterKitchen.Combat;
 using MonsterKitchen.Data;
@@ -70,7 +71,7 @@ namespace MonsterKitchen.Enemy
             m_Movement = GetComponent<MonsterMovementBase>();
             if (m_Movement != null)
             {
-                m_Movement.Init(m_Rb, anim, this);
+                m_Movement.Init(m_Rb, anim, this, Data != null ? Data.MoveSpeed : 2.5f);
                 m_Movement.InitNavAgent();
                 m_Movement.OnSpawned();
             }
@@ -92,17 +93,19 @@ namespace MonsterKitchen.Enemy
 
             if (groups != null && groups.Length > 0)
             {
-                float maxSearch = 0f;
-                float minSearch = float.MaxValue;
+                float maxSearch   = 0f;
+                float minAttack   = float.MaxValue;
                 foreach (var g in groups)
                 {
                     var s = g?.GetStep(0);
                     if (s == null) continue;
-                    if (s.SearchRange > maxSearch) maxSearch = s.SearchRange;
-                    if (s.SearchRange < minSearch) minSearch = s.SearchRange;
+                    if (s.SearchRange  > maxSearch) maxSearch = s.SearchRange;
+                    if (s.AttackRange  < minAttack) minAttack = s.AttackRange;
                 }
+                // DetectRange: 탐지 범위 (SearchRange 기반)
                 detectRange   = maxSearch + m_DetectRangeBonus;
-                preferredDist = minSearch == float.MaxValue ? 1f : minSearch;
+                // PreferredDistance: Chase 목표 거리 = AttackRange 이내로 접근
+                preferredDist = minAttack == float.MaxValue ? 1f : minAttack;
             }
 
             bb.Set("DetectRange",       detectRange);
@@ -123,7 +126,6 @@ namespace MonsterKitchen.Enemy
             var col = GetComponent<Collider2D>();
             if (col != null) col.enabled = false;
 
-            MonsterRespawnManager.Instance?.NotifyDeath(this);
             Destroy(gameObject, 1.5f);
         }
 
@@ -166,14 +168,14 @@ namespace MonsterKitchen.Enemy
         {
             if (string.IsNullOrEmpty(skill.ProjectilePrefabAddress))
             {
-                Debug.LogError($"[BTMonsterController] {name}: SkillData({skill.SkillId}).projectilePrefabAddress 가 비어있습니다.", this);
+                DebugUtil.LogError($"[BTMonsterController] {name}: SkillData({skill.SkillId}).projectilePrefabAddress 가 비어있습니다.", this);
                 return;
             }
 
             var prefab = MonsterKitchen.Core.AssetLoadManager.Instance?.Load<GameObject>(skill.ProjectilePrefabAddress);
             if (prefab == null)
             {
-                Debug.LogError($"[BTMonsterController] {name}: 투사체 프리팹 로드 실패 — 키: {skill.ProjectilePrefabAddress}", this);
+                DebugUtil.LogError($"[BTMonsterController] {name}: 투사체 프리팹 로드 실패 — 키: {skill.ProjectilePrefabAddress}", this);
                 return;
             }
 

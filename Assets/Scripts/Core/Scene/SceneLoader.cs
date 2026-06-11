@@ -1,3 +1,4 @@
+using MonsterKitchen.Core;
 using System;
 using System.Collections;
 using UnityEngine;
@@ -22,10 +23,12 @@ namespace MonsterKitchen.Core
 
         readonly MonoBehaviour m_Runner;
 
-        public bool IsLoading { get; private set; }
+        public bool  IsLoading      { get; private set; }
+        public float LoadingProgress { get; private set; }   // 0~1, 타겟씬 비동기 진행률
 
         public event Action<string> OnSceneLoadStarted;
         public event Action<string> OnSceneLoadFinished;
+        public event Action<float>  OnProgressChanged;        // LoadingProgress 갱신 시
 
         public SceneLoader(MonoBehaviour runner) => m_Runner = runner;
 
@@ -39,7 +42,8 @@ namespace MonsterKitchen.Core
 
         IEnumerator LoadAsync(string sceneName)
         {
-            IsLoading = true;
+            IsLoading      = true;
+            LoadingProgress = 0f;
             OnSceneLoadStarted?.Invoke(sceneName);
 
             // SceneFader 보장
@@ -50,6 +54,7 @@ namespace MonsterKitchen.Core
                 yield return m_Runner.StartCoroutine(SceneFader.Instance.FadeOut(0.3f));
 
             // ── 2. 로딩씬 경유 (현재 씬 언로드 → 메모리 해제) ───────────
+            bool usedLoadingScene = false;
             if (LoadingSceneExists())
             {
                 var loadOp = SceneManager.LoadSceneAsync(LOADING_SCENE);
@@ -62,6 +67,12 @@ namespace MonsterKitchen.Core
                     System.GC.Collect();
                     yield return null;
                     yield return null;
+
+                    // 로딩씬 텍스트 노출 — FadeIn 으로 검정 해제
+                    if (SceneFader.Instance != null)
+                        yield return m_Runner.StartCoroutine(SceneFader.Instance.FadeIn(0.2f));
+
+                    usedLoadingScene = true;
                 }
             }
 
@@ -69,7 +80,7 @@ namespace MonsterKitchen.Core
             var op = SceneManager.LoadSceneAsync(sceneName);
             if (op == null)
             {
-                Debug.LogError(
+                DebugUtil.LogError(
                     $"[SceneLoader] 씬 '{sceneName}' 로드 실패. " +
                     "Build Settings 에 씬이 추가됐는지 확인하세요.");
                 IsLoading = false;
@@ -83,14 +94,26 @@ namespace MonsterKitchen.Core
             op.allowSceneActivation = false;
 
             while (op.progress < 0.9f)
+            {
+                // progress: 0 ~ 0.9 → normalize to 0 ~ 1
+                LoadingProgress = Mathf.Clamp01(op.progress / 0.9f);
+                OnProgressChanged?.Invoke(LoadingProgress);
                 yield return null;
+            }
+            LoadingProgress = 1f;
+            OnProgressChanged?.Invoke(1f);
+            yield return null;   // 1프레임 대기 — 바 100% 시각 확인
 
-            // ── 4. 씬 활성화 (Awake → Start 실행) ───────────────────────
+            // ── 4. 타겟씬 활성화 전 페이드 아웃 (로딩씬 가리기) ─────────
+            if (usedLoadingScene && SceneFader.Instance != null)
+                yield return m_Runner.StartCoroutine(SceneFader.Instance.FadeOut(0.2f));
+
+            // ── 5. 씬 활성화 (Awake → Start 실행) ───────────────────────
             op.allowSceneActivation = true;
             while (!op.isDone)
                 yield return null;
 
-            // ── 5. 페이드 인 ─────────────────────────────────────────────
+            // ── 6. 페이드 인 ─────────────────────────────────────────────
             if (SceneFader.Instance != null)
                 yield return m_Runner.StartCoroutine(SceneFader.Instance.FadeIn(0.3f));
 

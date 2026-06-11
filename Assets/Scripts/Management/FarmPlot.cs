@@ -55,21 +55,21 @@ namespace MonsterKitchen.Management
             if (IsPlanted || m_CropIngredientId == 0u || DayManager.Instance == null) return false;
             m_PlantedDay = DayManager.Instance.CurrentDay;
             UpdateVisual();
-            var data = DataRegistry.Instance?.GetIngredient(m_CropIngredientId);
-            Debug.Log($"[FarmPlot] {(data != null ? data.DisplayName : m_CropIngredientId.ToString())} 심기 (Day {m_PlantedDay}, {m_GrowDays}일 후 수확)");
+            var data = DataRegistry.Instance?.Ingredients?.Get(m_CropIngredientId);
+            DebugUtil.Log($"[FarmPlot] {(data != null ? data.DisplayName : m_CropIngredientId.ToString())} 심기 (Day {m_PlantedDay}, {m_GrowDays}일 후 수확)");
             return true;
         }
 
         public bool Harvest()
         {
             if (!IsReady) return false;
-            var data = DataRegistry.Instance?.GetIngredient(m_CropIngredientId);
+            var data = DataRegistry.Instance?.Ingredients?.Get(m_CropIngredientId);
             string cropName = data != null ? data.DisplayName : m_CropIngredientId.ToString();
             m_PlantedDay = -1;
             if (m_CropIngredientId != 0u)
                 NetworkManager.Instance?.RequestAddIngredient(m_CropIngredientId, m_YieldAmount);
             UpdateVisual();
-            Debug.Log($"[FarmPlot] {cropName} x{m_YieldAmount} 수확!");
+            DebugUtil.Log($"[FarmPlot] {cropName} x{m_YieldAmount} 수확!");
             return true;
         }
 
@@ -83,8 +83,8 @@ namespace MonsterKitchen.Management
                 Plant();
             else
             {
-                var data = DataRegistry.Instance?.GetIngredient(m_CropIngredientId);
-                Debug.Log($"[FarmPlot] {(data != null ? data.DisplayName : m_CropIngredientId.ToString())} 성장 중 (남은 {DaysRemaining}일)");
+                var data = DataRegistry.Instance?.Ingredients?.Get(m_CropIngredientId);
+                DebugUtil.Log($"[FarmPlot] {(data != null ? data.DisplayName : m_CropIngredientId.ToString())} 성장 중 (남은 {DaysRemaining}일)");
             }
         }
 

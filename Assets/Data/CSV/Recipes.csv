@@ -3,10 +3,11 @@
 ; ingredients: "uint재료ID:수량|uint재료ID:수량" 형식 (파이프 구분)
 ; resultFoodId: uint (FOOD uint)
 ; isUnlockedByDefault: true/false
+; nameKey/descKey: 비워두면 _key + _NAME/_DESC 로 자동 생성 (StringData 참조)
 #TYPE,string,uint,string,string,string,uint,int,int,bool
-_key,Id,DisplayName,Description,Ingredients,ResultFoodId,CookTimeSeconds,UnlockDay,IsUnlockedByDefault
-RCP_001,4001,슬라임 젤리 디저트 레시피,슬라임 젤리 2개를 틀에 굳혀 완성하는 기본 디저트.,2001:2,3001,10,0,true
-RCP_002,4002,매콤 슬라임 볶음 레시피,불꽃 슬라임 코어 1개와 슬라임 젤리 1개를 볶는다.,2002:1|2001:1,3002,15,0,true
-RCP_003,4003,고블린 뼈 육수 레시피,고블린 뼈 3개를 오래 끓여 육수를 낸다.,2003:3,3003,20,1,false
-RCP_004,4004,버섯 갓 구이 레시피,버섯인간 갓 2개를 팬에 굽는다.,2005:2,3004,12,1,false
-RCP_005,4005,그린 웜 스테이크 레시피,그린 웜 고기 1개를 두껍게 썰어 굽는 고급 레시피.,2007:1,3005,30,3,false
+_key,Id,NameKey,DescKey,Ingredients,ResultFoodId,CookTimeSeconds,UnlockDay,IsUnlockedByDefault
+RCP_001,4001,,,2001:2,3001,10,0,true
+RCP_002,4002,,,2002:1|2001:1,3002,15,0,true
+RCP_003,4003,,,2003:3,3003,20,1,false
+RCP_004,4004,,,2005:2,3004,12,1,false
+RCP_005,4005,,,2007:1,3005,30,3,false

@@ -1,0 +1,11 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" editor-extension-mode="False">
+    <Style src="project://database/Assets/UI/DungeonBagPanel.uss"/>
+    <ui:VisualElement name="bag-overlay" class="bag-overlay">
+        <ui:VisualElement name="bag-panel" class="bag-panel">
+            <ui:Label name="bag-title" text="던전 가방" class="bag-title"/>
+            <ui:Label name="bag-weight-text" text="무게: 0/10" class="bag-weight-text"/>
+            <ui:ScrollView name="bag-item-list" class="bag-item-list"/>
+            <ui:Button name="bag-close-btn" text="닫기 [B]" class="bag-close-btn"/>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

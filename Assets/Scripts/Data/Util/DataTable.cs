@@ -12,8 +12,15 @@ namespace MonsterKitchen.Data
     /// 새 데이터 타입을 추가할 때 TableData 에 DataTable&lt;NewData&gt; 필드 하나만
     /// 추가하면 되고, 별도 Get/All 메서드는 작성할 필요가 없다.
     /// </summary>
+    /// <summary>비제네릭 base — RuntimeSetData 일괄 호출용.</summary>
     [Serializable]
-    public class DataTable<T> where T : class
+    public abstract class DataTableBase
+    {
+        public virtual void RuntimeSetData() { }
+    }
+
+    [Serializable]
+    public class DataTable<T> : DataTableBase where T : class
     {
         [SerializeField] SerializedDictionary<uint, T> m_Dict = new();
 

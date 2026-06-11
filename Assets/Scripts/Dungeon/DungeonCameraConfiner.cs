@@ -1,3 +1,4 @@
+using MonsterKitchen.Core;
 using Unity.Cinemachine;
 using UnityEngine;
 using UnityEngine.Tilemaps;
@@ -75,7 +76,7 @@ namespace MonsterKitchen.Dungeon
 
             m_Confiner.InvalidateBoundingShapeCache();
 
-            Debug.Log($"[DungeonCameraConfiner] 경계 빌드 완료: " +
+            DebugUtil.Log($"[DungeonCameraConfiner] 경계 빌드 완료: " +
                       $"({min.x:F1},{min.y:F1}) ~ ({max.x:F1},{max.y:F1})  pad={pad:F1}");
         }
     }

@@ -8,14 +8,19 @@ namespace MonsterKitchen.Navigation
     //
     //  ▶ NavGrid.Instance 를 사용하므로 씬에 NavGrid 가 있어야 동작한다.
     //  ▶ 8방향 이동, 대각선 코너컷팅 방지.
-    //  ▶ LOS(시야선) 최적화: 출발점과 도착점이 직통이면 2점 경로 반환.
-    //  ▶ 경로 스무딩: 불필요한 중간 경유지를 제거해 자연스러운 이동선 생성.
-    //  ▶ FindPath 반환값: 월드 좌표 Vector2[] (null = 경로 없음 또는 맵 없음)
+    //  ▶ LOS 최적화: 출발~도착 직통이면 2점 경로 즉시 반환.
+    //  ▶ 경로 스무딩: 불필요한 중간 경유지 제거.
+    //  ▶ FindPath 반환값: 월드 좌표 Vector2[] (null = 경로 없음/맵 없음)
+    //
+    //  최적화 포인트
+    //    · Node[,] 정적 캐시 — FindPath 호출마다 배열 할당 없음.
+    //    · 세대 ID(SearchGen) — 노드 상태 초기화를 O(w×h) → O(1)/노드 로 절감.
+    //    · Node 객체 재사용 — 초기 방문 후 GC 없음.
     // ====================================================================
 
     public static class NavPathfinder
     {
-        // 8방향 오프셋
+        // ── 8방향 오프셋 ─────────────────────────────────────────────────
         static readonly Vector2Int[] s_Dirs = {
             new Vector2Int( 0,  1), new Vector2Int( 0, -1),
             new Vector2Int(-1,  0), new Vector2Int( 1,  0),
@@ -23,17 +28,21 @@ namespace MonsterKitchen.Navigation
             new Vector2Int(-1, -1), new Vector2Int( 1, -1),
         };
 
-        const float SQRT_TWO = 1.41421356f;
+        const float Sqrt2 = 1.41421356f;
+
+        // ── 노드 풀 (정적 캐시) ─────────────────────────────────────────
+        static Node[,] s_Pool;
+        static int     s_SearchGen;  // 검색마다 증가 — 노드 상태를 O(1)로 무효화
 
         // ── A* 노드 ─────────────────────────────────────────────────────
-
         sealed class Node
         {
-            public int x, y;
-            public float g = float.MaxValue;
+            public int   x, y;
+            public float g;
             public float h;
-            public Node parent;
-            public bool InOpen;
+            public Node  parent;
+            public bool  InOpen;
+            public int   SearchGen;   // s_SearchGen 과 다르면 미방문
             public float F => g + h;
         }
 
@@ -53,56 +62,51 @@ namespace MonsterKitchen.Navigation
             if (!grid.WorldToGrid(start, out int sx, out int sy)) return null;
             if (!grid.WorldToGrid(end,   out int ex, out int ey)) return null;
 
-            // 출발 == 도착
-            if (sx == ex && sy == ey)
-                return new[] { start, end };
+            if (sx == ex && sy == ey) return new[] { start, end };
 
-            // 직통 시야선이면 2점 경로로 즉시 반환
-            if (HasLOSGrid(grid, sx, sy, ex, ey))
-                return new[] { start, end };
+            if (HasLOSGrid(grid, sx, sy, ex, ey)) return new[] { start, end };
 
             var path = RunAStar(grid, sx, sy, ex, ey);
-            if (path == null) return null;
-
-            return SmoothPath(grid, path);
+            return path == null ? null : SmoothPath(grid, path);
         }
 
         // ================================================================
-        //  A* 내부 구현
+        //  A* 내부
         // ================================================================
 
         static Vector2[] RunAStar(NavGrid grid, int sx, int sy, int ex, int ey)
         {
             int w = grid.Width, h = grid.Height;
-            var nodes = new Node[w, h];
 
-            // 오픈 리스트 — PooledList 로 ArrayPool 재사용.
-            // using var 로 감싸 어떤 반환 경로에서도 Dispose 보장 (우려 1).
+            // ── 노드 풀 준비 ─────────────────────────────────────────────
+            // 그리드 크기가 달라졌을 때만 재할당.
+            // 세대 ID 증가로 이전 검색 결과를 O(1) 무효화.
+            s_SearchGen++;
+            if (s_Pool == null || s_Pool.GetLength(0) < w || s_Pool.GetLength(1) < h)
+                s_Pool = new Node[w, h];
+
             using var open = new PooledList<Node>(64);
 
-            var start = GetNode(nodes, sx, sy);
-            start.g = 0;
+            var start = GetNode(w: w, x: sx, y: sy);
+            start.g = 0f;
             start.h = Heuristic(sx, sy, ex, ey);
             start.InOpen = true;
             open.Add(start);
 
             while (open.Count > 0)
             {
-                // f 값이 가장 낮은 노드 선택
-                int bestIdx = 0;
-                float bestF = open[0].F;
+                // 최소 F 노드 선택 (swap-and-pop)
+                int best = 0;
                 for (int i = 1; i < open.Count; i++)
-                {
-                    if (open[i].F < bestF) { bestF = open[i].F; bestIdx = i; }
-                }
+                    if (open[i].F < open[best].F) best = i;
 
-                var cur = open[bestIdx];
-                open[bestIdx] = open[open.Count - 1]; // swap-and-pop
+                var cur = open[best];
+                open[best] = open[open.Count - 1];
                 open.RemoveAt(open.Count - 1);
                 cur.InOpen = false;
 
                 if (cur.x == ex && cur.y == ey)
-                    return RetracePath(grid, cur); // open.Dispose() 는 return 후 자동 호출
+                    return RetracePath(grid, cur);
 
                 foreach (var dir in s_Dirs)
                 {
@@ -111,20 +115,17 @@ namespace MonsterKitchen.Navigation
 
                     if (!grid.IsWalkableGrid(nx, ny)) continue;
 
-                    // 대각선 이동 시 양 옆이 막혀 있으면 코너컷팅 방지
                     bool diag = dir.x != 0 && dir.y != 0;
                     if (diag && (!grid.IsWalkableGrid(cur.x + dir.x, cur.y)
                               || !grid.IsWalkableGrid(cur.x, cur.y + dir.y)))
                         continue;
 
-                    float moveCost = diag ? SQRT_TWO : 1f;
-                    float newG = cur.g + moveCost;
-
-                    var nbr = GetNode(nodes, nx, ny);
+                    float newG = cur.g + (diag ? Sqrt2 : 1f);
+                    var   nbr  = GetNode(w, nx, ny);
                     if (newG >= nbr.g) continue;
 
-                    nbr.g = newG;
-                    nbr.h = Heuristic(nx, ny, ex, ey);
+                    nbr.g      = newG;
+                    nbr.h      = Heuristic(nx, ny, ex, ey);
                     nbr.parent = cur;
 
                     if (!nbr.InOpen)
@@ -135,40 +136,54 @@ namespace MonsterKitchen.Navigation
                 }
             }
 
-            return null; // 경로 없음 — using var open 이 Dispose 처리
+            return null;
         }
 
-        static Node GetNode(Node[,] nodes, int x, int y)
+        // ── 노드 풀 접근 ─────────────────────────────────────────────────
+        static Node GetNode(int w, int x, int y)
         {
-            if (nodes[x, y] == null)
-                nodes[x, y] = new Node { x = x, y = y };
-            return nodes[x, y];
+            var n = s_Pool[x, y];
+            if (n == null)
+            {
+                n = new Node { x = x, y = y };
+                s_Pool[x, y] = n;
+            }
+
+            // 현재 검색 세대와 다르면 상태 초기화
+            if (n.SearchGen != s_SearchGen)
+            {
+                n.g         = float.MaxValue;
+                n.h         = 0f;
+                n.parent    = null;
+                n.InOpen    = false;
+                n.SearchGen = s_SearchGen;
+            }
+
+            return n;
         }
 
         static Vector2[] RetracePath(NavGrid grid, Node end)
         {
-            // using var: Dispose 보장 (우려 1).
-            // ToArray() 는 using 블록 안에서 호출 — 배열 복사 후 Dispose (우려 2).
             using var pts = new PooledList<Vector2>();
             for (var n = end; n != null; n = n.parent)
                 pts.Add(grid.GridToWorld(n.x, n.y));
             pts.Reverse();
-            return pts.ToArray(); // 복사 완료 → using 블록 종료 시 내부 배열 반환
+            return pts.ToArray();
         }
 
         // ================================================================
-        //  Heuristic — Octile Distance (8방향 최적 휴리스틱)
+        //  휴리스틱 — Octile Distance (8방향 최적)
         // ================================================================
 
         static float Heuristic(int ax, int ay, int bx, int by)
         {
             int dx = Mathf.Abs(ax - bx);
             int dy = Mathf.Abs(ay - by);
-            return Mathf.Max(dx, dy) + (SQRT_TWO - 1f) * Mathf.Min(dx, dy);
+            return Mathf.Max(dx, dy) + (Sqrt2 - 1f) * Mathf.Min(dx, dy);
         }
 
         // ================================================================
-        //  LOS (Bresenham 직선 순회)
+        //  LOS — Bresenham 직선 순회
         // ================================================================
 
         static bool HasLOSGrid(NavGrid grid, int x0, int y0, int x1, int y1)
@@ -210,7 +225,6 @@ namespace MonsterKitchen.Navigation
 
             while (cur < path.Length - 1)
             {
-                // 현재 점에서 가장 멀리 직통으로 볼 수 있는 점 탐색
                 int furthest = cur + 1;
                 for (int i = path.Length - 1; i > cur + 1; i--)
                 {

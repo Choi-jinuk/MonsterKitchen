@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using MonsterKitchen.Data;
+using MonsterKitchen.Restaurant;
 
 namespace MonsterKitchen.Core
 {
@@ -35,9 +36,12 @@ namespace MonsterKitchen.Core
         public static PlayerDataManager Instance { get; private set; }
 
         // ── 서브 데이터 클래스 ───────────────────────────────────────
-        public PlayerCoinData      Coin      { get; private set; }
-        public PlayerInventoryData Inventory { get; private set; }
-        public PlayerUpgradeData   Upgrades  { get; private set; }
+        public PlayerCoinData           Coin      { get; private set; }
+        public PlayerInventoryData      Inventory { get; private set; }
+        public PlayerUpgradeData        Upgrades  { get; private set; }
+        public PlayerCookingMasteryData Mastery   { get; private set; }
+        public PlayerFameData           Fame      { get; private set; }
+        public DailyMenuData            DailyMenu { get; private set; }
 
         /// <summary>현재 선택된 플레이어 캐릭터 ID. ServerDB 저장/로드 시 사용.</summary>
         public uint SelectedCharId { get; set; } = 9001;
@@ -52,10 +56,14 @@ namespace MonsterKitchen.Core
             Coin      = new PlayerCoinData();
             Inventory = new PlayerInventoryData();
             Upgrades  = new PlayerUpgradeData();
+            Mastery   = new PlayerCookingMasteryData();
+            Fame      = new PlayerFameData();
+            DailyMenu = new DailyMenuData();
 
             Coin.Init();
             Inventory.Init();
             Upgrades.Init();
+            Mastery.Init();
         }
 
         // ================================================================
@@ -86,16 +94,30 @@ namespace MonsterKitchen.Core
         /// <summary>저장 데이터 복원 시 ServerDBManager 가 호출한다.</summary>
         public void LoadFrom(ServerSaveData save)
         {
-            if (save == null) return;
+            if (save == null)
+            {
+                DebugUtil.Log("[PlayerDataManager] save == null → 새 게임으로 초기화.");
+                return;
+            }
 
             SelectedCharId = save.SelectedCharId;
             Coin.SetGold(save.Gold);
             Upgrades.LoadLevels(
                 save.ToolDamageLevel, save.ToolRangeLevel, save.ToolCooldownLevel,
-                save.ShopSeatLevel,   save.ShopTipLevel);
+                save.ShopSeatLevel,   save.ShopTipLevel,   save.BagCapacityLevel);
 
             Inventory.LoadIngredients(FlatEntries(save.Ingredients));
             Inventory.LoadFoods(FlatEntries(save.Foods));
+
+            if (save.RecipeCookCounts != null)
+            {
+                var dict = new Dictionary<uint, int>();
+                foreach (var e in save.RecipeCookCounts)
+                    dict[e.RecipeId] = e.Count;
+                Mastery.LoadCounts(dict);
+            }
+
+            Fame.Load(save.TotalFame);
         }
 
         // ── 내부 헬퍼 ────────────────────────────────────────────────

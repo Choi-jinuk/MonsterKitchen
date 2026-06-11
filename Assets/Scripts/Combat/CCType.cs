@@ -11,9 +11,11 @@ namespace MonsterKitchen.Combat
 
     public enum CCType
     {
-        None,
-        Knockback,
-        Stun,
-        PullIn,
+        None      = 0,
+        Knockback = 1,
+        Stun      = 2,
+        PullIn    = 3,
+        Sleep     = 4,   // 수면 — 처치 시 재료 품질 +1
+        Hypnosis  = 5,   // 최면 — 처치 시 재료 품질 +1
     }
 }

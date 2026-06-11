@@ -1,0 +1,66 @@
+.settlement-overlay {
+    flex-grow: 1;
+    background-color: rgba(0, 0, 0, 0.75);
+    align-items: center;
+    justify-content: center;
+}
+
+.settlement-panel {
+    width: 420px;
+    background-color: rgb(22, 18, 14);
+    border-radius: 14px;
+    border-width: 2px;
+    border-color: rgb(100, 80, 50);
+    padding: 28px;
+    flex-direction: column;
+    align-items: stretch;
+}
+
+.settlement-title {
+    font-size: 26px;
+    -unity-font-style: bold;
+    color: rgb(255, 220, 100);
+    -unity-text-align: middle-center;
+    margin-bottom: 4px;
+}
+
+.settlement-day {
+    font-size: 16px;
+    color: rgb(180, 160, 110);
+    -unity-text-align: middle-center;
+    margin-bottom: 14px;
+}
+
+.settlement-divider {
+    height: 1px;
+    background-color: rgb(70, 55, 35);
+    margin-top: 8px;
+    margin-bottom: 8px;
+}
+
+.settlement-row {
+    font-size: 16px;
+    color: rgb(220, 200, 160);
+    margin-top: 6px;
+    padding-left: 8px;
+}
+
+.settlement-fame {
+    color: rgb(120, 200, 255);
+    -unity-font-style: bold;
+}
+
+.settlement-next-btn {
+    margin-top: 20px;
+    height: 46px;
+    font-size: 18px;
+    -unity-font-style: bold;
+    color: rgb(30, 20, 10);
+    background-color: rgb(220, 170, 60);
+    border-radius: 8px;
+    border-width: 0;
+}
+
+.settlement-next-btn:hover {
+    background-color: rgb(240, 190, 80);
+}

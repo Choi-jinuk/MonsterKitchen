@@ -1,3 +1,4 @@
+using MonsterKitchen.Core;
 using System;
 using System.Buffers;
 using System.Runtime.CompilerServices;
@@ -116,7 +117,7 @@ namespace MonsterKitchen.Core.Collections
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
                 // 우려 5: 초과 크기 배열 GC 회수를 로그로 확인 (에디터/개발 빌드만)
                 else
-                    Debug.Log($"[PooledList<{typeof(T).Name}>] capacity={m_Array.Length} > {MAX_POOLABLE_CAPACITY}, not returned to pool (GC).");
+                    DebugUtil.Log($"[PooledList<{typeof(T).Name}>] capacity={m_Array.Length} > {MAX_POOLABLE_CAPACITY}, not returned to pool (GC).");
 #endif
                 // 우려 2: 반환된 배열에 대한 참조를 즉시 무효화
                 m_Array = null;

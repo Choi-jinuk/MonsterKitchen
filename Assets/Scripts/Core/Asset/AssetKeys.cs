@@ -27,9 +27,15 @@ namespace MonsterKitchen.Core
     {
         // ── 고정 프리팹 ──────────────────────────────────────────────
         public const string PREFAB_HUD          = "prefab/hud";
+        public const string PREFAB_MOBILE_HUD   = "prefab/mobile_hud";
         public const string PREFAB_PLAYER       = "prefab/player";
         public const string PREFAB_DAMAGE_POPUP = "prefab/damage_popup";
         public const string PREFAB_CUSTOMER     = "prefab/customer";
+
+        // ── VFX 프리팹 ───────────────────────────────────────────────
+        public const string PREFAB_VFX_HIT          = "prefab/vfx/hit";
+        public const string PREFAB_VFX_DEATH         = "prefab/vfx/death";
+        public const string PREFAB_VFX_COOK_COMPLETE = "prefab/vfx/cook_complete";
 
         // ── 고정 데이터 SO ───────────────────────────────────────────
         /// <summary>[사용 중단] PlayerSpawnData SO 키. Players.csv + DataRegistry 로 대체됨.</summary>
@@ -50,5 +56,6 @@ namespace MonsterKitchen.Core
         public static string SkillIcon         (string gid)   => StringUtil.Format("sprite/skill/{0}",       gid);
         public static string ProjectilePrefab  (string sid)   => StringUtil.Format("prefab/projectile/{0}",  sid);
         public static string PlayerCharPrefab  (uint id)      => StringUtil.Format("prefab/player/{0}",      id);
+        public static string UIPanelPrefab     (string pid)   => StringUtil.Format("prefab/ui/{0}",          pid.ToLower());
     }
 }

@@ -348,8 +348,7 @@ MonoBehaviour:
   m_FallbackAttackRange: 0.8
   m_FallbackCooltime: 0.4
   m_AttackMovePenalty: 0.5
-  m_AutoChaseRange: 999
-  m_AutoStopRatio: 0.85
+  m_AutoChaseRange: 10
   m_DashSpeed: 18
   m_DashDuration: 0.18
   m_DashCooldown: 0.9
@@ -421,6 +420,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MonsterKitchen.AI.BehaviorTree.BTRunner
   m_Asset: {fileID: 0}
+  m_TickInterval: 0
 --- !u!1 &6076282370209601616
 GameObject:
   m_ObjectHideFlags: 0

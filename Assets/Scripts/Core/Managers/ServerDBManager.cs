@@ -1,3 +1,4 @@
+using MonsterKitchen.Core;
 using System;
 using System.IO;
 using MonsterKitchen.Data;
@@ -24,7 +25,7 @@ namespace MonsterKitchen.Core
     //    ServerDBManager         — 영속 저장/로드 (이 클래스)    ← 현재
     // ====================================================================
 
-    public class ServerDBManager
+    public class ServerDBManager : IServerDBManager
     {
         public static ServerDBManager Instance { get; private set; }
 
@@ -48,11 +49,11 @@ namespace MonsterKitchen.Core
             try
             {
                 File.WriteAllText(SavePath, json);
-                Debug.Log(StringUtil.Format("[ServerDB] 저장 완료 → {0}", SavePath));
+                DebugUtil.Log(StringUtil.Format("[ServerDB] 저장 완료 → {0}", SavePath));
             }
             catch (Exception e)
             {
-                Debug.LogError(StringUtil.Format("[ServerDB] 저장 실패: {0}", e.Message));
+                DebugUtil.LogError(StringUtil.Format("[ServerDB] 저장 실패: {0}", e.Message));
             }
         }
 
@@ -69,7 +70,7 @@ namespace MonsterKitchen.Core
         {
             if (!File.Exists(SavePath))
             {
-                Debug.Log("[ServerDB] 저장 파일 없음 — 새 게임 시작.");
+                DebugUtil.Log("[ServerDB] 저장 파일 없음 — 새 게임 시작.");
                 return;
             }
 
@@ -82,12 +83,12 @@ namespace MonsterKitchen.Core
                 if (DayManager.Instance != null && save.DayCount > 1)
                     DayManager.Instance.RestoreDay(save.DayCount);
 
-                Debug.Log(StringUtil.Format("[ServerDB] 로드 완료 (v{0}, Day {1}, Gold {2}G)",
+                DebugUtil.Log(StringUtil.Format("[ServerDB] 로드 완료 (v{0}, Day {1}, Gold {2}G)",
                     save.Version, save.DayCount, save.Gold));
             }
             catch (Exception e)
             {
-                Debug.LogError(StringUtil.Format("[ServerDB] 로드 실패 — 새 게임으로 진행합니다. 오류: {0}", e.Message));
+                DebugUtil.LogError(StringUtil.Format("[ServerDB] 로드 실패 — 새 게임으로 진행합니다. 오류: {0}", e.Message));
             }
         }
 
@@ -115,6 +116,7 @@ namespace MonsterKitchen.Core
                 ToolCooldownLevel = upg?.ToolCooldownLevel ?? 0,
                 ShopSeatLevel     = upg?.ShopSeatLevel     ?? 0,
                 ShopTipLevel      = upg?.ShopTipLevel      ?? 0,
+                BagCapacityLevel  = upg?.BagCapacityLevel  ?? 0,
             };
 
             if (inv != null)
@@ -125,6 +127,15 @@ namespace MonsterKitchen.Core
                 foreach (var kv in inv.AllFoods)
                     save.Foods.Add(new FoodEntry { Id = kv.Key, Qty = kv.Value });
             }
+
+            var mastery = pm?.Mastery;
+            if (mastery != null)
+            {
+                foreach (var kv in mastery.CookCounts)
+                    save.RecipeCookCounts.Add(new CookCountEntry { RecipeId = kv.Key, Count = kv.Value });
+            }
+
+            save.TotalFame = pm?.Fame?.Save() ?? 0;
 
             return save;
         }

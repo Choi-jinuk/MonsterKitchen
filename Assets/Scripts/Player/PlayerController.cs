@@ -3,7 +3,7 @@ using MonsterKitchen.Combat;
 using MonsterKitchen.Core;
 using MonsterKitchen.Data;
 using MonsterKitchen.Dungeon;
-using MonsterKitchen.Navigation;
+using MonsterKitchen.Navigation;  // NavAgent (정적 유틸 포함)
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -44,9 +44,7 @@ namespace MonsterKitchen.Player
 
         [Header("Auto AI (던전 전용)")]
         [Tooltip("자동 추적 감지 반경.")]
-        [SerializeField] float m_AutoChaseRange = 999f;
-        [Tooltip("자동 추적 시 공격 범위 앞에서 정지하는 비율 (0~1).")]
-        [SerializeField] float m_AutoStopRatio  = 0.85f;
+        [SerializeField] float m_AutoChaseRange = 10f;
 
         [Header("Dash")]
         [SerializeField] float m_DashSpeed    = 18f;
@@ -84,6 +82,7 @@ namespace MonsterKitchen.Player
         // ── 상태 ──────────────────────────────────────────────────────
         bool m_IsInDungeon;
         bool m_Initialized;
+        bool m_IsDead;
 
         // ── BT 연동 ───────────────────────────────────────────────────
         BTRunner     m_BtRunner;
@@ -109,6 +108,9 @@ namespace MonsterKitchen.Player
         //  공개 프로퍼티 — BT 노드에서 접근
         // ================================================================
 
+        /// <summary>물리 이동 적용 후 발생. 미니맵 도트 갱신 등에 사용.</summary>
+        public event System.Action<Vector3> OnMoved;
+
         public bool             IsInitialized   => m_Initialized;
         public bool             IsDashing        => m_IsDashing;
         public bool             CanAttack        => m_AtkTimer <= 0f;
@@ -121,7 +123,6 @@ namespace MonsterKitchen.Player
         public LayerMask        EnemyLayer       => m_EnemyLayer;
         public bool             IsInDungeon      => m_IsInDungeon;
         public float            AutoChaseRange   => m_AutoChaseRange;
-        public float            AutoStopRatio    => m_AutoStopRatio;
 
         // ================================================================
         //  IBTBlackboardInitializer
@@ -223,12 +224,12 @@ namespace MonsterKitchen.Player
                 if (btAsset != null)
                     m_BtRunner.SetAsset(btAsset);
                 else
-                    Debug.LogWarning(StringUtil.Format("[PlayerController] BT 에셋 로드 실패 — 키: {0}", btKey), this);
+                    DebugUtil.LogWarning(StringUtil.Format("[PlayerController] BT 에셋 로드 실패 — 키: {0}", btKey), this);
             }
 
             m_Initialized = true;
 
-            Debug.Log("[PlayerController] Init 완료 (BT 구동)");
+            DebugUtil.Log("[PlayerController] Init 완료 (BT 구동)");
         }
 
 #if UNITY_EDITOR
@@ -255,7 +256,7 @@ namespace MonsterKitchen.Player
 
         void Update()
         {
-            if (!m_Initialized) return;
+            if (!m_Initialized || m_IsDead) return;
 
             if (m_AtkTimer > 0f)          m_AtkTimer         -= Time.deltaTime;
             if (m_DashCooldownTimer > 0f) m_DashCooldownTimer -= Time.deltaTime;
@@ -274,17 +275,18 @@ namespace MonsterKitchen.Player
 
         void FixedUpdate()
         {
-            if (!m_Initialized || m_IsDashing) return;
+            if (!m_Initialized || m_IsDashing || m_IsDead) return;
 
             float speed = m_Stats != null ? m_Stats.FinalMoveSpeed : 5f;
             if (m_AtkTimer > 0f) speed *= m_AttackMovePenalty;
 
-            // BT 가 설정한 방향을 사용. BT 미초기화(m_Bb == null) 시 폴백.
-            Vector2 effectiveDir = m_Blackboard != null ? m_BtMoveDir : GetEffectiveMoveDir();
+            Vector2 effectiveDir = m_BtMoveDir;
 
             Vector2 targetPos = ComputeNavPosition(effectiveDir, speed, Time.fixedDeltaTime);
             m_CurrentVel = (targetPos - m_Rb.position) / Time.fixedDeltaTime;
             m_Rb.MovePosition(targetPos);
+            if (effectiveDir.sqrMagnitude > 0.01f)
+                OnMoved?.Invoke((Vector3)targetPos);
 
             if (effectiveDir.sqrMagnitude > 0.01f)
                 m_FacingDir = effectiveDir.normalized;
@@ -701,29 +703,14 @@ namespace MonsterKitchen.Player
         }
 
         // ================================================================
-        //  자동 추적 폴백 (BT 미초기화 시)
-        // ================================================================
-
-        Vector2 GetEffectiveMoveDir()
-        {
-            if (m_MoveDir.sqrMagnitude > 0.01f) return m_MoveDir;
-            if (!m_IsInDungeon || m_IsDashing) return Vector2.zero;
-
-            var target = FindNearestEnemy(m_AutoChaseRange);
-            if (target == null) return Vector2.zero;
-
-            float dist     = Vector2.Distance(transform.position, target.position);
-            float stopDist = GetCurrentAttackRange() * m_AutoStopRatio;
-            if (dist <= stopDist) return Vector2.zero;
-
-            return ((Vector2)(target.position - transform.position)).normalized;
-        }
-
-        // ================================================================
         //  씬 전환
         // ================================================================
 
-        void OnSceneLoaded(Scene scene, LoadSceneMode _) => UpdateDungeonState(scene.name);
+        void OnSceneLoaded(Scene scene, LoadSceneMode _)
+        {
+            m_IsDead = false;
+            UpdateDungeonState(scene.name);
+        }
 
         void UpdateDungeonState(string sceneName)
         {
@@ -735,35 +722,8 @@ namespace MonsterKitchen.Player
         //  NavGrid 이동 계산
         // ================================================================
 
-        Vector2 ComputeNavPosition(Vector2 inputDir, float speed, float dt)
-        {
-            Vector2 pos = m_Rb.position;
-            if (inputDir.sqrMagnitude < 0.01f) return pos;
-
-            var     grid    = NavGrid.Instance;
-            Vector2 normDir = inputDir.normalized;
-            float   step    = speed * dt;
-
-            if (grid == null) return pos + normDir * step;
-
-            Vector2 newPos = pos + normDir * step;
-            if (grid.PointIsValid(newPos)) return newPos;
-
-            float angle = Mathf.Atan2(normDir.y, normDir.x) * Mathf.Rad2Deg;
-            if (angle == 0f || angle == 90f || angle == -90f || angle == 180f) return pos;
-
-            float   xStep    = normDir.x * step;
-            bool    canSlideX = grid.PointIsValid(new Vector2(pos.x + xStep, pos.y));
-            Vector2 altDir;
-
-            if (canSlideX)
-                altDir = (angle > 90f || angle < -90f) ? Vector2.left : Vector2.right;
-            else
-                altDir = angle > 0f ? Vector2.up : Vector2.down;
-
-            Vector2 altPos = pos + altDir * step;
-            return grid.PointIsValid(altPos) ? altPos : pos;
-        }
+        Vector2 ComputeNavPosition(Vector2 inputDir, float speed, float dt) =>
+            NavAgent.ComputeStep(m_Rb.position, inputDir, speed, dt);
 
         // ================================================================
         //  대시
@@ -781,8 +741,7 @@ namespace MonsterKitchen.Player
             while (elapsed < m_DashDuration)
             {
                 Vector2 nextPos = m_Rb.position + dir * m_DashSpeed * Time.fixedDeltaTime;
-                var grid = NavGrid.Instance;
-                if (grid != null && !grid.PointIsValid(nextPos)) break;
+                if (!NavAgent.IsValid(nextPos)) break;
                 m_Rb.MovePosition(nextPos);
                 elapsed += Time.fixedDeltaTime;
                 yield return s_WaitFixed;
@@ -800,11 +759,37 @@ namespace MonsterKitchen.Player
         // ================================================================
 
         void OnPlayerDamaged(int amount, AttributeType attr) =>
-            Debug.Log(StringUtil.Format("[PlayerController] 피격 -{0}  속성:{1}  HP:{2}/{3}",
+            DebugUtil.Log(StringUtil.Format("[PlayerController] 피격 -{0}  속성:{1}  HP:{2}/{3}",
                 amount, attr, m_Health?.CurrentHp, m_Health?.MaxHp));
 
-        void OnPlayerDied(AttributeType killAttr) =>
-            Debug.Log(StringUtil.Format("[PlayerController] 사망  막타속성:{0}", killAttr));
+        void OnPlayerDied(AttributeType killAttr)
+        {
+            DebugUtil.Log(StringUtil.Format("[PlayerController] 사망  막타속성:{0}", killAttr));
+
+            if (m_IsInDungeon)
+                StartCoroutine(DungeonDeathCoroutine());
+        }
+
+        System.Collections.IEnumerator DungeonDeathCoroutine()
+        {
+            m_IsDead = true;
+
+            // 물리 정지
+            if (m_Rb != null)
+                m_Rb.linearVelocity = Vector2.zero;
+
+            // 사망 연출 대기 (1.5초)
+            yield return new WaitForSeconds(1.5f);
+
+            // 가방 재료 전부 소실
+            DungeonBag.Current?.ClearAll();
+
+            // 다음 던전을 위해 체력 완전 회복 (Revive: 사망 상태에서도 작동)
+            m_Health?.Revive();
+
+            DebugUtil.Log("[PlayerController] 던전 사망 → ManagementScene 복귀");
+            SceneLoader.Instance?.LoadScene("ManagementScene");
+        }
 
         void OnWeaponChanged(Data.WeaponData weapon) => m_WeaponSocket?.SetWeapon(weapon);
 

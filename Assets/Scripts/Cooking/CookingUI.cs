@@ -21,41 +21,34 @@ namespace MonsterKitchen.Cooking
         const int MAX_SLOTS = 3;
 
         // ── 슬롯 상태 ────────────────────────────────────────────────
-        readonly List<uint>         m_SlotIds  = new();   // 현재 슬롯 재료 ID
-        CookingStation              m_Station;
-        RecipeData                  m_Matched;
+        readonly List<uint> m_SlotIds = new();
+        CookingStation      m_Station;
+        RecipeData          m_Matched;
+        FoodGrade           m_CurrentGrade;
 
         // ── UXML 요소 참조 ───────────────────────────────────────────
-        VisualElement[]   m_SlotElements;     // cook-slot-0~2
-        VisualElement[]   m_SlotIcons;        // cook-slot-icon-0~2
-        Label[]           m_SlotNames;        // cook-slot-name-0~2
+        VisualElement[]   m_SlotElements;
+        VisualElement[]   m_SlotIcons;
+        Label[]           m_SlotNames;
         VisualElement     m_InvGrid;
         Label             m_RecipeLabel;
         Label             m_CookBtn;
 
-        // ── Unity 생명주기 ────────────────────────────────────────────
+        // ── UIPanel 훅 ────────────────────────────────────────────────
 
-        protected override void Awake()
+        protected override void OnFirstOpen()
         {
-            base.Awake();
-        }
-
-        protected override void Start()
-        {
-            base.Start(); // UIManager.Register
-
-            // 슬롯 요소 캐싱
+            // UXML 요소 캐싱 (첫 열기 시 1회)
             m_SlotElements = new VisualElement[MAX_SLOTS];
             m_SlotIcons    = new VisualElement[MAX_SLOTS];
             m_SlotNames    = new Label[MAX_SLOTS];
             for (int i = 0; i < MAX_SLOTS; i++)
             {
-                int idx = i; // 클로저 캡처
+                int idx = i;
                 m_SlotElements[i] = Root?.Q<VisualElement>($"cook-slot-{i}");
                 m_SlotIcons[i]    = Root?.Q<VisualElement>($"cook-slot-icon-{i}");
                 m_SlotNames[i]    = Root?.Q<Label>($"cook-slot-name-{i}");
 
-                // 슬롯 클릭 → 재료 제거
                 m_SlotElements[i]?.RegisterCallback<ClickEvent>(_ => RemoveSlot(idx));
             }
 
@@ -63,11 +56,9 @@ namespace MonsterKitchen.Cooking
             m_RecipeLabel = Root?.Q<Label>("cook-recipe-label");
             m_CookBtn     = Root?.Q<Label>("cook-btn");
 
-            // ✕ 버튼
             Root?.Q<Label>("cook-close-btn")
                 ?.RegisterCallback<ClickEvent>(_ => UIManager.Instance?.Close(PanelId));
 
-            // 오버레이 클릭 닫기
             Root?.Q<VisualElement>("cook-overlay")
                 ?.RegisterCallback<ClickEvent>(evt =>
                 {
@@ -75,17 +66,13 @@ namespace MonsterKitchen.Cooking
                         UIManager.Instance?.Close(PanelId);
                 });
 
-            // 요리 버튼 클릭
             m_CookBtn?.RegisterCallback<ClickEvent>(_ => TryCook());
-
-            // 인벤토리 변경 → 열려 있을 때만 갱신
-            if (PlayerDataManager.Instance?.Inventory != null)
-                PlayerDataManager.Instance.Inventory.OnIngredientChanged += (_, _) => { if (IsOpen) BuildInventoryGrid(); };
+            if (m_CookBtn != null) m_CookBtn.text = LocaleManager.Get("UI_COOKING_START");
         }
 
         // ── 외부 진입점 ──────────────────────────────────────────────
 
-        /// <summary>CookingStation에서 호출. 스테이션 참조를 저장하고 패널을 연다.</summary>
+        /// <summary>CookingStation에서 호출. 스테이션 참조 저장 후 패널 열기.</summary>
         public void OpenFor(CookingStation station)
         {
             m_Station = station;
@@ -97,14 +84,30 @@ namespace MonsterKitchen.Cooking
         public override void OnOpen()
         {
             m_SlotIds.Clear();
-            base.OnOpen();
+            base.OnOpen(); // OnFirstOpen 포함
+            if (PlayerDataManager.Instance?.Inventory != null)
+                PlayerDataManager.Instance.Inventory.OnIngredientChanged += HandleIngredientChanged;
             RefreshAll();
         }
 
         public override void OnClose()
         {
+            if (PlayerDataManager.Instance?.Inventory != null)
+                PlayerDataManager.Instance.Inventory.OnIngredientChanged -= HandleIngredientChanged;
             m_Station = null;
             base.OnClose();
+        }
+
+        void HandleIngredientChanged(uint id, int qty) => BuildInventoryGrid();
+
+        // ── 로컬라이제이션 ──────────────────────────────────────────────
+
+        protected override void RefreshLocale()
+        {
+            base.RefreshLocale(); // LocalizedLabel 자동 갱신
+            if (m_CookBtn != null) m_CookBtn.text = LocaleManager.Get("UI_COOKING_START");
+            RefreshSlotDisplay();
+            RefreshRecipeMatch();
         }
 
         // ── UI 갱신 ──────────────────────────────────────────────────
@@ -124,7 +127,7 @@ namespace MonsterKitchen.Cooking
             var all = PlayerDataManager.Instance?.Inventory.AllIngredients;
             if (all == null || all.Count == 0)
             {
-                m_InvGrid.Add(EmptyMsg("재료가 없습니다."));
+                m_InvGrid.Add(EmptyMsg(LocaleManager.Get("UI_COOKING_NO_INGREDIENTS")));
                 return;
             }
 
@@ -133,10 +136,9 @@ namespace MonsterKitchen.Cooking
             foreach (var kv in all)
             {
                 if (kv.Value <= 0) continue;
-                var d      = registry?.GetIngredient(kv.Key);
+                var d      = registry?.Ingredients?.Get(kv.Key);
                 var sprite = loader?.Load<Sprite>(d?.SpriteAddress);
-                var wrap   = BuildInvSlot(sprite, kv.Value.ToString(), d?.DisplayName ?? kv.Key.ToString(), kv.Key);
-                m_InvGrid.Add(wrap);
+                m_InvGrid.Add(BuildInvSlot(sprite, kv.Value.ToString(), d?.DisplayName ?? kv.Key.ToString(), kv.Key));
             }
         }
 
@@ -157,7 +159,6 @@ namespace MonsterKitchen.Cooking
             countLbl.AddToClassList("cook-inv-slot-count");
             slot.Add(countLbl);
 
-            // 클릭 → 슬롯에 추가
             slot.RegisterCallback<ClickEvent>(_ => AddIngredientToSlot(ingredientId));
 
             var nameLbl = new Label(name);
@@ -173,9 +174,9 @@ namespace MonsterKitchen.Cooking
             for (int i = 0; i < MAX_SLOTS; i++)
             {
                 bool filled = i < m_SlotIds.Count;
-                var se = m_SlotElements[i];
-                var si = m_SlotIcons[i];
-                var sn = m_SlotNames[i];
+                var se = m_SlotElements?[i];
+                var si = m_SlotIcons?[i];
+                var sn = m_SlotNames?[i];
 
                 if (se == null) continue;
 
@@ -185,7 +186,7 @@ namespace MonsterKitchen.Cooking
                 if (filled)
                 {
                     uint id    = m_SlotIds[i];
-                    var d      = DataRegistry.Instance?.GetIngredient(id);
+                    var d      = DataRegistry.Instance?.Ingredients?.Get(id);
                     var sprite = AssetLoadManager.Instance?.Load<Sprite>(d?.SpriteAddress);
 
                     if (si != null)
@@ -199,7 +200,7 @@ namespace MonsterKitchen.Cooking
                 else
                 {
                     if (si != null) si.style.backgroundImage = StyleKeyword.None;
-                    if (sn != null) sn.text = "비어 있음";
+                    if (sn != null) sn.text = LocaleManager.Get("UI_COOKING_SLOT_EMPTY");
                     se.AddToClassList("cook-slot-empty");
                 }
             }
@@ -209,24 +210,32 @@ namespace MonsterKitchen.Cooking
         {
             if (m_RecipeLabel == null || m_CookBtn == null) return;
 
-            m_Matched = (m_SlotIds.Count > 0)
-                ? RecipeMatcher.FindSlotMatch(DataRegistry.Instance?.AllRecipes, m_SlotIds)
+            var all = DataRegistry.Instance?.Recipes?.All;
+            if (all == null && m_SlotIds.Count > 0) return;
+
+            m_Matched = m_SlotIds.Count > 0
+                ? RecipeMatcher.FindSlotMatch(all, m_SlotIds)
                 : null;
 
             if (m_Matched != null)
             {
-                m_RecipeLabel.text = $"레시피: {m_Matched.DisplayName}";
+                m_CurrentGrade    = PlayerDataManager.Instance?.Inventory
+                                        .CalculateCookingGrade(m_Matched) ?? FoodGrade.Normal;
+                string gradeSuffix = $"  [{m_CurrentGrade}]";
+                m_RecipeLabel.text = LocaleManager.Get("UI_COOKING_RECIPE_PREFIX")
+                                     + m_Matched.DisplayName + gradeSuffix;
                 m_RecipeLabel.RemoveFromClassList("cook-recipe-matched");
                 m_RecipeLabel.AddToClassList("cook-recipe-matched");
-
                 m_CookBtn.RemoveFromClassList("cook-btn-disabled");
                 m_CookBtn.AddToClassList("cook-btn-enabled");
             }
             else
             {
-                m_RecipeLabel.text = m_SlotIds.Count > 0 ? "재료 조합이 맞지 않습니다" : "재료를 선택하세요";
+                m_CurrentGrade = FoodGrade.Normal;
+                m_RecipeLabel.text = m_SlotIds.Count > 0
+                    ? LocaleManager.Get("UI_COOKING_NO_MATCH")
+                    : LocaleManager.Get("UI_COOKING_SELECT");
                 m_RecipeLabel.RemoveFromClassList("cook-recipe-matched");
-
                 m_CookBtn.RemoveFromClassList("cook-btn-enabled");
                 m_CookBtn.AddToClassList("cook-btn-disabled");
             }
@@ -237,8 +246,15 @@ namespace MonsterKitchen.Cooking
         void AddIngredientToSlot(uint id)
         {
             if (m_SlotIds.Count >= MAX_SLOTS) return;
-            if (PlayerDataManager.Instance?.Inventory == null ||
-                !PlayerDataManager.Instance.Inventory.HasIngredient(id, 1)) return;
+
+            var inv = PlayerDataManager.Instance?.Inventory;
+            if (inv == null) return;
+
+            int alreadySlotted = 0;
+            foreach (var slotId in m_SlotIds)
+                if (slotId == id) alreadySlotted++;
+
+            if (!inv.HasIngredient(id, alreadySlotted + 1)) return;
 
             m_SlotIds.Add(id);
             RefreshSlotDisplay();
@@ -259,10 +275,9 @@ namespace MonsterKitchen.Cooking
         {
             if (m_Matched == null || m_Station == null) return;
 
-            // 슬롯 재료가 인벤토리에 있는지 재확인
             if (!RecipeMatcher.CanCook(m_Matched, PlayerDataManager.Instance?.Inventory))
             {
-                m_RecipeLabel.text = "재료가 부족합니다!";
+                GameHUD.Instance?.ShowNotification(LocaleManager.Get("UI_COOKING_NO_INGREDIENTS"), 2f);
                 return;
             }
 

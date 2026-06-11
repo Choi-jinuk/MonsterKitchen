@@ -11,9 +11,9 @@ namespace MonsterKitchen.Restaurant
     /// </summary>
     public class ServingSystem : MonoBehaviour
     {
-        static readonly Collider2D[] _overlapBuffer = new Collider2D[16];
+        static readonly Collider2D[] s_OverlapBuffer = new Collider2D[16];
 
-        [SerializeField] float serveRadius = 1.5f;
+        [SerializeField] float m_ServeRadius = 1.5f;
 
         void OnEnable()
         {
@@ -34,10 +34,10 @@ namespace MonsterKitchen.Restaurant
                 : (Vector2)transform.position;
 
             var serveFilter = ContactFilter2D.noFilter;
-            int hitCount = Physics2D.OverlapCircle(origin, serveRadius, serveFilter, _overlapBuffer);
+            int hitCount = Physics2D.OverlapCircle(origin, m_ServeRadius, serveFilter, s_OverlapBuffer);
             for (int i = 0; i < hitCount; i++)
             {
-                var col      = _overlapBuffer[i];
+                var col      = s_OverlapBuffer[i];
                 var customer = col.GetComponent<CustomerAI>();
                 if (customer == null || !customer.IsWaiting) continue;
 
@@ -48,22 +48,22 @@ namespace MonsterKitchen.Restaurant
                 {
                     if (!success)
                     {
-                        Debug.Log($"[Serving] {food.DisplayName} 재고 없음.");
+                        DebugUtil.Log($"[Serving] {food.DisplayName} 재고 없음.");
                         return;
                     }
                     customer.Serve(food, grade);
-                    Debug.Log($"[Serving] {food.DisplayName} 서빙 완료.");
+                    DebugUtil.Log($"[Serving] {food.DisplayName} 서빙 완료.");
                 });
                 return;
             }
 
-            Debug.Log("[Serving] 근처에 대기 중인 손님 없음.");
+            DebugUtil.Log("[Serving] 근처에 대기 중인 손님 없음.");
         }
 
         void OnDrawGizmosSelected()
         {
             Gizmos.color = Color.green;
-            Gizmos.DrawWireSphere(transform.position, serveRadius);
+            Gizmos.DrawWireSphere(transform.position, m_ServeRadius);
         }
     }
 }

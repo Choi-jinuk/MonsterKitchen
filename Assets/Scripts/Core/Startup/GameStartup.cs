@@ -1,3 +1,4 @@
+using MonsterKitchen.Core;
 using System;
 using System.Collections;
 using UnityEngine;
@@ -81,7 +82,7 @@ namespace MonsterKitchen.Core
             if (IsAborted) yield break;
 
             IsComplete = true;
-            Debug.Log("[GameStartup] 시작 프로세스 완료.");
+            DebugUtil.Log("[GameStartup] 시작 프로세스 완료.");
             OnComplete?.Invoke();
         }
 
@@ -118,7 +119,7 @@ namespace MonsterKitchen.Core
             if (!GlobalController.Instance.Registry.IsReady)
             {
                 string msg = "[GameStartup] TableData 로드 실패 — AssetManifest 'data/table_data' 키 확인 요망";
-                Debug.LogError(msg);
+                DebugUtil.LogError(msg);
                 IsAborted = true;
                 OnError?.Invoke(msg);
             }
@@ -164,7 +165,7 @@ namespace MonsterKitchen.Core
 
         IEnumerator RunPhase(StartupPhase phase, Func<IEnumerator> step)
         {
-            Debug.Log(StringUtil.Format("[GameStartup] ▶ {0}", phase));
+            DebugUtil.Log(StringUtil.Format("[GameStartup] ▶ {0}", phase));
             OnPhaseStart?.Invoke(phase);
             yield return step();
             if (!IsAborted)

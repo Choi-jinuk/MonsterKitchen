@@ -17,14 +17,12 @@ MonoBehaviour:
       m_Keys: e9030000ea030000eb030000ec030000ed030000
       m_Values:
       - Id: 1001
-        DisplayName: "\uCD08\uB85D \uC2AC\uB77C\uC784"
-        Description: "\uC5D0\uBC84\uADF8\uB9B0 \uC232\uC5D0 \uAC00\uC7A5 \uD754\uD788
-          \uCD9C\uBAB0\uD558\uB294 \uC824\uB9AC\uD615 \uBAAC\uC2A4\uD130. \uB3C5\uC131
-          \uC810\uC561\uC744 \uBD84\uBE44\uD55C\uB2E4."
+        NameKey: MON_001_NAME
+        DescKey: MON_001_DESC
         Hp: 30
         Attack: 5
         Defense: 2
-        MoveSpeed: 5
+        MoveSpeed: 10
         Attribute: 6
         Rarity: 0
         SkillGroupIds:
@@ -64,13 +62,12 @@ MonoBehaviour:
         ImmuneToStun: 0
         ImmuneToPullIn: 0
       - Id: 1002
-        DisplayName: "\uBD88\uAF43 \uC2AC\uB77C\uC784"
-        Description: "\uC6A9\uC554 \uC9C0\uB300\uC5D0\uC11C \uD758\uB7EC\uC628 \uC2AC\uB77C\uC784.
-          \uBAB8\uCCB4\uAC00 \uB728\uAC81\uAC8C \uB2EC\uC544\uC62C\uB77C \uC788\uB2E4."
+        NameKey: MON_002_NAME
+        DescKey: MON_002_DESC
         Hp: 35
         Attack: 8
         Defense: 2
-        MoveSpeed: 2
+        MoveSpeed: 10
         Attribute: 1
         Rarity: 0
         SkillGroupIds:
@@ -110,14 +107,12 @@ MonoBehaviour:
         ImmuneToStun: 0
         ImmuneToPullIn: 0
       - Id: 1003
-        DisplayName: "\uC232 \uACE0\uBE14\uB9B0"
-        Description: "\uC5D0\uBC84\uADF8\uB9B0 \uC232\uC744 \uADFC\uAC70\uC9C0\uB85C
-          \uC0BC\uB294 \uC18C\uD615 \uC778\uAC04\uD615 \uBAAC\uC2A4\uD130. \uBF08
-          \uBABD\uB465\uC774\uB97C \uD718\uB450\uB978\uB2E4."
+        NameKey: MON_003_NAME
+        DescKey: MON_003_DESC
         Hp: 45
         Attack: 10
         Defense: 5
-        MoveSpeed: 3
+        MoveSpeed: 10
         Attribute: 0
         Rarity: 1
         SkillGroupIds:
@@ -157,14 +152,12 @@ MonoBehaviour:
         ImmuneToStun: 0
         ImmuneToPullIn: 0
       - Id: 1004
-        DisplayName: "\uAC70\uB300 \uBC84\uC12F\uC778\uAC04"
-        Description: "\uC232 \uAE4A\uC740 \uACF3\uC758 \uADE0\uB958\uC5D0\uC11C \uD0DC\uC5B4\uB09C
-          \uBAAC\uC2A4\uD130. \uD3EC\uC790\uB97C \uBFDC\uC5B4 \uC2DC\uC57C\uB97C
-          \uD750\uB9B0\uB2E4."
+        NameKey: MON_004_NAME
+        DescKey: MON_004_DESC
         Hp: 60
         Attack: 8
         Defense: 8
-        MoveSpeed: 1.5
+        MoveSpeed: 10
         Attribute: 6
         Rarity: 1
         SkillGroupIds:
@@ -204,14 +197,12 @@ MonoBehaviour:
         ImmuneToStun: 0
         ImmuneToPullIn: 0
       - Id: 1005
-        DisplayName: "\uC232 \uBCF4\uC2A4 \u2014 \uADF8\uB9B0 \uC6DC"
-        Description: "\uC5D0\uBC84\uADF8\uB9B0 \uC232 \uC9C0\uD558\uC5D0 \uC11C\uC2DD\uD558\uB294
-          \uB300\uD615 \uC9C0\uB801\uC774 \uBAAC\uC2A4\uD130. \uB545\uC744 \uD30C\uACE0\uB4E4\uC5B4
-          \uAE30\uC2B5\uD55C\uB2E4."
+        NameKey: MON_005_NAME
+        DescKey: MON_005_DESC
         Hp: 200
         Attack: 18
         Defense: 10
-        MoveSpeed: 2.5
+        MoveSpeed: 10
         Attribute: 4
         Rarity: 2
         SkillGroupIds:
@@ -282,85 +273,84 @@ MonoBehaviour:
       m_Keys: d1070000d2070000d3070000d4070000d5070000d6070000d7070000d8070000
       m_Values:
       - Id: 2001
-        DisplayName: "\uC2AC\uB77C\uC784 \uC824\uB9AC"
-        Description: "\uCD08\uB85D \uC2AC\uB77C\uC784\uC5D0\uC11C \uCC44\uCDE8\uD55C
-          \uD22C\uBA85\uD55C \uC824\uB9AC. \uD0C4\uB825\uC774 \uC788\uACE0 \uB2EC\uCF64\uD558\uB2E4."
+        NameKey: ING_001_NAME
+        DescKey: ING_001_DESC
         Attribute: 6
         Rarity: 0
         DefaultState: 0
         SourceMonsterIds: 1001
         SpriteAddress: sprite/ingredient/2001
+        Weight: 1
       - Id: 2002
-        DisplayName: "\uBD88\uAF43 \uC2AC\uB77C\uC784 \uCF54\uC5B4"
-        Description: "\uBD88\uAF43 \uC2AC\uB77C\uC784\uC758 \uD575\uC2EC \uBD80\uC704.
-          \uC2DD\uD788\uBA74 \uB9E4\uCF64\uD55C \uD5A5\uC774 \uB09C\uB2E4."
+        NameKey: ING_002_NAME
+        DescKey: ING_002_DESC
         Attribute: 1
         Rarity: 0
         DefaultState: 0
         SourceMonsterIds: 1002
         SpriteAddress: sprite/ingredient/2002
+        Weight: 1
       - Id: 2003
-        DisplayName: "\uACE0\uBE14\uB9B0 \uBF08"
-        Description: "\uC232 \uACE0\uBE14\uB9B0\uC758 \uB2E8\uB2E8\uD55C \uC18C\uD615
-          \uBF08. \uC721\uC218 \uC7AC\uB8CC\uB85C \uD65C\uC6A9\uB41C\uB2E4."
+        NameKey: ING_003_NAME
+        DescKey: ING_003_DESC
         Attribute: 0
         Rarity: 0
         DefaultState: 0
         SourceMonsterIds: 1003
         SpriteAddress: sprite/ingredient/2003
+        Weight: 1
       - Id: 2004
-        DisplayName: "\uACE0\uBE14\uB9B0 \uACE0\uAE30"
-        Description: "\uC232 \uACE0\uBE14\uB9B0\uC758 \uC0B4\uCF54\uAE30. \uC7A1\uB0B4\uAC00
-          \uC788\uC5B4 \uC190\uC9C8\uC774 \uD544\uC694\uD558\uB2E4."
+        NameKey: ING_004_NAME
+        DescKey: ING_004_DESC
         Attribute: 0
         Rarity: 1
         DefaultState: 0
         SourceMonsterIds: 1003
         SpriteAddress: sprite/ingredient/2004
+        Weight: 2
       - Id: 2005
-        DisplayName: "\uBC84\uC12F\uC778\uAC04 \uAC13"
-        Description: "\uAC70\uB300 \uBC84\uC12F\uC778\uAC04\uC758 \uC6B0\uC0B0 \uBD80\uC704.
-          \uD48D\uBBF8\uAC00 \uAE4A\uACE0 \uB450\uD23C\uD558\uB2E4."
+        NameKey: ING_005_NAME
+        DescKey: ING_005_DESC
         Attribute: 6
         Rarity: 1
         DefaultState: 0
         SourceMonsterIds: 1004
         SpriteAddress: sprite/ingredient/2005
+        Weight: 2
       - Id: 2006
-        DisplayName: "\uBC84\uC12F\uC778\uAC04 \uD3EC\uC790"
-        Description: "\uBC84\uC12F\uC778\uAC04\uC774 \uBD84\uBE44\uD558\uB294 \uD3EC\uC790.
-          \uC18C\uB7C9\uC774\uBA74 \uD5A5\uC2E0\uB8CC\uB85C \uC4F8 \uC218 \uC788\uB2E4."
+        NameKey: ING_006_NAME
+        DescKey: ING_006_DESC
         Attribute: 6
         Rarity: 1
         DefaultState: 0
         SourceMonsterIds: 1004
         SpriteAddress: sprite/ingredient/2006
+        Weight: 2
       - Id: 2007
-        DisplayName: "\uADF8\uB9B0 \uC6DC \uACE0\uAE30"
-        Description: "\uADF8\uB9B0 \uC6DC\uC758 \uB300\uD615 \uC0B4\uCF54\uAE30.
-          \uCAC4\uAE43\uD558\uACE0 \uC601\uC591\uC774 \uD48D\uBD80\uD558\uB2E4."
+        NameKey: ING_007_NAME
+        DescKey: ING_007_DESC
         Attribute: 4
         Rarity: 2
         DefaultState: 0
         SourceMonsterIds: 1005
         SpriteAddress: sprite/ingredient/2007
+        Weight: 3
       - Id: 2008
-        DisplayName: "\uADF8\uB9B0 \uC6DC \uAECD\uC9C8"
-        Description: "\uADF8\uB9B0 \uC6DC\uC758 \uB450\uAEBC\uC6B4 \uC678\uD53C.
-          \uC624\uB798 \uB053\uC774\uBA74 \uAD6D\uBB3C\uC774 \uC9C4\uD574\uC9C4\uB2E4."
+        NameKey: ING_008_NAME
+        DescKey: ING_008_DESC
         Attribute: 4
         Rarity: 2
         DefaultState: 0
         SourceMonsterIds: 1005
         SpriteAddress: sprite/ingredient/2008
+        Weight: 3
   Foods:
     m_Dict:
       m_Keys: b90b0000ba0b0000bb0b0000bc0b0000bd0b0000
       m_Values:
       - Id: 3001
-        DisplayName: "\uC2AC\uB77C\uC784 \uC824\uB9AC \uB514\uC800\uD2B8"
-        Description: "\uB2EC\uCF64\uD55C \uC2AC\uB77C\uC784 \uC824\uB9AC\uB97C \uAD73\uD600
-          \uB9CC\uB4E0 \uB514\uC800\uD2B8. \uD68C\uBCF5 \uD6A8\uACFC\uAC00 \uC788\uB2E4."
+        NameKey: FOOD_001_NAME
+        DescKey: FOOD_001_DESC
         BasePrice: 50
         HpRestore: 20
         BuffAttribute: 0
@@ -371,9 +361,8 @@ MonoBehaviour:
         LegendaryMultiplier: 2
         SpriteAddress: sprite/food/3001
       - Id: 3002
-        DisplayName: "\uB9E4\uCF64 \uC2AC\uB77C\uC784 \uBCF6\uC74C"
-        Description: "\uBD88\uAF43 \uC2AC\uB77C\uC784 \uCF54\uC5B4\uB97C \uBCF6\uC544\uB0B8
-          \uB9E4\uCF64\uD55C \uC694\uB9AC. \uACF5\uACA9\uB825\uC774 \uC624\uB978\uB2E4."
+        NameKey: FOOD_002_NAME
+        DescKey: FOOD_002_DESC
         BasePrice: 80
         HpRestore: 10
         BuffAttribute: 1
@@ -384,9 +373,8 @@ MonoBehaviour:
         LegendaryMultiplier: 2
         SpriteAddress: sprite/food/3002
       - Id: 3003
-        DisplayName: "\uACE0\uBE14\uB9B0 \uBF08 \uC721\uC218"
-        Description: "\uACE0\uBE14\uB9B0 \uBF08\uB97C \uC6B0\uB824\uB0B8 \uAE4A\uC740
-          \uC721\uC218. \uCCB4\uB825 \uD68C\uBCF5\uC5D0 \uD0C1\uC6D4\uD558\uB2E4."
+        NameKey: FOOD_003_NAME
+        DescKey: FOOD_003_DESC
         BasePrice: 70
         HpRestore: 40
         BuffAttribute: 0
@@ -397,9 +385,8 @@ MonoBehaviour:
         LegendaryMultiplier: 2
         SpriteAddress: sprite/food/3003
       - Id: 3004
-        DisplayName: "\uBC84\uC12F \uAC13 \uAD6C\uC774"
-        Description: "\uBC84\uC12F\uC778\uAC04\uC758 \uAC13\uC744 \uB450\uD23C\uD558\uAC8C
-          \uC370\uC5B4 \uAD6C\uC6B4 \uC694\uB9AC. \uBC29\uC5B4\uB825\uC774 \uC624\uB978\uB2E4."
+        NameKey: FOOD_004_NAME
+        DescKey: FOOD_004_DESC
         BasePrice: 90
         HpRestore: 15
         BuffAttribute: 6
@@ -410,10 +397,8 @@ MonoBehaviour:
         LegendaryMultiplier: 2
         SpriteAddress: sprite/food/3004
       - Id: 3005
-        DisplayName: "\uADF8\uB9B0 \uC6DC \uC2A4\uD14C\uC774\uD06C"
-        Description: "\uADF8\uB9B0 \uC6DC \uACE0\uAE30\uB97C \uB450\uAECD\uAC8C \uC36C
-          \uACE0\uAE09 \uC2A4\uD14C\uC774\uD06C. \uBAA8\uB4E0 \uB2A5\uB825\uCE58\uAC00
-          \uC0C1\uC2B9\uD55C\uB2E4."
+        NameKey: FOOD_005_NAME
+        DescKey: FOOD_005_DESC
         BasePrice: 250
         HpRestore: 50
         BuffAttribute: 4
@@ -428,9 +413,8 @@ MonoBehaviour:
       m_Keys: a10f0000a20f0000a30f0000a40f0000a50f0000
       m_Values:
       - Id: 4001
-        DisplayName: "\uC2AC\uB77C\uC784 \uC824\uB9AC \uB514\uC800\uD2B8 \uB808\uC2DC\uD53C"
-        Description: "\uC2AC\uB77C\uC784 \uC824\uB9AC 2\uAC1C\uB97C \uD2C0\uC5D0
-          \uAD73\uD600 \uC644\uC131\uD558\uB294 \uAE30\uBCF8 \uB514\uC800\uD2B8."
+        NameKey: RCP_001_NAME
+        DescKey: RCP_001_DESC
         Ingredients:
         - IngredientId: 2001
           Quantity: 2
@@ -439,9 +423,8 @@ MonoBehaviour:
         UnlockDay: 0
         IsUnlockedByDefault: 1
       - Id: 4002
-        DisplayName: "\uB9E4\uCF64 \uC2AC\uB77C\uC784 \uBCF6\uC74C \uB808\uC2DC\uD53C"
-        Description: "\uBD88\uAF43 \uC2AC\uB77C\uC784 \uCF54\uC5B4 1\uAC1C\uC640
-          \uC2AC\uB77C\uC784 \uC824\uB9AC 1\uAC1C\uB97C \uBCF6\uB294\uB2E4."
+        NameKey: RCP_002_NAME
+        DescKey: RCP_002_DESC
         Ingredients:
         - IngredientId: 2002
           Quantity: 1
@@ -452,9 +435,8 @@ MonoBehaviour:
         UnlockDay: 0
         IsUnlockedByDefault: 1
       - Id: 4003
-        DisplayName: "\uACE0\uBE14\uB9B0 \uBF08 \uC721\uC218 \uB808\uC2DC\uD53C"
-        Description: "\uACE0\uBE14\uB9B0 \uBF08 3\uAC1C\uB97C \uC624\uB798 \uB053\uC5EC
-          \uC721\uC218\uB97C \uB0B8\uB2E4."
+        NameKey: RCP_003_NAME
+        DescKey: RCP_003_DESC
         Ingredients:
         - IngredientId: 2003
           Quantity: 3
@@ -463,9 +445,8 @@ MonoBehaviour:
         UnlockDay: 1
         IsUnlockedByDefault: 0
       - Id: 4004
-        DisplayName: "\uBC84\uC12F \uAC13 \uAD6C\uC774 \uB808\uC2DC\uD53C"
-        Description: "\uBC84\uC12F\uC778\uAC04 \uAC13 2\uAC1C\uB97C \uD32C\uC5D0
-          \uAD7D\uB294\uB2E4."
+        NameKey: RCP_004_NAME
+        DescKey: RCP_004_DESC
         Ingredients:
         - IngredientId: 2005
           Quantity: 2
@@ -474,9 +455,8 @@ MonoBehaviour:
         UnlockDay: 1
         IsUnlockedByDefault: 0
       - Id: 4005
-        DisplayName: "\uADF8\uB9B0 \uC6DC \uC2A4\uD14C\uC774\uD06C \uB808\uC2DC\uD53C"
-        Description: "\uADF8\uB9B0 \uC6DC \uACE0\uAE30 1\uAC1C\uB97C \uB450\uAECD\uAC8C
-          \uC370\uC5B4 \uAD7D\uB294 \uACE0\uAE09 \uB808\uC2DC\uD53C."
+        NameKey: RCP_005_NAME
+        DescKey: RCP_005_DESC
         Ingredients:
         - IngredientId: 2007
           Quantity: 1
@@ -583,6 +563,69 @@ MonoBehaviour:
         GatherMultiplier: 1.2
         SpeedMultiplier: 1
         CompatibleNodeTypes: 000000000100000002000000
+  ResourceNodes:
+    m_Dict:
+      m_Keys: 591b00005a1b00005b1b0000
+      m_Values:
+      - Id: 7001
+        NameKey: RNO_001_NAME
+        DisplayName: "\uBC14\uC704"
+        NodeType: 1
+        DropIngredientId: 2003
+        DropMin: 1
+        DropMax: 2
+        MaxHp: 30
+        RespawnSeconds: 120
+        NodeSpriteAddress: 
+      - Id: 7002
+        NameKey: RNO_002_NAME
+        DisplayName: "\uB098\uBB34"
+        NodeType: 0
+        DropIngredientId: 2001
+        DropMin: 1
+        DropMax: 2
+        MaxHp: 20
+        RespawnSeconds: 90
+        NodeSpriteAddress: 
+      - Id: 7003
+        NameKey: RNO_003_NAME
+        DisplayName: "\uAD11\uC11D"
+        NodeType: 2
+        DropIngredientId: 2002
+        DropMin: 1
+        DropMax: 2
+        MaxHp: 50
+        RespawnSeconds: 180
+        NodeSpriteAddress: 
+  UIPanels:
+    m_Dict:
+      m_Keys: 292300002a2300002b2300002c2300002d230000
+      m_Values:
+      - Id: 9001
+        PanelId: CookingUI
+        DisplayName: "\uC870\uB9AC\uB300"
+        PrefabAddress: prefab/ui/cookingui
+        ToggleKey: 
+      - Id: 9002
+        PanelId: InventoryUI
+        DisplayName: "\uC778\uBCA4\uD1A0\uB9AC"
+        PrefabAddress: prefab/ui/inventoryui
+        ToggleKey: I
+      - Id: 9003
+        PanelId: RewardPopup
+        DisplayName: "\uBCF4\uC0C1 \uD31D\uC5C5"
+        PrefabAddress: prefab/ui/rewardpopup
+        ToggleKey: 
+      - Id: 9004
+        PanelId: DungeonBagUI
+        DisplayName: "\uB358\uC804 \uAC00\uBC29"
+        PrefabAddress: prefab/ui/dungeonbagui
+        ToggleKey: B
+      - Id: 9005
+        PanelId: RecipeBookUI
+        DisplayName: "\uB808\uC2DC\uD53C \uB3C4\uAC10"
+        PrefabAddress: prefab/ui/recipebookui
+        ToggleKey: Tab
   SkillSteps:
     m_Dict:
       m_Keys: f92a0000fa2a0000fb2a0000032b0000042b00000d2b00000e2b00000f2b0000102b00005d2b0000c12b0000252c0000262c0000272c0000282c0000292c0000
@@ -1221,6 +1264,7 @@ MonoBehaviour:
         Abils:
         - AbilType: 0
           Value: 10
+        Tier: 1
         MaxDurability: 0
         DecayMode: 0
         NormalAttackGroupId: SGD_001
@@ -1295,6 +1339,7 @@ MonoBehaviour:
           Value: 18
         - AbilType: 1
           Value: 3
+        Tier: 2
         MaxDurability: 0
         DecayMode: 0
         NormalAttackGroupId: SGD_002
@@ -1352,6 +1397,7 @@ MonoBehaviour:
           Value: 8
         - AbilType: 4
           Value: 0.2
+        Tier: 2
         MaxDurability: 0
         DecayMode: 0
         NormalAttackGroupId: SGD_003
@@ -1435,7 +1481,7 @@ MonoBehaviour:
           AllowedWeaponTypes: 02000000
         WeaponSpriteAddress: sprite/weapon/7003
         WeaponAnimAddress: anim/weapon/7003
-  Players:
+  PlayersChar:
     m_Dict:
       m_Keys: 29230000
       m_Values:
@@ -1455,3 +1501,305 @@ MonoBehaviour:
         MaxUltimateGauge: 100
         GaugeOnHit: 15
         GaugeOnKill: 25
+  Strings:
+    m_Dict:
+      m_Keys: 411f0000421f0000431f0000441f0000451f0000461f0000471f0000481f0000491f00004a1f00004b1f00004c1f00004d1f00004e1f00004f1f0000501f0000511f0000521f0000531f0000541f0000551f0000561f0000571f0000581f0000591f00005a1f00005b1f00005c1f00005d1f00005e1f00005f1f0000601f0000611f0000621f0000631f0000641f0000651f0000661f0000671f0000681f0000691f00006a1f00006b1f00006c1f00006d1f00006e1f00006f1f0000701f0000711f0000721f0000731f0000741f0000751f0000761f0000771f0000781f0000791f00007a1f00007b1f00007c1f00007d1f00007e1f00007f1f0000801f0000811f0000821f0000831f0000
+      m_Values:
+      - Id: 8001
+        StringId: MON_001_NAME
+        Ko: "\uCD08\uB85D \uC2AC\uB77C\uC784"
+        En: Green Slime
+      - Id: 8002
+        StringId: MON_001_DESC
+        Ko: "\uC5D0\uBC84\uADF8\uB9B0 \uC232\uC5D0 \uAC00\uC7A5 \uD754\uD788 \uCD9C\uBAB0\uD558\uB294
+          \uC824\uB9AC\uD615 \uBAAC\uC2A4\uD130. \uB3C5\uC131 \uC810\uC561\uC744
+          \uBD84\uBE44\uD55C\uB2E4."
+        En: A jelly-type monster commonly found in Evergreen Forest. Secretes toxic
+          slime.
+      - Id: 8003
+        StringId: MON_002_NAME
+        Ko: "\uBD88\uAF43 \uC2AC\uB77C\uC784"
+        En: Flame Slime
+      - Id: 8004
+        StringId: MON_002_DESC
+        Ko: "\uC6A9\uC554 \uC9C0\uB300\uC5D0\uC11C \uD758\uB7EC\uC628 \uC2AC\uB77C\uC784.
+          \uBAB8\uCCB4\uAC00 \uB728\uAC81\uAC8C \uB2EC\uC544\uC62C\uB77C \uC788\uB2E4."
+        En: A slime from the lava zone. Its body burns with intense heat.
+      - Id: 8005
+        StringId: MON_003_NAME
+        Ko: "\uC232 \uACE0\uBE14\uB9B0"
+        En: Forest Goblin
+      - Id: 8006
+        StringId: MON_003_DESC
+        Ko: "\uC5D0\uBC84\uADF8\uB9B0 \uC232\uC744 \uADFC\uAC70\uC9C0\uB85C \uC0BC\uB294
+          \uC18C\uD615 \uC778\uAC04\uD615 \uBAAC\uC2A4\uD130. \uBF08 \uBABD\uB465\uC774\uB97C
+          \uD718\uB450\uB978\uB2E4."
+        En: A small humanoid monster that calls Evergreen Forest home. Wields a bone
+          club.
+      - Id: 8007
+        StringId: MON_004_NAME
+        Ko: "\uAC70\uB300 \uBC84\uC12F\uC778\uAC04"
+        En: Giant Mushroom Man
+      - Id: 8008
+        StringId: MON_004_DESC
+        Ko: "\uC232 \uAE4A\uC740 \uACF3\uC758 \uADE0\uB958\uC5D0\uC11C \uD0DC\uC5B4\uB09C
+          \uBAAC\uC2A4\uD130. \uD3EC\uC790\uB97C \uBFDC\uC5B4 \uC2DC\uC57C\uB97C
+          \uD750\uB9B0\uB2E4."
+        En: A monster born from fungi deep in the forest. Releases spores to obscure
+          vision.
+      - Id: 8009
+        StringId: MON_005_NAME
+        Ko: "\uC232 \uBCF4\uC2A4 \u2014 \uADF8\uB9B0 \uC6DC"
+        En: "Forest Boss \u2014 Green Worm"
+      - Id: 8010
+        StringId: MON_005_DESC
+        Ko: "\uC5D0\uBC84\uADF8\uB9B0 \uC232 \uC9C0\uD558\uC5D0 \uC11C\uC2DD\uD558\uB294
+          \uB300\uD615 \uC9C0\uB801\uC774 \uBAAC\uC2A4\uD130. \uB545\uC744 \uD30C\uACE0\uB4E4\uC5B4
+          \uAE30\uC2B5\uD55C\uB2E4."
+        En: A giant worm monster living beneath Evergreen Forest. Burrows underground
+          to ambush prey.
+      - Id: 8011
+        StringId: ING_001_NAME
+        Ko: "\uC2AC\uB77C\uC784 \uC824\uB9AC"
+        En: Slime Jelly
+      - Id: 8012
+        StringId: ING_001_DESC
+        Ko: "\uCD08\uB85D \uC2AC\uB77C\uC784\uC5D0\uC11C \uCC44\uCDE8\uD55C \uD22C\uBA85\uD55C
+          \uC824\uB9AC. \uD0C4\uB825\uC774 \uC788\uACE0 \uB2EC\uCF64\uD558\uB2E4."
+        En: Translucent jelly harvested from green slimes. Elastic and sweet.
+      - Id: 8013
+        StringId: ING_002_NAME
+        Ko: "\uBD88\uAF43 \uC2AC\uB77C\uC784 \uCF54\uC5B4"
+        En: Flame Slime Core
+      - Id: 8014
+        StringId: ING_002_DESC
+        Ko: "\uBD88\uAF43 \uC2AC\uB77C\uC784\uC758 \uD575\uC2EC \uBD80\uC704. \uC2DD\uD788\uBA74
+          \uB9E4\uCF64\uD55C \uD5A5\uC774 \uB09C\uB2E4."
+        En: The core of a flame slime. When cooled
+      - Id: 8015
+        StringId: ING_003_NAME
+        Ko: "\uACE0\uBE14\uB9B0 \uBF08"
+        En: Goblin Bone
+      - Id: 8016
+        StringId: ING_003_DESC
+        Ko: "\uC232 \uACE0\uBE14\uB9B0\uC758 \uB2E8\uB2E8\uD55C \uC18C\uD615 \uBF08.
+          \uC721\uC218 \uC7AC\uB8CC\uB85C \uD65C\uC6A9\uB41C\uB2E4."
+        En: Small dense bones from forest goblins. Used to make rich stock.
+      - Id: 8017
+        StringId: ING_004_NAME
+        Ko: "\uACE0\uBE14\uB9B0 \uACE0\uAE30"
+        En: Goblin Meat
+      - Id: 8018
+        StringId: ING_004_DESC
+        Ko: "\uC232 \uACE0\uBE14\uB9B0\uC758 \uC0B4\uCF54\uAE30. \uC7A1\uB0B4\uAC00
+          \uC788\uC5B4 \uC190\uC9C8\uC774 \uD544\uC694\uD558\uB2E4."
+        En: Flesh from forest goblins. Has a gamey smell and requires preparation.
+      - Id: 8019
+        StringId: ING_005_NAME
+        Ko: "\uBC84\uC12F\uC778\uAC04 \uAC13"
+        En: Mushroom Cap
+      - Id: 8020
+        StringId: ING_005_DESC
+        Ko: "\uAC70\uB300 \uBC84\uC12F\uC778\uAC04\uC758 \uC6B0\uC0B0 \uBD80\uC704.
+          \uD48D\uBBF8\uAC00 \uAE4A\uACE0 \uB450\uD23C\uD558\uB2E4."
+        En: The cap of a giant mushroom man. Rich in flavor and satisfyingly thick.
+      - Id: 8021
+        StringId: ING_006_NAME
+        Ko: "\uBC84\uC12F\uC778\uAC04 \uD3EC\uC790"
+        En: Mushroom Spore
+      - Id: 8022
+        StringId: ING_006_DESC
+        Ko: "\uBC84\uC12F\uC778\uAC04\uC774 \uBD84\uBE44\uD558\uB294 \uD3EC\uC790.
+          \uC18C\uB7C9\uC774\uBA74 \uD5A5\uC2E0\uB8CC\uB85C \uC4F8 \uC218 \uC788\uB2E4."
+        En: Spores secreted by mushroom men. In small amounts they work as seasoning.
+      - Id: 8023
+        StringId: ING_007_NAME
+        Ko: "\uADF8\uB9B0 \uC6DC \uACE0\uAE30"
+        En: Green Worm Meat
+      - Id: 8024
+        StringId: ING_007_DESC
+        Ko: "\uADF8\uB9B0 \uC6DC\uC758 \uB300\uD615 \uC0B4\uCF54\uAE30. \uCAC4\uAE43\uD558\uACE0
+          \uC601\uC591\uC774 \uD48D\uBD80\uD558\uB2E4."
+        En: Large cuts of meat from the green worm. Chewy and highly nutritious.
+      - Id: 8025
+        StringId: ING_008_NAME
+        Ko: "\uADF8\uB9B0 \uC6DC \uAECD\uC9C8"
+        En: Green Worm Hide
+      - Id: 8026
+        StringId: ING_008_DESC
+        Ko: "\uADF8\uB9B0 \uC6DC\uC758 \uB450\uAEBC\uC6B4 \uC678\uD53C. \uC624\uB798
+          \uB053\uC774\uBA74 \uAD6D\uBB3C\uC774 \uC9C4\uD574\uC9C4\uB2E4."
+        En: The thick outer skin of a green worm. Long boiling creates a rich broth.
+      - Id: 8027
+        StringId: FOOD_001_NAME
+        Ko: "\uC2AC\uB77C\uC784 \uC824\uB9AC \uB514\uC800\uD2B8"
+        En: Slime Jelly Dessert
+      - Id: 8028
+        StringId: FOOD_001_DESC
+        Ko: "\uB2EC\uCF64\uD55C \uC2AC\uB77C\uC784 \uC824\uB9AC\uB97C \uAD73\uD600
+          \uB9CC\uB4E0 \uB514\uC800\uD2B8. \uD68C\uBCF5 \uD6A8\uACFC\uAC00 \uC788\uB2E4."
+        En: A dessert made by setting sweet slime jelly. Has a restorative effect.
+      - Id: 8029
+        StringId: FOOD_002_NAME
+        Ko: "\uB9E4\uCF64 \uC2AC\uB77C\uC784 \uBCF6\uC74C"
+        En: Spicy Slime Stir-fry
+      - Id: 8030
+        StringId: FOOD_002_DESC
+        Ko: "\uBD88\uAF43 \uC2AC\uB77C\uC784 \uCF54\uC5B4\uB97C \uBCF6\uC544\uB0B8
+          \uB9E4\uCF64\uD55C \uC694\uB9AC. \uACF5\uACA9\uB825\uC774 \uC624\uB978\uB2E4."
+        En: A spicy stir-fry made from flame slime cores. Increases attack power.
+      - Id: 8031
+        StringId: FOOD_003_NAME
+        Ko: "\uACE0\uBE14\uB9B0 \uBF08 \uC721\uC218"
+        En: Goblin Bone Broth
+      - Id: 8032
+        StringId: FOOD_003_DESC
+        Ko: "\uACE0\uBE14\uB9B0 \uBF08\uB97C \uC6B0\uB824\uB0B8 \uAE4A\uC740 \uC721\uC218.
+          \uCCB4\uB825 \uD68C\uBCF5\uC5D0 \uD0C1\uC6D4\uD558\uB2E4."
+        En: Rich stock simmered from goblin bones. Excellent for HP recovery.
+      - Id: 8033
+        StringId: FOOD_004_NAME
+        Ko: "\uBC84\uC12F \uAC13 \uAD6C\uC774"
+        En: Grilled Mushroom Cap
+      - Id: 8034
+        StringId: FOOD_004_DESC
+        Ko: "\uBC84\uC12F\uC778\uAC04\uC758 \uAC13\uC744 \uB450\uD23C\uD558\uAC8C
+          \uC370\uC5B4 \uAD6C\uC6B4 \uC694\uB9AC. \uBC29\uC5B4\uB825\uC774 \uC624\uB978\uB2E4."
+        En: Thick slices of mushroom cap seared in a pan. Increases defense.
+      - Id: 8035
+        StringId: FOOD_005_NAME
+        Ko: "\uADF8\uB9B0 \uC6DC \uC2A4\uD14C\uC774\uD06C"
+        En: Green Worm Steak
+      - Id: 8036
+        StringId: FOOD_005_DESC
+        Ko: "\uADF8\uB9B0 \uC6DC \uACE0\uAE30\uB97C \uB450\uAECD\uAC8C \uC36C \uACE0\uAE09
+          \uC2A4\uD14C\uC774\uD06C. \uBAA8\uB4E0 \uB2A5\uB825\uCE58\uAC00 \uC0C1\uC2B9\uD55C\uB2E4."
+        En: A premium steak cut thick from green worm meat. Raises all stats.
+      - Id: 8037
+        StringId: RCP_001_NAME
+        Ko: "\uC2AC\uB77C\uC784 \uC824\uB9AC \uB514\uC800\uD2B8 \uB808\uC2DC\uD53C"
+        En: Slime Jelly Dessert Recipe
+      - Id: 8038
+        StringId: RCP_001_DESC
+        Ko: "\uC2AC\uB77C\uC784 \uC824\uB9AC 2\uAC1C\uB97C \uD2C0\uC5D0 \uAD73\uD600
+          \uC644\uC131\uD558\uB294 \uAE30\uBCF8 \uB514\uC800\uD2B8."
+        En: A basic dessert. Set 2 slime jellies in a mold.
+      - Id: 8039
+        StringId: RCP_002_NAME
+        Ko: "\uB9E4\uCF64 \uC2AC\uB77C\uC784 \uBCF6\uC74C \uB808\uC2DC\uD53C"
+        En: Spicy Slime Stir-fry Recipe
+      - Id: 8040
+        StringId: RCP_002_DESC
+        Ko: "\uBD88\uAF43 \uC2AC\uB77C\uC784 \uCF54\uC5B4 1\uAC1C\uC640 \uC2AC\uB77C\uC784
+          \uC824\uB9AC 1\uAC1C\uB97C \uBCF6\uB294\uB2E4."
+        En: Stir-fry 1 flame slime core with 1 slime jelly.
+      - Id: 8041
+        StringId: RCP_003_NAME
+        Ko: "\uACE0\uBE14\uB9B0 \uBF08 \uC721\uC218 \uB808\uC2DC\uD53C"
+        En: Goblin Bone Broth Recipe
+      - Id: 8042
+        StringId: RCP_003_DESC
+        Ko: "\uACE0\uBE14\uB9B0 \uBF08 3\uAC1C\uB97C \uC624\uB798 \uB053\uC5EC \uC721\uC218\uB97C
+          \uB0B8\uB2E4."
+        En: Simmer 3 goblin bones for a long time to extract rich broth.
+      - Id: 8043
+        StringId: RCP_004_NAME
+        Ko: "\uBC84\uC12F \uAC13 \uAD6C\uC774 \uB808\uC2DC\uD53C"
+        En: Grilled Mushroom Cap Recipe
+      - Id: 8044
+        StringId: RCP_004_DESC
+        Ko: "\uBC84\uC12F\uC778\uAC04 \uAC13 2\uAC1C\uB97C \uD32C\uC5D0 \uAD7D\uB294\uB2E4."
+        En: Grill 2 mushroom caps in a pan.
+      - Id: 8045
+        StringId: RCP_005_NAME
+        Ko: "\uADF8\uB9B0 \uC6DC \uC2A4\uD14C\uC774\uD06C \uB808\uC2DC\uD53C"
+        En: Green Worm Steak Recipe
+      - Id: 8046
+        StringId: RCP_005_DESC
+        Ko: "\uADF8\uB9B0 \uC6DC \uACE0\uAE30 1\uAC1C\uB97C \uB450\uAECD\uAC8C \uC370\uC5B4
+          \uAD7D\uB294 \uACE0\uAE09 \uB808\uC2DC\uD53C."
+        En: A premium recipe. Cut 1 green worm meat thick and grill it.
+      - Id: 8047
+        StringId: UI_INTERACT
+        Ko: "\uC0C1\uD638\uC791\uC6A9"
+        En: Interact
+      - Id: 8048
+        StringId: UI_ENTER_DUNGEON
+        Ko: "\uB358\uC804 \uC785\uC7A5"
+        En: Enter Dungeon
+      - Id: 8049
+        StringId: UI_ENTER_KITCHEN
+        Ko: "\uC8FC\uBC29 \uC785\uC7A5"
+        En: Enter Kitchen
+      - Id: 8050
+        StringId: UI_ENTER_RESTAURANT
+        Ko: "\uC2DD\uB2F9 \uC785\uC7A5"
+        En: Enter Restaurant
+      - Id: 8051
+        StringId: UI_TALK
+        Ko: "\uB300\uD654"
+        En: Talk
+      - Id: 8052
+        StringId: UI_PICK_UP
+        Ko: "\uC90D\uAE30"
+        En: Pick Up
+      - Id: 8053
+        StringId: UI_OPEN
+        Ko: "\uC5F4\uAE30"
+        En: Open
+      - Id: 8054
+        StringId: UI_COOKING_TITLE
+        Ko: "\uC870\uB9AC\uB300"
+        En: Kitchen
+      - Id: 8055
+        StringId: UI_COOKING_SLOTS
+        Ko: "\uC7AC\uB8CC \uC2AC\uB86F"
+        En: Ingredient Slots
+      - Id: 8056
+        StringId: UI_COOKING_START
+        Ko: "\uC694\uB9AC \uC2DC\uC791"
+        En: Start Cooking
+      - Id: 8057
+        StringId: UI_COOKING_SLOT_EMPTY
+        Ko: "\uBE44\uC5B4 \uC788\uC74C"
+        En: Empty
+      - Id: 8058
+        StringId: UI_COOKING_SELECT
+        Ko: "\uC7AC\uB8CC\uB97C \uC120\uD0DD\uD558\uC138\uC694"
+        En: Select ingredients
+      - Id: 8059
+        StringId: UI_COOKING_NO_MATCH
+        Ko: "\uC7AC\uB8CC \uC870\uD569\uC774 \uB9DE\uC9C0 \uC54A\uC2B5\uB2C8\uB2E4"
+        En: No matching recipe
+      - Id: 8060
+        StringId: UI_COOKING_RECIPE_PREFIX
+        Ko: "\uB808\uC2DC\uD53C: "
+        En: 'Recipe:'
+      - Id: 8061
+        StringId: UI_COOKING_NO_INGREDIENTS
+        Ko: "\uC7AC\uB8CC\uAC00 \uC5C6\uC2B5\uB2C8\uB2E4."
+        En: No ingredients.
+      - Id: 8062
+        StringId: UI_INVENTORY
+        Ko: "\uC778\uBCA4\uD1A0\uB9AC"
+        En: Inventory
+      - Id: 8063
+        StringId: UI_INGREDIENTS
+        Ko: "\uC7AC\uB8CC"
+        En: Ingredients
+      - Id: 8064
+        StringId: UI_FOOD
+        Ko: "\uC694\uB9AC"
+        En: Food
+      - Id: 8065
+        StringId: UI_CONFIRM
+        Ko: "\uD655\uC778"
+        En: Confirm
+      - Id: 8066
+        StringId: UI_START_EVENING
+        Ko: "\uC800\uB141 \uC601\uC5C5 \uC2DC\uC791"
+        En: Start Evening
+      - Id: 8067
+        StringId: UI_SAVING
+        Ko: "\uC800\uC7A5 \uC911..."
+        En: Saving...

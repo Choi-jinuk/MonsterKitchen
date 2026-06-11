@@ -1,0 +1,10 @@
+; UI 패널 데이터
+; PanelId    : UIManager.Open() 에 전달하는 문자열 — 프리팹 루트 GO 이름과 동일
+; PrefabAddress : AssetManifest 등록 키. 비어 있으면 prefab/ui/{panelId.lower} 자동 생성
+#TYPE,string,uint,string,string,string,string
+_key,Id,PanelId,DisplayName,PrefabAddress,ToggleKey
+UI_001,9001,CookingUI,조리대,prefab/ui/cookingui,
+UI_002,9002,InventoryUI,인벤토리,prefab/ui/inventoryui,I
+UI_003,9003,RewardPopup,보상 팝업,prefab/ui/rewardpopup,
+UI_004,9004,DungeonBagUI,던전 가방,prefab/ui/dungeonbagui,B
+UI_005,9005,RecipeBookUI,레시피 도감,prefab/ui/recipebookui,Tab

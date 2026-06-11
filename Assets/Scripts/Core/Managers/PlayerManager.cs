@@ -1,19 +1,23 @@
+using MonsterKitchen.Core;
 using MonsterKitchen.Data;
 using MonsterKitchen.Player;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 
 namespace MonsterKitchen.Core
 {
     /// <summary>
     /// 플레이어 단일 인스턴스 관리자.
     /// GlobalController 가 new 로 생성하고 Init() 를 호출한다.
-    /// GlobalController.Start() 에서 Start() 를 위임 호출해 플레이어를 스폰한다.
-    /// GlobalController.OnDestroy() 에서 Dispose() 를 위임 호출한다.
     ///
-    /// ▶ 플레이어 데이터 로드 방식
-    ///   TableData.Players 에서 DefaultPlayerId 로 PlayerCharData 를 조회한다.
-    ///   플레이어 프리팹은 PlayerCharData.prefabAddress → AssetManifest 키로 로드한다.
+    /// ▶ 라이프사이클
+    ///   Init()             : 싱글톤 등록
+    ///   Start()            : ManagementSceneController.OnInit() 에서 첫 1회 호출
+    ///                        — 플레이어 데이터 로드 + 스폰 + 위치 설정
+    ///   RepositionInScene(): 씬 전환 후 각 SceneController.OnInit() 에서 명시적 호출
+    ///                        — 현재 씬의 PlayerSpawnPoint 로 이동
+    ///   Dispose()          : GlobalController.OnDestroy() 에서 호출
+    ///
+    /// ▶ sceneLoaded 콜백 없이 각 SceneController 가 명시적으로 제어한다.
     /// </summary>
     public class PlayerManager
     {
@@ -27,31 +31,53 @@ namespace MonsterKitchen.Core
         /// <summary>현재 살아있는 Player 인스턴스.</summary>
         public PlayerController Player { get; private set; }
 
+        /// <summary>Start() 가 1회 이상 호출됐는지 여부.</summary>
+        public bool IsStarted { get; private set; }
+
         public void Init() => Instance = this;
 
-        /// <summary>GlobalController.Start() 에서 호출 — AssetLoadManager 초기화 이후 실행.</summary>
+        /// <summary>
+        /// ManagementSceneController.OnInit() 에서 첫 진입 시 1회 호출.
+        /// 플레이어 데이터 로드 + 스폰 + 현재 씬 스폰 포인트 위치 설정.
+        /// </summary>
         public void Start()
         {
-            // TableData.Players 에서 PlayerCharData 조회
-            m_PlayerData = DataRegistry.Instance?.GetPlayer(DefaultPlayerId);
+            if (IsStarted) return;
+            IsStarted = true;
+
+            m_PlayerData = DataRegistry.Instance?.PlayerChars?.Get(DefaultPlayerId);
             if (m_PlayerData == null)
-                Debug.LogError($"[PlayerManager] Players 테이블에서 id={DefaultPlayerId} 를 찾을 수 없습니다. " +
-                               "Players.csv 를 확인하고 Sync All SO 를 실행하세요.");
+                DebugUtil.LogError($"[PlayerManager] Players 테이블에서 id={DefaultPlayerId} 를 찾을 수 없습니다. " +
+                                   "Players.csv 를 확인하고 Sync All SO 를 실행하세요.");
 
-            SpawnOrReposition(SceneManager.GetActiveScene());
-            SceneManager.sceneLoaded += OnSceneLoaded;
+            SpawnOrReposition();
         }
 
-        /// <summary>GlobalController.OnDestroy() 에서 호출 — 이벤트 구독 해제.</summary>
-        public void Dispose()
+        /// <summary>
+        /// 씬 전환 후 각 SceneController.OnInit() 에서 명시적으로 호출.
+        /// 현재 씬의 PlayerSpawnPoint 로 플레이어를 이동시킨다.
+        /// </summary>
+        public void RepositionInScene()
         {
-            SceneManager.sceneLoaded -= OnSceneLoaded;
+            if (!IsStarted || Player == null) return;
+            SpawnOrReposition();
         }
 
-        void OnSceneLoaded(Scene scene, LoadSceneMode mode) => SpawnOrReposition(scene);
+        /// <summary>GlobalController.OnDestroy() 에서 호출.</summary>
+        public void Dispose() { }
 
-        void SpawnOrReposition(Scene scene)
+        // ================================================================
+        //  내부
+        // ================================================================
+
+        void SpawnOrReposition()
         {
+            if (m_PlayerData == null)
+            {
+                DebugUtil.LogError("[PlayerManager] PlayerCharData 없음 — 스폰 불가. DataRegistry에 등록됐는지 확인.");
+                return;
+            }
+
             var spawnPoint = FindSpawnPoint();
             Vector3 pos    = spawnPoint != null ? spawnPoint.position : Vector3.zero;
 
@@ -62,7 +88,7 @@ namespace MonsterKitchen.Core
             else
             {
                 Player.transform.position = pos;
-                Debug.Log($"[PlayerManager] 씬 '{scene.name}' — Player 위치 이동: {pos}");
+                DebugUtil.Log($"[PlayerManager] 플레이어 위치 이동 → {pos}");
             }
         }
 
@@ -76,16 +102,15 @@ namespace MonsterKitchen.Core
         {
             if (m_PlayerData == null || string.IsNullOrEmpty(m_PlayerData.PrefabAddress))
             {
-                Debug.LogError("[PlayerManager] PlayerCharData 가 없거나 prefabAddress 가 비어 있습니다.");
+                DebugUtil.LogError("[PlayerManager] PlayerCharData 가 없거나 prefabAddress 가 비어 있습니다.");
                 return null;
             }
 
-            // 프리팹을 AssetManifest 에서 주소 키로 로드
             var prefab = AssetLoadManager.Instance?.Load<PlayerController>(m_PlayerData.PrefabAddress);
             if (prefab == null)
             {
-                Debug.LogError($"[PlayerManager] 플레이어 프리팹 로드 실패 — 키: {m_PlayerData.PrefabAddress}. " +
-                               "AssetManifest 에 등록되어 있는지 확인하세요.");
+                DebugUtil.LogError($"[PlayerManager] 플레이어 프리팹 로드 실패 — 키: {m_PlayerData.PrefabAddress}. " +
+                                   "AssetManifest 에 등록되어 있는지 확인하세요.");
                 return null;
             }
 
@@ -100,7 +125,7 @@ namespace MonsterKitchen.Core
             player.gameObject.SetActive(true);
             Object.DontDestroyOnLoad(player.gameObject);
 
-            Debug.Log($"[PlayerManager] Player '{m_PlayerData.DisplayName}' 스폰 완료: {pos}");
+            DebugUtil.Log($"[PlayerManager] Player '{m_PlayerData.DisplayName}' 스폰 완료: {pos}");
             return player;
         }
     }

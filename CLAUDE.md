@@ -1,84 +1,125 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+> 최종 갱신: 2026-06-01
 
 ---
 
-## Project Overview
+## 프로젝트
 
-**몬스터 키친 (MonsterKitchen)** — Unity 6 (6000.4.2f1) 기반 2D 타이쿤 게임.
-폴더명은 `FantasyTycoon`이지만 실제 게임명/네임스페이스는 **MonsterKitchen**.
-
-플레이 사이클: 던전 탐험(재료 획득) → 주방 요리 → 식당 운영 → 다음 날 반복.
-빌드 타겟: Desktop (우선) + Mobile (Phase 2).
+**몬스터 키친 (MonsterKitchen)** — Unity 6 (6000.4.2f1) URP 2D 타이쿤.
+폴더명 `FantasyTycoon`, 게임명/네임스페이스 **MonsterKitchen**.
+사이클: 던전(재료) → 주방(요리) → 식당(운영) → 다음 날.
+빌드: Desktop 우선, Mobile Phase 2.
 
 ---
 
-## Unity CLI 명령어
+## Unity CLI
 
 ```bash
-# Unity Editor 열기
+# Editor 열기
 "C:/Program Files/Unity/Hub/Editor/6000.4.2f1/Editor/Unity.exe" -projectPath "C:/Users/CHOI/Desktop/Program/Unity/FantasyTycoon"
 
-# PlayMode 테스트 (headless)
+# PlayMode 테스트
 "C:/Program Files/Unity/Hub/Editor/6000.4.2f1/Editor/Unity.exe" -projectPath "C:/Users/CHOI/Desktop/Program/Unity/FantasyTycoon" -runTests -testPlatform PlayMode -testResults results.xml -batchmode -quit
 
-# EditMode 테스트 (headless)
+# EditMode 테스트
 "C:/Program Files/Unity/Hub/Editor/6000.4.2f1/Editor/Unity.exe" -projectPath "C:/Users/CHOI/Desktop/Program/Unity/FantasyTycoon" -runTests -testPlatform EditMode -testResults results.xml -batchmode -quit
 
 # Windows 빌드
 "C:/Program Files/Unity/Hub/Editor/6000.4.2f1/Editor/Unity.exe" -projectPath "C:/Users/CHOI/Desktop/Program/Unity/FantasyTycoon" -buildTarget Win64 -batchmode -quit
 ```
 
-테스트는 `Assets/Tests/` (EditMode) 및 `Assets/Tests/PlayMode/`에 위치.
+테스트 위치: `Assets/Tests/` (EditMode), `Assets/Tests/PlayMode/`.
 
 ---
 
-## 씬 구조 (Build Settings 순서)
+## 씬 구조
 
 | Build Index | 파일명 | 역할 |
 |---|---|---|
-| **0** | `Assets/Scenes/ManagementScene.unity` | 기지/마을. 던전 포털·저녁 시작·상점 업그레이드 오브젝트 배치 |
-| **1** | `Assets/Scenes/KitchenScene.unity` | 주방. CookingStation에서 재료→음식 요리 |
-| **2** | `Assets/Scenes/DungeonScene.unity` | 던전. 몬스터 처치 → 재료 드롭 → 던전 클리어 |
-| **3** | `Assets/Scenes/RestaurantScene.unity` | 식당. 손님 서빙 → 골드 획득 → 다음 날 전환 |
+| **0** | `Assets/Scenes/StartScene.unity` | 앱 진입점. GlobalController·Startup·"Touch To Start" |
+| **1** | `Assets/Scenes/ManagementScene.unity` | 기지/마을. 던전 포털·저녁 시작·상점 |
+| **2** | `Assets/Scenes/KitchenScene.unity` | 주방. CookingStation 재료→음식 |
+| **3** | `Assets/Scenes/DungeonScene.unity` | 던전. 단일 오픈맵, 몬스터 리스폰, 가방(무게) 채집 후 귀환 |
+| **4** | `Assets/Scenes/RestaurantScene.unity` | 식당. 서빙→골드→다음 날 |
+| **5** | `Assets/Scenes/LoadingScene.unity` | 씬 전환 버퍼 (메모리 해제·GC) |
 
-플레이는 반드시 **ManagementScene(Build Index 0)** 에서 시작.
+시작: **StartScene(Index 0)** 고정.
 
 ---
 
-## 아키텍처 원칙
+## 인게임 시작 프로세스 (GameStartup)
+
+`Assets/Scripts/Core/Startup/GameStartup.cs` — 앱 시작 시 순서 보장.
+
+| Phase | 역할 | 현재 |
+|---|---|---|
+| 1. SdkInit | Analytics/Firebase/Crash SDK 초기화 | Stub (TODO) |
+| 2. DataLoad | `DataRegistry.Load()` — TableData SO 로드 | 구현 완료 |
+| 3. ServerConnect | 서버 인증 & WebSocket 핸드셰이크 | Stub (TODO) |
+| 4. SaveLoad | `ServerDB.Load()` — 플레이어 세이브 로드 | 구현 완료 |
+
+- `GlobalController.Start()` → `StartCoroutine(Startup.Run())` — **StartScene** 에서 실행
+- Startup 완료 후 `StartSceneController` 가 "Touch To Start" 표시
+- 입력 감지 → `SceneLoader.LoadScene("ManagementScene")`
+- ManagementScene 첫 로드 시 `GlobalController.OnFirstManagementSceneLoaded` → `Player.Start()`
+- 각 Phase는 독립 IEnumerator — UniTask/async 교체 가능
+- `OnPhaseStart / OnPhaseComplete / OnComplete / OnError` 이벤트 제공
+- DataLoad 실패 → `IsAborted = true`, 이후 단계 중단
+
+---
+
+## 아키텍처
 
 ### 렌더링
-- **URP 2D Renderer** (`Assets/Settings/Renderer2D.asset`) 사용.
-- 빌트인 파이프라인 셰이더/머티리얼 사용 금지.
-- 모든 씬에 `UniversalAdditionalCameraData` + `Global Light 2D` 필수.
+- **URP 2D Renderer** (`Assets/Settings/Renderer2D.asset`).
+- 빌트인 파이프라인 셰이더/머티리얼 금지.
+- 모든 씬: `UniversalAdditionalCameraData` + `Global Light 2D` 필수.
 
-### 싱글톤 & DontDestroyOnLoad
-아래 매니저는 ManagementScene에서 생성되어 씬 전환 후에도 유지된다.
-새 씬에서 같은 타입의 두 번째 인스턴스가 생기면 `Destroy(gameObject)`로 자신을 제거한다.
+### 데이터 4-레이어
+
+| 레이어 | 클래스 | 역할 |
+|---|---|---|
+| **TableData** | `TableData` SO + `DataRegistry` | 정적 정의 (CSV→SO, 읽기 전용) |
+| **PlayerData** | `PlayerCoinData` · `PlayerInventoryData` · `PlayerUpgradeData` | 런타임 상태 |
+| **NetworkManager** | `NetworkManager` | 변경 요청 중계 (Server Stub → 실 서버) |
+| **ServerDB** | `ServerSaveData` + `ServerDBManager` | JSON 직렬화 |
+
+**PlayerData 규칙:**
+- 읽기: `PlayerDataManager.Instance.Coin.Gold` / `.Inventory.AllFoods` 직접 허용
+- 변경: `NetworkManager.Instance.Request*()` 경유만
+  - `RequestEarnGold(amount)`
+  - `RequestAddIngredient(id, qty)`
+  - `RequestCook(recipe, grade, callback)`
+  - `RequestServeFood(id, callback)`
+  - `RequestUpgrade(type, callback)`
+
+### 싱글톤 (DontDestroyOnLoad)
+ManagementScene 생성 → 씬 전환 후 유지. 중복 인스턴스 → `Destroy(gameObject)`.
 
 | 클래스 | 위치 | 역할 |
 |---|---|---|
-| `SceneLoader` | `Assets/Scripts/Core/SceneLoader.cs` | 씬 전환 |
-| `PhaseManager` | `Assets/Scripts/Core/PhaseManager.cs` | 게임 페이즈 (아침/던전/저녁/식당) 관리 |
-| `DayManager` | `Assets/Scripts/Core/DayManager.cs` | 날짜 카운터 + 식당 영업 루프 |
-| `GoldManager` | `Assets/Scripts/Core/GoldManager.cs` | 골드 수치 |
-| `Inventory` | `Assets/Scripts/Inventory/Inventory.cs` | 재료 인벤토리 |
-| `FoodInventory` | `Assets/Scripts/Inventory/FoodInventory.cs` | 요리 완성품 인벤토리 |
-| `ToolManager` | `Assets/Scripts/Core/ToolManager.cs` | 공격 업그레이드 수치 |
+| `SceneLoader` | `Core/Scene/SceneLoader.cs` | 씬 전환 |
+| `PhaseManager` | `Core/Managers/PhaseManager.cs` | 페이즈 관리 |
+| `DayManager` | `Core/Managers/DayManager.cs` | 날짜 + 영업 루프 |
+| `PlayerDataManager` | `Core/Managers/PlayerDataManager.cs` | 런타임 상태 접근점 |
+| `NetworkManager` | `Core/Managers/NetworkManager.cs` | 서버 중계 |
+| `ServerDBManager` | `Core/Managers/ServerDBManager.cs` | 저장/로드 |
+| `DataRegistry` | `Data/Table/DataRegistry.cs` | ID→데이터 조회 (pure C# class) |
+| `LocaleManager` | `Core/LocaleManager.cs` | 다국어 문자열 관리 |
 
-**주의**: `DayManager`는 DontDestroyOnLoad 싱글톤이므로 RestaurantScene에서 GameManager 오브젝트가 중복 파괴된다.
-`RestaurantOpener`(StartDay 호출)는 **GameManager가 아닌 별도 오브젝트**(RestaurantSetup)에 배치해야 한다.
+**주의**: `DayManager` DontDestroyOnLoad → RestaurantScene서 GameManager 중복 파괴됨.
+`RestaurantOpener`(StartDay) → GameManager 아닌 별도 오브젝트(RestaurantSetup)에 배치.
+**GlobalController 배치**: StartScene 단독. ManagementScene에 없음.
+**PlayerManager.Start()**: ManagementScene 첫 로드 시점(`GlobalController.OnFirstManagementSceneLoaded`)에서 호출 — DataRegistry 보장 후.
 
-### SpawnManager 소환 패턴
+### SpawnManager 패턴
 ```
 1. InstantiateDisabled(prefab)  → Awake/OnEnable 실행 안 됨
 2. entity.Init(data)            → GetComponent + 스탯 세팅
 3. entity.SetActive(true)       → OnEnable → 코루틴/입력 활성화
 ```
-PlayerController, MonsterAI 모두 이 패턴을 따른다.
-PlayerController는 SpawnManager 없이 씬에 직접 배치된 경우 `Start()`에서 자동 Init된다.
+PlayerController는 씬 직접 배치 시 `Start()`에서 자동 Init.
 
 ---
 
@@ -86,183 +127,348 @@ PlayerController는 SpawnManager 없이 씬에 직접 배치된 경우 `Start()`
 
 ```
 Assets/Scripts/
-├── Core/           DayManager, PhaseManager, SceneLoader, GoldManager, ToolManager
-├── Player/         PlayerController, PlayerSpawnData (SO)
-├── Enemy/          MonsterBase, MonsterAI, SpawnManager, DropResolver
-├── Combat/         Health
-├── Inventory/      Inventory, FoodInventory
-├── Kitchen/        CookingStation, RecipeMatcher
-├── Restaurant/     CustomerAI, ServingSystem, RestaurantTable, RestaurantSetup, RestaurantOpener
-├── Dungeon/        DungeonRoom, DungeonExit, PhaseManager (씬 전환)
-├── Data/           MonsterData, IngredientData, RecipeData, FoodData, DropTableData (SO 클래스)
-│                   DataRegistry (인프라만 존재, MVP에서는 미사용)
-├── UI/             GameHUD (UIDocument), UIManager
-└── Editor/
-    └── DataPipeline/  DataManagerWindow, ScriptableObjectSync, CsvParser
+├── Core/
+│   ├── Startup/     GameStartup, StartSceneController
+│   ├── Managers/    GlobalController, DayManager, PhaseManager, PlayerDataManager,
+│   │                NetworkManager, ServerDBManager, PlayerManager, InputManager
+│   ├── Scene/       SceneLoader, SceneFader, SceneControllerBase
+│   ├── Asset/       AssetKeys, AssetLoadManager, AssetManifest, IAssetLoader
+│   ├── Camera/      CameraFollow, CinemachineAutoFollow
+│   ├── Rendering/   PerspectiveManager, PerspectiveEntityTilt, PerspectiveMapTilt,
+│   │                PerspectiveCameraSync
+│   ├── Pool/        ObjectPool, PooledList
+│   ├── LocaleManager.cs          (다국어 문자열 싱글톤)
+│   └── Util/        FontPreloader, CommonString, RandomUtil, DebugUtil, StringUtil
+│
+├── Data/
+│   ├── Table/       TableData, DataRegistry, GameEnums, GameConfig, AbilEntry
+│   │                MonsterTable, IngredientTable, RecipeTable, FoodTable,
+│   │                DropTable, WeaponTable, SkillStepTable, SkillGroupTable,
+│   │                DungeonSpawnTable, PlayerCharTable, GatheringToolTable,
+│   │                ResourceNodeTable, StringTable, UITable
+│   ├── Player/      PlayerCoinData, PlayerInventoryData, PlayerUpgradeData  [Layer 2]
+│   ├── Server/      ServerSaveData  [Layer 3]
+│   ├── Util/        DataTable<T>, SerializedDictionary
+│   └── Pipeline/    CsvParser, CsvReadWriter, ScriptableObjectSync
+│
+├── AI/
+│   └── BehaviorTree/
+│       ├── (core)   BTRunner, BTAsset, BTBlackboard, BTNode, BTComposite,
+│       │            BTSelector, BTSequence, BTParallel, BTCondition, BTDecorator,
+│       │            BTService, BTInverter, BTNodeAttribute, BTNodeRegistry,
+│       │            BTContext, BTStatus, IBTBlackboardInitializer
+│       ├── Monster/ BTAction_Attack, BTAction_MoveToPlayer, BTAction_Patrol,
+│       │            BTCondition_PlayerInRange
+│       └── Player/  BTAction_PlayerAutoAttack, BTAction_PlayerDash,
+│                    BTAction_PlayerMove, BTAction_PlayerSkill,
+│                    BTCondition_PlayerEnemyInAttackRange
+│
+├── Player/          PlayerController, PlayerStats, WeaponSocketController
+│
+├── Enemy/
+│   ├── Movement/    MonsterMovementBase, SlimeMovement, IMonsterSeparation
+│   └── (root)       MonsterBase, MonsterAI, BTMonsterController, EnemyHpBar,
+│                    SpawnManager
+│
+├── Combat/          Health, Projectile, ItemDrop, DropResolver,
+│                    CrowdControlComponent, CCType
+├── Navigation/      NavGrid, NavPathfinder, NavAgent, NavObstacleLayer, NavPolyObstacle
+├── Cooking/         CookingStation, CookingUI, RecipeMatcher, KitchenExit,
+│                    RestaurantEntry, KitchenSceneController
+├── Dungeon/         DungeonMapController, DungeonSpawnZone, DungeonBag, DungeonExit,
+│                    DungeonCameraConfiner, ResourceNode
+├── Management/      DungeonPortal, EveningStarter, FarmManager, FarmPlot,
+│                    ShopUpgradeStation, ToolUpgradeStation, ManagementSceneController
+├── Restaurant/      CustomerAI, ServingSystem, RestaurantTable, RestaurantSetup,
+│                    RestaurantOpener, RestaurantSceneController
+├── UI/
+│   ├── Core/        UILayer, UIManager, UIPanel, LocalizedLabel
+│   ├── HUD/         GameHUD, InteractionPrompt, InventoryUI
+│   ├── Combat/      DamagePopup, DamagePopupManager, DamagePopupTrigger
+│   └── Reward/      RewardEntry, RewardPopup
+└── ZString/         (third-party, 수정 금지)
 ```
 
 ---
 
 ## 코드 컨벤션
 
-### 네임스페이스
-`MonsterKitchen.{System}` 형태 사용:
-- `MonsterKitchen.Core`, `MonsterKitchen.Player`, `MonsterKitchen.Enemy`
-- `MonsterKitchen.Combat`, `MonsterKitchen.Inventory`, `MonsterKitchen.Kitchen`
-- `MonsterKitchen.Restaurant`, `MonsterKitchen.Dungeon`, `MonsterKitchen.Data`
+### 네이밍 (Rider C#)
 
-### 입력 시스템
-- **New Input System** (`InputSystem_Actions.inputactions`) 만 사용.
-- `Input.GetKey` 등 레거시 입력 API 사용 금지.
+| 대상 | 규칙 | 예시 |
+|---|---|---|
+| private/protected 인스턴스 필드 | `m_` + PascalCase | `m_AliveCount`, `m_FacingDir` |
+| static readonly 필드 | `s_` + PascalCase | `s_HashMoveX`, `s_WaitFixed` |
+| const | PascalCase | `MaxRetries` |
+| public 프로퍼티 | PascalCase | `IsCleared`, `PanelId` |
+| 이벤트 | PascalCase | `OnRoomCleared`, `OnDeath` |
+| 메서드 (전체) | PascalCase | `RegisterMonsters` |
+| 로컬 변수 | camelCase | `hp`, `target` |
+| 파라미터 | camelCase | `monsters`, `amount` |
+
+**필드 선언:**
+```csharp
+// [SerializeField] — private 생략
+[SerializeField] UILayer m_Layer   = UILayer.Panel;
+[SerializeField] bool    m_IsPopup = false;
+
+// private 필드 — private 생략
+int  m_AliveCount;
+bool m_Cleared;
+
+// static readonly — s_ 접두사
+static readonly int                s_HashMoveX = Animator.StringToHash("MoveX");
+static readonly WaitForFixedUpdate s_WaitFixed = new WaitForFixedUpdate();
+```
+
+**코드 구조:**
+```csharp
+// ── 섹션 구분 ──────────────────────────────────────────────────────
+
+// ================================================================
+//  Region Title
+// ================================================================
+
+// 파일 상단
+// ====================================================================
+//  ClassName — 한 줄 설명
+//
+//  ▶ 소항목
+//    내용
+// ====================================================================
+```
+
+**접근 제한자**: `private` 생략. `public`/`protected`/`internal` 명시.
+
+**정렬**: 같은 그룹 필드는 스페이스로 세로 정렬.
+```csharp
+[SerializeField] UILayer m_Layer     = UILayer.Panel;
+[SerializeField] bool    m_IsPopup   = false;
+[SerializeField] Key     m_ToggleKey = Key.None;
+
+static readonly int s_HashMoveX = Animator.StringToHash("MoveX");
+static readonly int s_HashMoveY = Animator.StringToHash("MoveY");
+static readonly int s_HashSpeed = Animator.StringToHash("Speed");
+```
+
+### 네임스페이스
+`MonsterKitchen.{System}`: Core, Player, Enemy, Combat, Inventory, Kitchen, Restaurant, Dungeon, Data.
+
+### 입력
+New Input System (`InputSystem_Actions.inputactions`) 전용. `Input.GetKey` 등 레거시 금지.
 
 ### 에셋 로딩
-- `Resources.Load` 사용 금지.
-- 에셋 로딩은 반드시 `AssetLoadManager.Instance.Load<T>(key)` 를 통한다.
-- 에셋 키는 `AssetKeys` 정적 클래스 또는 헬퍼 메서드로 생성한다 (e.g. `AssetKeys.MonsterPrefab(id)`).
-- 런타임에 필요한 에셋은 `AssetManifest` SO 에 `key + asset` 쌍으로 등록한다.
+- `Resources.Load` 금지.
+- `AssetLoadManager.Instance.Load<T>(key)` 경유.
+- 키: `AssetKeys` 정적 클래스 또는 헬퍼 (`AssetKeys.MonsterPrefab(id)`).
+- 런타임 에셋 → `AssetManifest` SO에 `key + asset` 쌍 등록.
 
-### 데이터 클래스 순수성 규칙 (필수 준수)
+### 데이터 클래스 순수성 규칙
 
-`TableData` 에 포함되는 모든 데이터 클래스(MonsterData, IngredientData, RecipeData, FoodData, DropTableData, WeaponData, SkillGroupData 등)는 **CSV 에서 읽을 수 있는 값만** 가져야 한다.
+TableData 데이터 클래스 — CSV 읽기 가능한 값만.
 
-**금지 — 데이터 클래스에 아래 타입 필드를 선언하지 않는다:**
 ```csharp
-// ❌ Unity Object 직접 참조 — CSV 직렬화 불가
+// ❌ Unity Object 직접 참조 금지
 public Sprite                    icon;
 public RuntimeAnimatorController animCtrl;
 public MonsterBase               prefab;
 public GameObject                go;
+
+// ✅ string 주소 키 + uint ID
+public string spriteAddress;   // "sprite/ingredient/{id}"
+public string prefabAddress;   // "prefab/monster/{id}"
+public string animAddress;     // "anim/weapon/{id}"
+public uint   dropTableId;     // DataRegistry.GetDropTable(id)
+public uint   resultFoodId;    // DataRegistry.GetFood(id)
 ```
 
-**올바른 패턴 — string 주소 키 + uint ID:**
+**런타임 로딩:**
 ```csharp
-// ✅ 에셋은 AssetManifest 등록 키(string)로 참조
-public string spriteAddress;      // 형식: "sprite/ingredient/{id}"
-public string prefabAddress;      // 형식: "prefab/monster/{id}"
-public string animAddress;        // 형식: "anim/weapon/{id}"
-
-// ✅ 다른 데이터는 uint ID 로 참조 → DataRegistry 경유 조회
-public uint dropTableId;          // DataRegistry.GetDropTable(id)
-public uint resultFoodId;         // DataRegistry.GetFood(id)
-```
-
-**런타임 에셋 로딩 패턴:**
-```csharp
-// 에셋 로드
 var sprite = AssetLoadManager.Instance?.Load<Sprite>(data.spriteAddress);
-var prefab = AssetLoadManager.Instance?.Load<MonsterBase>(data.prefabAddress);
-
-// 크로스 데이터 조회
-var food = DataRegistry.Instance?.GetFood(recipe.resultFoodId);
+var food   = DataRegistry.Instance?.GetFood(recipe.resultFoodId);
 ```
 
 ### LayerMask 직렬화
-`enemyLayer = {"value": 256}` 형태 (Layer 8 = Enemy, LayerMask bit format).
-`manage_components`로 설정 시 int가 아닌 object 형태로 전달해야 한다.
+`{"value": 256}` 형태 (Layer 8 = Enemy). `manage_components` 설정 시 int 아닌 object로.
 
-### Inspector 캐싱 원칙 (필수 준수)
+### Inspector 캐싱 원칙
 
-씬 오브젝트 참조는 **반드시 `[SerializeField]` 로 Inspector 에서 직접 연결**한다.
+씬 오브젝트 참조 → `[SerializeField]` Inspector 직접 연결.
 
-**금지 패턴 — 아래 API 는 최소한으로만 사용한다:**
 ```csharp
-// ❌ 절대 사용 금지 — 런타임 탐색은 GC·성능 비용이 크고 버그 추적이 어렵다
+// ❌ 금지 — GC/성능 비용, 버그 추적 어려움
 FindObjectsByType<T>()
 FindFirstObjectByType<T>()
 FindObjectsOfType<T>()
 GameObject.Find()
-transform.Find()          // 씬 오브젝트 탐색 용도로 사용 시
-```
+transform.Find()
 
-**허용 예외 — 진짜 런타임 의존성만:**
-```csharp
-// ✅ 동적 스폰 오브젝트에 한해 허용, 결과는 반드시 필드에 캐시
-Transform _cachedPlayer;
+// ✅ 동적 스폰 오브젝트만 허용, 필드에 캐시
+Transform m_CachedPlayer;
 Transform GetPlayer()
 {
-    if (_cachedPlayer != null) return _cachedPlayer;
-    _cachedPlayer = GameObject.FindGameObjectWithTag("Player")?.transform;
-    return _cachedPlayer;
+    if (m_CachedPlayer != null) return m_CachedPlayer;
+    m_CachedPlayer = GameObject.FindGameObjectWithTag("Player")?.transform;
+    return m_CachedPlayer;
 }
 
-// ✅ Instantiate — 몬스터·투사체 등 런타임 생성 오브젝트만 허용
+// ✅ Instantiate — 몬스터·투사체 등 런타임 생성만
 Instantiate(prefab, pos, Quaternion.identity);
 ```
 
-**참조가 없을 때 처리 방법:**
-- 필수 참조가 null 이면 `Debug.LogError(message, this)` 출력 후 해당 기능을 건너뛴다.
-- `OnValidate()` 에서도 동일하게 경고를 출력해 Editor 에서 미리 발견할 수 있게 한다.
-- AutoDiscover / 자동 탐색 fallback 패턴은 작성하지 않는다.
+null 참조 → `Debug.LogError(message, this)` 후 기능 skip. `OnValidate()`에서도 경고. AutoDiscover fallback 금지.
 
 ---
 
 ## 데이터 파이프라인
 
 ```
-Assets/Data/CSV/      ← Excel에서 내보낸 원본 CSV (`;` 주석, `_` 무시 컬럼)
-Assets/Data/SO/       ← CSV에서 동기화된 ScriptableObject
-Assets/Editor/DataPipeline/DataManagerWindow.cs  ← 동기화 에디터 창
+Assets/Data/CSV/      ← Excel 원본 CSV (`;` 주석, `_` 무시 컬럼)
+Assets/Data/SO/       ← CSV 동기화 ScriptableObject
+Assets/Editor/DataPipeline/DataManagerWindow.cs  ← 동기화 Editor 창
 ```
 
-SO 파일 ID 규칙:
-- Monster: `MON_001` ~ `MON_005`
-- Ingredient: `ING_001` ~ `ING_008`
-- Recipe: `RCP_001` ~ `RCP_005`
-- Food: `FOOD_001` ~ `FOOD_005`
-- DropTable: `DRP_001` ~ `DRP_005`
-
-CsvParser 특징: `;` 줄 주석, `_` 시작 컬럼 무시, `#TYPE` 행 타입 지정, `|` 배열 구분자.
+SO ID: MON_001~005 / ING_001~008 / RCP_001~005 / FOOD_001~005 / DRP_001~005.
+CsvParser: `;` 주석, `_` 컬럼 무시, `#TYPE` 타입 지정, `|` 배열 구분자.
 
 ---
 
-## 설치된 패키지
+## 패키지
 
 | 패키지 | 용도 |
 |---|---|
-| `com.unity.addressables` | 에셋 로딩 (MVP 이후 DataRegistry와 연동 예정) |
+| `com.unity.addressables` | 에셋 로딩 |
 | `com.unity.cinemachine` | 카메라 전환 |
 | `com.unity.inputsystem` | 플레이어 입력 |
 | `com.unity.2d.animation` | 2D 스켈레탈 애니메이션 |
-| `com.unity.2d.aseprite` | Aseprite 스프라이트 직접 임포트 |
-| `com.unity.2d.tilemap` + extras | 타일맵 기반 맵 |
+| `com.unity.2d.aseprite` | Aseprite 임포트 |
+| `com.unity.2d.tilemap` + extras | 타일맵 맵 |
 | `com.unity.2d.spriteshape` | 유기적 지형 |
 | `com.unity.timeline` | 컷씬 |
-| `com.unity.feature.mobile` | 모바일 빌드 지원 |
+| `com.unity.feature.mobile` | 모바일 빌드 |
 | `com.unity.test-framework` | 유닛 테스트 |
-| `com.coplaydev.unity-mcp` | Claude Code ↔ Unity Editor MCP 연동 |
+| `com.coplaydev.unity-mcp` | MCP Unity Editor 연동 |
 
 ---
 
-## MCP / AI 통합
+## MCP 제약
 
-`com.coplaydev.unity-mcp` (Git 패키지)가 설치되어 있어 Claude Code가 MCP 도구로 Unity Editor를 직접 제어할 수 있다.
+- `execute_code`: Windows MAX_PATH 실패 가능 → `manage_components`/`manage_gameobject` 사용.
+- 비활성 GameObject: `find_gameobjects`/`manage_gameobject` 이름 검색 안 될 수 있음.
+- LayerMask: `{"value": N}` 오브젝트 형태.
+- InstanceID: 씬 리로드 후 무효 → `by_name` 방식 사용.
 
-MCP 도구 사용 시 알려진 제약:
-- `execute_code` 도구: Windows MAX_PATH 문제로 실패할 수 있음 (`파일 이름이나 확장명이 너무 깁니다`). 대신 `manage_components`, `manage_gameobject` 등 전용 도구 사용.
-- 비활성 GameObject는 `find_gameobjects`나 `manage_gameobject`로 이름 검색이 안 될 수 있음.
-- `manage_components`에서 LayerMask는 `{"value": N}` 오브젝트 형태로 전달.
-- InstanceID는 씬 리로드 후 무효화됨 — `by_name` 검색 방식 사용.
+---
+
+## AI 능력 — 설치된 플러그인 & 스킬
+
+### 플러그인 목록
+
+| 플러그인 | 설명 |
+|---|---|
+| **superpowers** | 소프트웨어 엔지니어링 워크플로 스킬 묶음 |
+| **caveman** | 토큰 절약 커뮤니케이션 모드 (현재 활성) |
+| **karpathy-skills** | Andrej Karpathy 스타일 코딩 가이드라인 |
+| **understand-anything** | 코드베이스 분석 & 지식 그래프 생성 |
+| **watch/claude-video** | yt-dlp + ffmpeg 기반 영상 분석 |
+
+### 핵심 스킬 — 사용 시점
+
+#### 기획/설계
+| 스킬 | 언제 | 용도 |
+|---|---|---|
+| `superpowers:brainstorming` | 새 기능/모듈 시작 전 | 요구사항 탐색 → 설계안 3종 → 스펙 문서 작성 |
+| `superpowers:writing-plans` | 스펙 확정 후 | 단계별 구현 계획 작성 (`docs/superpowers/plans/`) |
+| `superpowers:executing-plans` | 계획 실행 시 | 체크포인트 리뷰와 함께 계획 단계 실행 |
+
+#### 구현 품질
+| 스킬 | 언제 | 용도 |
+|---|---|---|
+| `superpowers:test-driven-development` | 기능/버그픽스 구현 전 | TDD 사이클 — 테스트 먼저 |
+| `superpowers:systematic-debugging` | 버그/예외/예상 외 동작 발생 시 | 원인 추적 → 수정 |
+| `superpowers:verification-before-completion` | 완료 선언 전 | 실제 동작 검증 체크리스트 |
+| `andrej-karpathy-skills:karpathy-guidelines` | 코드 작성/리뷰 시 | LLM 코딩 실수 방지 가이드라인 |
+
+#### 코드 리뷰
+| 스킬 | 언제 | 용도 |
+|---|---|---|
+| `superpowers:requesting-code-review` | 기능 완료 후 | 코드 리뷰 요청 준비 |
+| `superpowers:receiving-code-review` | 리뷰 수신 시 | 피드백 처리 방식 결정 |
+| `caveman:cavecrew-reviewer` | 특정 파일/diff 리뷰 | 1줄 severity 태그 리뷰 |
+
+#### 코드베이스 이해
+| 스킬 | 언제 | 용도 |
+|---|---|---|
+| `understand-anything:understand` | 대규모 구조 파악 필요 시 | 지식 그래프 생성 |
+| `understand-anything:understand-explain` | 특정 파일/함수 심층 설명 | 구조 설명 |
+| `understand-anything:understand-diff` | PR/git diff 분석 | 변경 영향 파악 |
+
+#### Unity MCP
+| 스킬 | 언제 | 용도 |
+|---|---|---|
+| `unity-mcp-skill` | Unity Editor 작업 시 | MCP 도구 오케스트레이션 |
+
+#### 유틸리티
+| 스킬 | 언제 | 용도 |
+|---|---|---|
+| `caveman:caveman` | 토큰 절약 필요 시 | 압축 커뮤니케이션 |
+| `caveman:caveman-commit` | 커밋 메시지 작성 | 노이즈 없는 커밋 |
+| `watch:watch` | 동영상 참고 자료 분석 | URL/로컬 영상 분석 |
+
+### 새 기능 개발 표준 워크플로
+
+```
+1. brainstorming      → 설계안 확정 + 스펙 문서 작성
+2. writing-plans      → 단계별 구현 계획
+3. (사용자 승인)
+4. executing-plans    → 계획 실행 (체크포인트 리뷰)
+5. verification       → 완료 검증
+6. (사용자 요청 시) commit
+```
+
+### 버그 수정 표준 워크플로
+
+```
+1. systematic-debugging → 원인 파악
+2. TDD (필요시)         → 재현 테스트 먼저
+3. 수정
+4. verification         → 회귀 확인
+```
 
 ---
 
 ## 작업 규칙
 
-1. **작업 시작 전**: 할 일 목록을 `WORK_IN_PROGRESS.md`에 먼저 기록한다.
-2. **작업 완료 후**: `WORK_IN_PROGRESS.md`의 완료 현황을 업데이트한다.
-3. **모듈 현황**: `docs/MODULES.md`가 전체 모듈 명세, `WORK_IN_PROGRESS.md`가 완료 체크 기준.
-4. **씬 수정 후**: 반드시 `manage_scene(action: save)` 호출.
-5. **스크립트 수정 후**: `read_console`로 컴파일 에러 확인.
-6. **새 컴포넌트 추가 시**: 컴파일 완료(`isCompiling: false`) 확인 후 씬에 배치.
+1. 시작 전: `WORK_IN_PROGRESS.md` 단계 목록 작성.
+2. 완료 후: `WORK_IN_PROGRESS.md` 완료 체크 업데이트.
+3. 모듈 현황: `docs/MODULES.md` (전체 명세), `WORK_IN_PROGRESS.md` (완료 체크).
+4. 씬 수정 후: `manage_scene(action: save)` 호출.
+5. 스크립트 수정 후: `read_console` 컴파일 에러 확인.
+6. 새 컴포넌트 추가 시: `isCompiling: false` 확인 후 씬 배치.
+7. 새 기능 시작 전: `brainstorming` 스킬 → `writing-plans` 스킬 순서 필수.
+8. 커밋: 사용자 명시적 요청 시만. 모듈 완료 후 "커밋할까요?" 확인 먼저.
 
 ---
 
-## 현재 구현 상태 요약
+## 현재 구현 상태
 
-- **완료된 핵심 사이클**: ManagementScene → DungeonScene(몬스터 처치) → KitchenScene(요리) → RestaurantScene(서빙) → 다음 날
-- **플레이어**: 8방향 이동, 근거리 공격, 대시(무적), 속성 시스템
-- **몬스터**: FSM(Idle/Patrol/Chase/Attack/Die), 드롭 시스템, Separation Steering
-- **인벤토리**: 재료/음식 싱글톤 (UI 미구현)
-- **주방**: RecipeMatcher + CookingStation, 요리 완성 → FoodInventory
-- **식당**: 손님 AI(FSM), 서빙(E키), 골드 획득, 일일 손님 수 처리
-- **UI**: GameHUD (UIToolkit) — 골드 표시, Day 카운터
-- **다음 우선 작업**: U-02 플레이어 HP 바, I-02 인벤토리 UI, S-06 Save/Load
+- **핵심 사이클**: Management → Dungeon(채집) → Kitchen(요리) → Restaurant(서빙) → 다음 날
+- **플레이어**: 8방향 이동, 근거리/원거리 공격, 대시(무적), 속성 시스템, BT 기반 AI
+- **몬스터**: BT(BTRunner) + FSM, 드롭, Separation Steering, A* 내비게이션
+- **던전**: 단일 오픈맵 리워크 예정 (스펙: `docs/superpowers/specs/2026-06-03-dungeon-rework-design.md`)
+  - DungeonMapController + DungeonSpawnZone(리스폰) + DungeonBag(무게 기반) + 미니맵
+- **재료 품질**: 처치 방식(속성·CC·무기 등급) → IngredientQuality I/II/III → FoodGrade
+- **인벤토리**: PlayerInventoryData (재료/음식 + 품질 side-dict), InventoryUI 품질 배지
+- **주방**: RecipeMatcher + CookingStation (품질 기반 FoodGrade 도출)
+- **식당**: 손님 AI(FSM), 서빙(E키), Perfect 서빙 30% 팁
+- **저장**: SaveScheduler (dirty flag + 주기 저장 + ForceSave), ServerDBManager JSON
+- **UI**: GameHUD (UIToolkit) — 골드, Day, HP바, 스킬 쿨타임, RewardPopup
+- **다국어**: LocaleManager + StringTable SO
+- **다음 우선 작업**: 던전 리워크 (모듈 5-2, 5-4, 5-5, 5-6)
+
+---
+
+## 언어 규칙
+
+- 작업 진행 중 설명·중간 메시지: **영어**
+- 최종 완료 보고: **한글**

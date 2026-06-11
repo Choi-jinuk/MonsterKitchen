@@ -1,0 +1,19 @@
+{
+    "name": "MonsterKitchen",
+    "rootNamespace": "MonsterKitchen",
+    "references": [
+        "Unity.InputSystem",
+        "Unity.TextMeshPro",
+        "Unity.Cinemachine",
+        "ZString"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

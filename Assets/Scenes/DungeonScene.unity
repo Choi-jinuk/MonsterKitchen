@@ -205,8 +205,8 @@ Transform:
   m_GameObject: {fileID: 13585191}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -10.58, y: -5.625, z: 1}
-  m_LocalScale: {x: 2, y: 2, z: 1}
+  m_LocalPosition: {x: 12, y: 0, z: 1}
+  m_LocalScale: {x: 3, y: 3, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
@@ -223,70 +223,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3ac0e2b3f4feda94b87fc00d4b208f24, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MonsterKitchen.Core.PerspectiveMapTilt
-  _config: {fileID: 11400000, guid: 9ef37e65254bf2c4186d3f7995f2b338, type: 2}
---- !u!1 &114353586
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 114353588}
-  - component: {fileID: 114353587}
-  m_Layer: 0
-  m_Name: DungeonSceneController
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &114353587
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 114353586}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9c02c6cd1b75a0b4494a7c1b46ecc747, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::MonsterKitchen.Dungeon.DungeonSceneController
-  m_Rooms:
-  - room: {fileID: 1387831860}
-    roomRoot: {fileID: 1387831859}
-    exitDoor: {fileID: 2112928160}
-    spawnTableId: 6001
-    spawnPoints:
-    - {fileID: 1306925357}
-    - {fileID: 1357740843}
-    - {fileID: 1982494686}
-  - room: {fileID: 579660313}
-    roomRoot: {fileID: 579660312}
-    exitDoor: {fileID: 0}
-    spawnTableId: 6002
-    spawnPoints:
-    - {fileID: 2033970002}
-    - {fileID: 1677257169}
-  m_Exit: {fileID: 888100003}
-  m_CameraConfiner: {fileID: 0}
-  m_PlayerRef: {fileID: 0}
---- !u!4 &114353588
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 114353586}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &232162794
 GameObject:
   m_ObjectHideFlags: 0
@@ -319,7 +255,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 16b2928b14da4f54eaab30c5f7d91a57, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MonsterKitchen.Dungeon.ResourceNode
-  m_Data: {fileID: 11400000, guid: e598cff6051d1b3429a2edb3bbbb2da9, type: 2}
+  m_NodeDataId: 7002
+  m_NodeTint: {r: 1, g: 1, b: 1, a: 1}
 --- !u!61 &232162796
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -374,7 +311,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 232162794}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0.1736482, y: 0, z: 0, w: 0.9848078}
   m_LocalPosition: {x: -5, y: 3, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -452,39 +389,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f7eb69a9cf605254c82e51cd1e7be5a7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MonsterKitchen.Core.PerspectiveEntityTilt
---- !u!1 &396445429
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 396445430}
-  m_Layer: 0
-  m_Name: SpawnPoints_Room2
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &396445430
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 396445429}
-  serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children:
-  - {fileID: 2033970002}
-  - {fileID: 1677257169}
-  m_Father: {fileID: 579660314}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &519420028
 GameObject:
   m_ObjectHideFlags: 0
@@ -617,8 +521,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 519420028}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0.000000002729422, y: 0.09549, z: -10}
+  m_LocalRotation: {x: -0.1736482, y: 0, z: 0, w: 0.9848078}
+  m_LocalPosition: {x: 0.000000002729422, y: 0, z: -10}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -637,6 +541,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MonsterKitchen.Core.CameraFollow
   m_Target: {fileID: 0}
+  m_Correction: {x: 0, y: -3, z: 0}
   m_SmoothTime: 0.25
 --- !u!114 &519420034
 MonoBehaviour:
@@ -650,52 +555,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 05292afb70711ee40ab8443c1ca3bd5b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MonsterKitchen.Core.PerspectiveCameraSync
-  _config: {fileID: 11400000, guid: 9ef37e65254bf2c4186d3f7995f2b338, type: 2}
---- !u!1 &579660312
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 579660314}
-  - component: {fileID: 579660313}
-  m_Layer: 0
-  m_Name: Room2
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 0
---- !u!114 &579660313
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 579660312}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 20bf9157788270544baac392a3f1c6d7, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::MonsterKitchen.Dungeon.DungeonRoom
---- !u!4 &579660314
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 579660312}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children:
-  - {fileID: 396445430}
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_Config: {fileID: 11400000, guid: 9ef37e65254bf2c4186d3f7995f2b338, type: 2}
 --- !u!1 &588317336
 GameObject:
   m_ObjectHideFlags: 0
@@ -4746,6 +4606,37 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &673146569
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 673146570}
+  m_Layer: 0
+  m_Name: SpawnPoint1
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &673146570
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 673146569}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: -3.5, y: 0.5, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1184997900}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &691625743
 GameObject:
   m_ObjectHideFlags: 0
@@ -4779,6 +4670,77 @@ Transform:
   - {fileID: 1042583482}
   - {fileID: 1189149372}
   - {fileID: 1365623304}
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &701576415
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 701576418}
+  - component: {fileID: 701576417}
+  - component: {fileID: 701576416}
+  m_Layer: 0
+  m_Name: DungeonBagUI
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &701576416
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 701576415}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 17c5b121392903343ab22bd91cc64fa6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: MonsterKitchen::MonsterKitchen.UI.DungeonBagUI
+  m_Layer: 20
+  m_IsPopup: 1
+  m_ToggleKey: 16
+--- !u!114 &701576417
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 701576415}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 19102, guid: 0000000000000000e000000000000000, type: 0}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.dll::UnityEngine.UIElements.UIDocument
+  m_PanelSettings: {fileID: 11400000, guid: 809134cccc8c0ed40ad6bc4171280fff, type: 2}
+  m_ParentUI: {fileID: 0}
+  sourceAsset: {fileID: 9197481963319205126, guid: 9540ff651f33c6f4897385624eb3f8dc, type: 3}
+  m_SortingOrder: 0
+  m_Position: 0
+  m_WorldSpaceSizeMode: 1
+  m_WorldSpaceWidth: 1920
+  m_WorldSpaceHeight: 1080
+  m_PivotReferenceSize: 0
+  m_Pivot: 0
+  m_WorldSpaceCollider: {fileID: 0}
+--- !u!4 &701576418
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 701576415}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &811611064
@@ -4828,6 +4790,68 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &814142965
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 814142966}
+  m_Layer: 0
+  m_Name: SpawnPoint2
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &814142966
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 814142965}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: -2.5, y: -0.5, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1184997900}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &866481304
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 866481305}
+  m_Layer: 0
+  m_Name: SpawnPoint2
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &866481305
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 866481304}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 3.5, y: -0.5, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1583683223}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &888100000
 GameObject:
@@ -5071,6 +5095,57 @@ BoxCollider2D:
   m_AutoTiling: 0
   m_Size: {x: 50, y: 1}
   m_EdgeRadius: 0
+--- !u!1 &1184997898
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1184997900}
+  - component: {fileID: 1184997899}
+  m_Layer: 0
+  m_Name: SpawnZone1
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1184997899
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1184997898}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a017be9620ba87e41a78612db259e506, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: MonsterKitchen::MonsterKitchen.Dungeon.DungeonSpawnZone
+  m_SpawnTableId: 6001
+  m_SpawnPoints:
+  - {fileID: 673146570}
+  - {fileID: 814142966}
+  m_RespawnDelay: 8
+--- !u!4 &1184997900
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1184997898}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -3, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 673146570}
+  - {fileID: 814142966}
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1189144890
 GameObject:
   m_ObjectHideFlags: 0
@@ -5103,7 +5178,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 16b2928b14da4f54eaab30c5f7d91a57, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MonsterKitchen.Dungeon.ResourceNode
-  m_Data: {fileID: 11400000, guid: e598cff6051d1b3429a2edb3bbbb2da9, type: 2}
+  m_NodeDataId: 7002
+  m_NodeTint: {r: 1, g: 1, b: 1, a: 1}
 --- !u!61 &1189144892
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -5158,7 +5234,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1189144890}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0.1736482, y: 0, z: 0, w: 0.9848078}
   m_LocalPosition: {x: 5, y: -4, z: -0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -5314,68 +5390,6 @@ BoxCollider2D:
   m_AutoTiling: 0
   m_Size: {x: 1, y: 13}
   m_EdgeRadius: 0
---- !u!1 &1306925356
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1306925357}
-  m_Layer: 0
-  m_Name: SP_R1_1
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &1306925357
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1306925356}
-  serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -8, y: 2, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 1524138906}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &1357740842
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1357740843}
-  m_Layer: 0
-  m_Name: SP_R1_2
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &1357740843
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1357740842}
-  serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -5, y: -3, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 1524138906}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1365623303
 GameObject:
   m_ObjectHideFlags: 0
@@ -5454,51 +5468,6 @@ BoxCollider2D:
   m_AutoTiling: 0
   m_Size: {x: 1, y: 13}
   m_EdgeRadius: 0
---- !u!1 &1387831859
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1387831861}
-  - component: {fileID: 1387831860}
-  m_Layer: 0
-  m_Name: Room1
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &1387831860
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1387831859}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 20bf9157788270544baac392a3f1c6d7, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::MonsterKitchen.Dungeon.DungeonRoom
---- !u!4 &1387831861
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1387831859}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children:
-  - {fileID: 1524138906}
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1510490912
 GameObject:
   m_ObjectHideFlags: 0
@@ -5558,41 +5527,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3ac0e2b3f4feda94b87fc00d4b208f24, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MonsterKitchen.Core.PerspectiveMapTilt
-  _config: {fileID: 11400000, guid: 9ef37e65254bf2c4186d3f7995f2b338, type: 2}
---- !u!1 &1524138905
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1524138906}
-  m_Layer: 0
-  m_Name: SpawnPoints_Room1
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &1524138906
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1524138905}
-  serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children:
-  - {fileID: 1306925357}
-  - {fileID: 1357740843}
-  - {fileID: 1982494686}
-  m_Father: {fileID: 1387831861}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1569095253
 GameObject:
   m_ObjectHideFlags: 0
@@ -5671,6 +5605,57 @@ BoxCollider2D:
   m_AutoTiling: 0
   m_Size: {x: 50, y: 1}
   m_EdgeRadius: 0
+--- !u!1 &1583683221
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1583683223}
+  - component: {fileID: 1583683222}
+  m_Layer: 0
+  m_Name: SpawnZone2
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1583683222
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1583683221}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a017be9620ba87e41a78612db259e506, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: MonsterKitchen::MonsterKitchen.Dungeon.DungeonSpawnZone
+  m_SpawnTableId: 6002
+  m_SpawnPoints:
+  - {fileID: 1727399368}
+  - {fileID: 866481305}
+  m_RespawnDelay: 8
+--- !u!4 &1583683223
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1583683221}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 3, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 1727399368}
+  - {fileID: 866481305}
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1619361886
 GameObject:
   m_ObjectHideFlags: 0
@@ -5703,7 +5688,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 16b2928b14da4f54eaab30c5f7d91a57, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MonsterKitchen.Dungeon.ResourceNode
-  m_Data: {fileID: 11400000, guid: 43c981b973b77f642af6373dc0cb169e, type: 2}
+  m_NodeDataId: 7003
+  m_NodeTint: {r: 1, g: 1, b: 1, a: 1}
 --- !u!61 &1619361888
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -5758,7 +5744,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1619361886}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0.1736482, y: 0, z: 0, w: 0.9848078}
   m_LocalPosition: {x: 10, y: 5, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -5836,7 +5822,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f7eb69a9cf605254c82e51cd1e7be5a7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MonsterKitchen.Core.PerspectiveEntityTilt
---- !u!1 &1677257168
+--- !u!1 &1727399367
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -5844,28 +5830,28 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 1677257169}
+  - component: {fileID: 1727399368}
   m_Layer: 0
-  m_Name: SP_R2_2
+  m_Name: SpawnPoint1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &1677257169
+--- !u!4 &1727399368
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1677257168}
+  m_GameObject: {fileID: 1727399367}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 25, y: -2, z: 0}
+  m_LocalPosition: {x: 2.5, y: 0.5, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 396445430}
+  m_Father: {fileID: 1583683223}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1793469239
 GameObject:
@@ -5899,7 +5885,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 16b2928b14da4f54eaab30c5f7d91a57, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MonsterKitchen.Dungeon.ResourceNode
-  m_Data: {fileID: 11400000, guid: 6a7f657a47b3f364499891ccf930793b, type: 2}
+  m_NodeDataId: 7001
+  m_NodeTint: {r: 1, g: 1, b: 1, a: 1}
 --- !u!61 &1793469241
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -5954,7 +5941,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1793469239}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0.1736482, y: 0, z: 0, w: 0.9848078}
   m_LocalPosition: {x: -8, y: -2, z: -0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -6032,68 +6019,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f7eb69a9cf605254c82e51cd1e7be5a7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MonsterKitchen.Core.PerspectiveEntityTilt
---- !u!1 &1982494685
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1982494686}
-  m_Layer: 0
-  m_Name: SP_R1_3
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &1982494686
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1982494685}
-  serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -2, y: 1, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 1524138906}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &2033970001
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 2033970002}
-  m_Layer: 0
-  m_Name: SP_R2_1
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &2033970002
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2033970001}
-  serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 15, y: 2, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 396445430}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &2109976300
 GameObject:
   m_ObjectHideFlags: 0
@@ -7469,7 +7394,7 @@ Tilemap:
     e31: 0
     e32: 0
     e33: 1
---- !u!1 &2112928159
+--- !u!1 &2123470384
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -7477,87 +7402,49 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 2112928162}
-  - component: {fileID: 2112928161}
-  - component: {fileID: 2112928160}
+  - component: {fileID: 2123470386}
+  - component: {fileID: 2123470385}
   m_Layer: 0
-  m_Name: DungeonDoor
+  m_Name: DungeonMapController
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &2112928160
+--- !u!114 &2123470385
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2112928159}
+  m_GameObject: {fileID: 2123470384}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 40460b2ea3e32fc4697e1ce9a27c1647, type: 3}
+  m_Script: {fileID: 11500000, guid: 095dd82eb7efe9c428c0d6976cd5e606, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::MonsterKitchen.Dungeon.DungeonDoor
-  linkedRoom: {fileID: 1387831860}
-  blocker: {fileID: 2112928161}
-  visualRenderer: {fileID: 0}
---- !u!61 &2112928161
-BoxCollider2D:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2112928159}
-  m_Enabled: 1
-  serializedVersion: 3
-  m_Density: 1
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
+  m_EditorClassIdentifier: MonsterKitchen::MonsterKitchen.Dungeon.DungeonMapController
+  m_SpawnZones:
+  - {fileID: 1184997899}
+  - {fileID: 1583683222}
+  m_Exit: {fileID: 888100003}
+  m_CameraConfiner: {fileID: 0}
+  m_MinimapSprite: {fileID: 0}
+  m_WorldBounds:
     serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_ForceSendLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_ForceReceiveLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_ContactCaptureLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_CallbackLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_IsTrigger: 0
-  m_UsedByEffector: 0
-  m_CompositeOperation: 0
-  m_CompositeOrder: 0
-  m_Offset: {x: 0, y: 0}
-  m_SpriteTilingProperty:
-    border: {x: 0, y: 0, z: 0, w: 0}
-    pivot: {x: 0, y: 0}
-    oldSize: {x: 0, y: 0}
-    newSize: {x: 0, y: 0}
-    adaptiveTilingThreshold: 0
-    drawMode: 0
-    adaptiveTiling: 0
-  m_AutoTiling: 0
-  m_Size: {x: 1, y: 13}
-  m_EdgeRadius: 0
---- !u!4 &2112928162
+    x: -10
+    y: -8
+    width: 20
+    height: 16
+--- !u!4 &2123470386
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2112928159}
+  m_GameObject: {fileID: 2123470384}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 8, y: 0, z: 0}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -7578,8 +7465,8 @@ SceneRoots:
   - {fileID: 1189144893}
   - {fileID: 1793469242}
   - {fileID: 1619361889}
-  - {fileID: 114353588}
-  - {fileID: 1387831861}
-  - {fileID: 579660314}
   - {fileID: 691625744}
-  - {fileID: 2112928162}
+  - {fileID: 2123470386}
+  - {fileID: 1184997900}
+  - {fileID: 1583683223}
+  - {fileID: 701576418}

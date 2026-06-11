@@ -13,7 +13,7 @@ namespace MonsterKitchen.Restaurant
             if (DayManager.Instance != null)
                 DayManager.Instance.StartDay();
             else
-                Debug.LogWarning("[RestaurantOpener] DayManager 인스턴스 없음.");
+                DebugUtil.LogWarning("[RestaurantOpener] DayManager 인스턴스 없음.");
         }
     }
 }

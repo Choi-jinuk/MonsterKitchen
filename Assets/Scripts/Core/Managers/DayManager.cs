@@ -1,5 +1,9 @@
+using MonsterKitchen.Core;
 using System;
 using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
+using MonsterKitchen.Data;
 using MonsterKitchen.Restaurant;
 using UnityEngine;
 
@@ -16,22 +20,36 @@ namespace MonsterKitchen.Core
 
         readonly MonoBehaviour m_Runner;
 
-        // 영업 설정 — RestaurantSetup 이 SetRestaurantConfig() 로 주입
+        // 영업 설정 — RestaurantSceneController 가 SetRestaurantConfig() 로 주입
         Transform         m_GuestSpawnPoint;
         CustomerAI        m_CustomerPrefab;
         RestaurantTable[] m_Tables;
 
-        const int   INITIAL_DAY          = 1;
-        const float TIME_BETWEEN_GUESTS  = 8f;
-        const int   GUESTS_PER_DAY       = 3;
+        const float TIME_BETWEEN_GUESTS = 8f;
 
         public int  CurrentDay { get; private set; }
         public bool IsOpen     { get; private set; }
 
         public event Action<int> OnDayStarted;
         public event Action<int> OnDayEnded;
+        /// <summary>모든 손님이 퇴장 완료 시 발행. SettlementUI 표시 트리거.</summary>
+        public event Action OnAllGuestsLeft;
 
-        int m_GuestsSpawned;
+        // ── 일일 통계 ────────────────────────────────────────────────
+        int       m_DayRevenue;
+        int       m_DayTips;
+        int       m_GuestsServed;
+        int       m_GuestsArrived;
+        int       m_GuestsForToday;
+        List<int> m_SatisfactionScores = new();
+
+        public int   DayRevenue    => m_DayRevenue;
+        public int   DayTips       => m_DayTips;
+        public int   GuestsServed  => m_GuestsServed;
+        public int   GuestsArrived => m_GuestsArrived;
+        public float AvgSatisfaction => m_SatisfactionScores.Count > 0
+            ? (float)m_SatisfactionScores.Average() : 50f;
+
         int m_GuestsFinished;
 
         public DayManager(MonoBehaviour runner) => m_Runner = runner;
@@ -39,38 +57,66 @@ namespace MonsterKitchen.Core
         public void Init()
         {
             Instance   = this;
-            CurrentDay = INITIAL_DAY;
+            CurrentDay = 1;
         }
 
         /// <summary>PhaseManager 에서 호출. 다음 날로 카운터만 증가.</summary>
         public void AdvanceToNextDay()
         {
             CurrentDay++;
-            Debug.Log($"[DayManager] Day {CurrentDay} 시작.");
+            DebugUtil.Log($"[DayManager] Day {CurrentDay} 시작.");
         }
 
         public void StartDay()
         {
             if (IsOpen) return;
             IsOpen           = true;
-            m_GuestsSpawned  = 0;
             m_GuestsFinished = 0;
+            m_GuestsArrived  = 0;
+            m_GuestsForToday = GetGuestCountForDay();
+            ResetDailyStats();
             OnDayStarted?.Invoke(CurrentDay);
-            Debug.Log($"[DayManager] Day {CurrentDay} 영업 시작!");
+            DebugUtil.Log($"[DayManager] Day {CurrentDay} 영업 시작! (손님 {m_GuestsForToday}명)");
             m_Runner.StartCoroutine(SpawnGuestsRoutine());
         }
 
+        // ── 일일 통계 기록 ───────────────────────────────────────────
+
+        /// <summary>CustomerAI 가 서빙 완료 또는 인내심 만료 시 호출.</summary>
+        public void RecordServing(int payment, int tip, int satisfaction)
+        {
+            m_DayRevenue += payment;
+            m_DayTips    += tip;
+            if (payment > 0) m_GuestsServed++;
+            m_SatisfactionScores.Add(satisfaction);
+        }
+
+        void ResetDailyStats()
+        {
+            m_DayRevenue   = 0;
+            m_DayTips      = 0;
+            m_GuestsServed = 0;
+            m_SatisfactionScores.Clear();
+        }
+
+        // ── 손님 수 계산 (명성 기반) ─────────────────────────────────
+
+        int GetGuestCountForDay()
+            => PlayerDataManager.Instance?.Fame?.MaxGuestsPerDay() ?? 3;
+
+        // ── 스폰 ────────────────────────────────────────────────────
+
         IEnumerator SpawnGuestsRoutine()
         {
-            while (m_GuestsSpawned < GUESTS_PER_DAY)
+            while (m_GuestsArrived < m_GuestsForToday)
             {
-                yield return new WaitForSeconds(m_GuestsSpawned == 0 ? 1f : TIME_BETWEEN_GUESTS);
+                yield return new WaitForSeconds(m_GuestsArrived == 0 ? 1f : TIME_BETWEEN_GUESTS);
 
                 var table = FindFreeTable();
                 if (table == null) { yield return new WaitForSeconds(2f); continue; }
 
                 SpawnGuest(table);
-                m_GuestsSpawned++;
+                m_GuestsArrived++;
             }
         }
 
@@ -78,7 +124,8 @@ namespace MonsterKitchen.Core
         {
             if (m_CustomerPrefab == null || m_GuestSpawnPoint == null) return;
 
-            var go = UnityEngine.Object.Instantiate(m_CustomerPrefab, m_GuestSpawnPoint.position, Quaternion.identity);
+            var go = UnityEngine.Object.Instantiate(
+                m_CustomerPrefab, m_GuestSpawnPoint.position, Quaternion.identity);
             go.gameObject.SetActive(true);
             go.Init(table);
             go.OnGuestFinished += HandleGuestFinished;
@@ -87,22 +134,30 @@ namespace MonsterKitchen.Core
         void HandleGuestFinished()
         {
             m_GuestsFinished++;
-            if (m_GuestsFinished >= GUESTS_PER_DAY)
-                m_Runner.StartCoroutine(EndDayRoutine());
+            if (m_GuestsFinished >= m_GuestsForToday)
+                OnAllGuestsLeft?.Invoke();
+        }
+
+        // ── 영업 종료 ────────────────────────────────────────────────
+
+        /// <summary>SettlementUI "다음 날로" 버튼이 호출한다.</summary>
+        public void CompleteDay()
+        {
+            m_Runner.StartCoroutine(EndDayRoutine());
         }
 
         IEnumerator EndDayRoutine()
         {
-            yield return new WaitForSeconds(2f);
+            yield return new WaitForSeconds(1f);
             IsOpen = false;
             OnDayEnded?.Invoke(CurrentDay);
-            Debug.Log($"[DayManager] Day {CurrentDay} 영업 마감.");
+            DebugUtil.Log($"[DayManager] Day {CurrentDay} 영업 마감.");
 
-            yield return new WaitForSeconds(1.5f);
+            yield return new WaitForSeconds(0.5f);
             if (PhaseManager.Instance != null)
                 PhaseManager.Instance.EndDay();
             else
-                SceneLoader.Instance?.LoadScene("KitchenScene");
+                SceneLoader.Instance?.LoadScene("ManagementScene");
         }
 
         RestaurantTable FindFreeTable()
@@ -121,9 +176,14 @@ namespace MonsterKitchen.Core
             if (day > 0) CurrentDay = day;
         }
 
-        /// <summary>RestaurantSetup 이 씬 로드 시 호출해 로컬 레퍼런스를 주입한다.</summary>
+        /// <summary>RestaurantSceneController 가 씬 로드 시 호출해 로컬 레퍼런스를 주입한다.</summary>
         public void SetRestaurantConfig(Transform spawnPoint, CustomerAI prefab, RestaurantTable[] tables)
         {
+            if (prefab == null)
+            {
+                DebugUtil.LogError("[DayManager] SetRestaurantConfig — customerPrefab is null. 식당 손님 스폰 불가.");
+                return;
+            }
             m_GuestSpawnPoint = spawnPoint;
             m_CustomerPrefab  = prefab;
             m_Tables          = tables;

@@ -1,13 +1,17 @@
 using MonsterKitchen.Core;
 using MonsterKitchen.Data;
+using MonsterKitchen.UI;
 using UnityEngine;
 
 namespace MonsterKitchen.Management
 {
-    /// <summary>
-    /// 가게 업그레이드 스테이션.
-    /// 플레이어가 Trigger 안에 있는 동안 Interact 키 → NetworkManager 를 통해 좌석 또는 팁 배율 업그레이드.
-    /// </summary>
+    // ====================================================================
+    //  ShopUpgradeStation — 가게 업그레이드 스테이션
+    //
+    //  ▶ 동작
+    //    플레이어 Trigger 진입 → 현재 레벨·비용 HUD 알림 표시
+    //    Interact 키(E) → NetworkManager.RequestUpgrade → 성공/실패 HUD 알림
+    // ====================================================================
     public class ShopUpgradeStation : MonoBehaviour
     {
         public enum UpgradeType { Seats, Tip }
@@ -17,6 +21,7 @@ namespace MonsterKitchen.Management
         void OnTriggerEnter2D(Collider2D other)
         {
             if (!other.CompareTag("Player")) return;
+            ShowCostHint();
             if (InputManager.Instance != null)
                 InputManager.Instance.OnInteract += Upgrade;
         }
@@ -34,28 +39,55 @@ namespace MonsterKitchen.Management
                 InputManager.Instance.OnInteract -= Upgrade;
         }
 
+        // ================================================================
+        //  내부
+        // ================================================================
+
+        void ShowCostHint()
+        {
+            var upg = PlayerDataManager.Instance?.Upgrades;
+            if (upg == null) return;
+
+            if (m_UpgradeType == UpgradeType.Seats)
+                GameHUD.Instance?.ShowNotification(
+                    $"[가게 좌석] Lv{upg.ShopSeatLevel} → Lv{upg.ShopSeatLevel + 1}  비용: {upg.ShopSeatUpgradeCost}G  (E 업그레이드)", 3f);
+            else
+                GameHUD.Instance?.ShowNotification(
+                    $"[가게 팁] Lv{upg.ShopTipLevel} → Lv{upg.ShopTipLevel + 1}  비용: {upg.ShopTipUpgradeCost}G  (E 업그레이드)", 3f);
+        }
+
         void Upgrade()
         {
             if (NetworkManager.Instance == null)
             {
-                Debug.LogWarning("[ShopUpgradeStation] NetworkManager 없음.");
+                DebugUtil.LogWarning("[ShopUpgradeStation] NetworkManager 없음.");
                 return;
             }
 
+            var upg  = PlayerDataManager.Instance?.Upgrades;
             PlayerUpgradeType type = m_UpgradeType == UpgradeType.Seats
                 ? PlayerUpgradeType.ShopSeats
                 : PlayerUpgradeType.ShopTip;
 
-            // 비용 미리 캡처 (실패 메시지용)
-            var upg = PlayerDataManager.Instance?.Upgrades;
             int cost = m_UpgradeType == UpgradeType.Seats
                 ? upg?.ShopSeatUpgradeCost ?? 0
                 : upg?.ShopTipUpgradeCost  ?? 0;
 
+            string label = m_UpgradeType == UpgradeType.Seats ? "좌석" : "팁 배율";
+
             NetworkManager.Instance.RequestUpgrade(type, success =>
             {
-                if (!success)
-                    Debug.Log($"[ShopUpgradeStation] 골드 부족. 필요: {cost}G");
+                if (success)
+                {
+                    int newLevel = m_UpgradeType == UpgradeType.Seats
+                        ? upg?.ShopSeatLevel ?? 0
+                        : upg?.ShopTipLevel  ?? 0;
+                    GameHUD.Instance?.ShowNotification($"[가게 {label}] Lv{newLevel} 업그레이드 완료!", 2f);
+                }
+                else
+                {
+                    GameHUD.Instance?.ShowNotification($"골드 부족 — {cost}G 필요합니다.", 2f);
+                }
             });
         }
     }

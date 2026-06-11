@@ -1,0 +1,23 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" editor-extension-mode="False">
+    <ui:Style src="project://database/Assets/UI/SettlementPanel.uss" />
+
+    <ui:VisualElement name="settlement-overlay" class="settlement-overlay">
+        <ui:VisualElement name="settlement-panel" class="settlement-panel">
+
+            <ui:Label name="settlement-title" text="영업 결산" class="settlement-title" />
+            <ui:Label name="settlement-day"   text="Day 1"   class="settlement-day" />
+
+            <ui:VisualElement class="settlement-divider" />
+
+            <ui:Label name="settlement-guests"       text="" class="settlement-row" />
+            <ui:Label name="settlement-revenue"      text="" class="settlement-row" />
+            <ui:Label name="settlement-satisfaction" text="" class="settlement-row" />
+            <ui:Label name="settlement-fame"         text="" class="settlement-row settlement-fame" />
+
+            <ui:VisualElement class="settlement-divider" />
+
+            <ui:Button name="settlement-next-btn" text="다음 날로" class="settlement-next-btn" />
+
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

@@ -1,0 +1,12 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" editor-extension-mode="False">
+    <ui:Style src="project://database/Assets/UI/RecipeBookPanel.uss"/>
+    <ui:VisualElement name="recipe-book-overlay" class="recipe-book-overlay">
+        <ui:VisualElement name="recipe-book-panel" class="recipe-book-panel">
+            <ui:VisualElement name="recipe-book-header" class="recipe-book-header">
+                <ui:Label name="recipe-book-title" text="레시피 도감" class="recipe-book-title"/>
+                <ui:Button name="recipe-book-close-btn" text="✕" class="recipe-book-close-btn"/>
+            </ui:VisualElement>
+            <ui:ScrollView name="recipe-card-list" class="recipe-card-list"/>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

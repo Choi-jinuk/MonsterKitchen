@@ -1,3 +1,4 @@
+using MonsterKitchen.Core;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -24,9 +25,10 @@ namespace MonsterKitchen.Data
 
     public class PlayerInventoryData
     {
-        readonly Dictionary<uint, int>              m_Ingredients = new();
-        readonly Dictionary<uint, int>              m_Foods       = new();
-        readonly Dictionary<uint, Queue<FoodGrade>> m_FoodGrades  = new();
+        readonly Dictionary<uint, int>                                    m_Ingredients        = new();
+        readonly Dictionary<uint, int>                                    m_Foods              = new();
+        readonly Dictionary<uint, Queue<FoodGrade>>                       m_FoodGrades         = new();
+        readonly Dictionary<uint, Dictionary<IngredientQuality, int>>     m_IngredientQualities = new();
 
         /// <summary>재료 수량 변경 시 발행. (ingredientId, newQty)</summary>
         public event Action<uint, int> OnIngredientChanged;
@@ -67,7 +69,7 @@ namespace MonsterKitchen.Data
                 m_Ingredients[id] = qty;
                 OnIngredientChanged?.Invoke(id, qty);
             }
-            Debug.Log($"[Inventory] id:{id} qty:{(qty <= 0 ? 0 : qty)}");
+            DebugUtil.Log($"[Inventory] id:{id} qty:{(qty <= 0 ? 0 : qty)}");
         }
 
         /// <summary>음식 1개와 등급을 추가한다.</summary>
@@ -84,7 +86,7 @@ namespace MonsterKitchen.Data
             q.Enqueue(grade);
 
             OnFoodChanged?.Invoke(id, m_Foods[id]);
-            Debug.Log($"[FoodInventory] +1 id:{id} [{grade}]  (total: {m_Foods[id]})");
+            DebugUtil.Log($"[FoodInventory] +1 id:{id} [{grade}]  (total: {m_Foods[id]})");
         }
 
         /// <summary>음식 1개를 소모하고 (등급, 잔여 수량) 을 반환한다.</summary>
@@ -107,6 +109,90 @@ namespace MonsterKitchen.Data
             int remaining = m_Foods.TryGetValue(id, out int r) ? r : 0;
             OnFoodChanged?.Invoke(id, remaining);
             return (grade, remaining);
+        }
+
+        // ── 품질 스토리지 API ─────────────────────────────────────────
+
+        /// <summary>품질 포함 재료 추가. 총 수량(m_Ingredients)과 품질 카운트 모두 갱신한다.</summary>
+        public void AddIngredientWithQuality(uint id, int qty, IngredientQuality quality)
+        {
+            if (qty <= 0) return;
+
+            // 총 수량 갱신
+            m_Ingredients.TryGetValue(id, out int cur);
+            int newTotal = cur + qty;
+            m_Ingredients[id] = newTotal;
+            OnIngredientChanged?.Invoke(id, newTotal);
+
+            // 품질 카운트 갱신
+            if (!m_IngredientQualities.TryGetValue(id, out var qDict))
+            {
+                qDict = new Dictionary<IngredientQuality, int>();
+                m_IngredientQualities[id] = qDict;
+            }
+            qDict.TryGetValue(quality, out int qCur);
+            qDict[quality] = qCur + qty;
+
+            DebugUtil.Log($"[Inventory] +{qty} id:{id} [{quality}] (total: {newTotal})");
+        }
+
+        /// <summary>품질별 재료 수량. 품질 정보 없으면 0.</summary>
+        public int GetIngredientCount(uint id, IngredientQuality quality)
+        {
+            if (!m_IngredientQualities.TryGetValue(id, out var qDict)) return 0;
+            qDict.TryGetValue(quality, out int c);
+            return c;
+        }
+
+        /// <summary>해당 재료의 최고 품질. 품질 정보 없으면 I.</summary>
+        public IngredientQuality GetBestQuality(uint id)
+        {
+            if (!m_IngredientQualities.TryGetValue(id, out var qDict)) return IngredientQuality.I;
+            if (qDict.TryGetValue(IngredientQuality.III, out int c3) && c3 > 0) return IngredientQuality.III;
+            if (qDict.TryGetValue(IngredientQuality.II,  out int c2) && c2 > 0) return IngredientQuality.II;
+            return IngredientQuality.I;
+        }
+
+        /// <summary>요리 시 재료를 품질 높은 것부터 qty 개 소모한다.</summary>
+        public void ConsumeIngredientQuality(uint id, int qty)
+        {
+            if (!m_IngredientQualities.TryGetValue(id, out var qDict)) return;
+            foreach (var q in new[] { IngredientQuality.III, IngredientQuality.II, IngredientQuality.I })
+            {
+                if (qty <= 0) break;
+                if (!qDict.TryGetValue(q, out int c)) continue;
+                int take = System.Math.Min(c, qty);
+                qDict[q] = c - take;
+                qty -= take;
+                if (qDict[q] == 0) qDict.Remove(q);
+            }
+            if (qDict.Count == 0) m_IngredientQualities.Remove(id);
+        }
+
+        /// <summary>레시피 재료 품질 평균 점수 → FoodGrade 도출. (읽기 전용)</summary>
+        public FoodGrade CalculateCookingGrade(RecipeData recipe)
+        {
+            if (recipe == null) return FoodGrade.Normal;
+
+            var seenIds = new HashSet<uint>();
+            float total = 0f;
+            int   count = 0;
+
+            foreach (var req in recipe.Ingredients)
+            {
+                if (req.IngredientId == 0u) continue;
+                if (!seenIds.Add(req.IngredientId)) continue;
+
+                total += (int)GetBestQuality(req.IngredientId);
+                count++;
+            }
+
+            if (count == 0) return FoodGrade.Normal;
+
+            float avg = total / count;
+            return avg >= 2.5f ? FoodGrade.Perfect
+                 : avg >= 1.5f ? FoodGrade.Good
+                 :               FoodGrade.Normal;
         }
 
         // ── 세이브/로드 — ServerDBManager 전용 ──────────────────────

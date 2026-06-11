@@ -1,0 +1,78 @@
+/* ==========================================
+   LoadingScene — 전체 화면 로딩 UI
+   ========================================== */
+
+.loading-root {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgb(10, 10, 10);
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+}
+
+.loading-text {
+    color: rgb(200, 200, 200);
+    font-size: 28px;
+    margin-bottom: 40px;
+    -unity-text-align: middle-center;
+    letter-spacing: 2px;
+}
+
+/* ── 스피너: 3변 컬러, 1변 투명 → 꼬리 효과 ── */
+.spinner {
+    width: 64px;
+    height: 64px;
+    border-radius: 32px;
+    border-top-width: 6px;
+    border-right-width: 6px;
+    border-bottom-width: 6px;
+    border-left-width: 6px;
+    border-top-color: rgba(255, 200, 80, 255);
+    border-right-color: rgba(255, 200, 80, 180);
+    border-bottom-color: rgba(255, 200, 80, 80);
+    border-left-color: rgba(255, 200, 80, 0);
+    animation-name: spin;
+    animation-duration: 0.9s;
+    animation-timing-function: linear;
+    animation-iteration-count: infinite;
+}
+
+@keyframes spin {
+    from { rotate: 0deg; }
+    to   { rotate: 360deg; }
+}
+
+/* ── 프로그레스 바 ── */
+.progress-bar-bg {
+    width: 320px;
+    height: 6px;
+    background-color: rgba(255, 255, 255, 0.12);
+    border-radius: 3px;
+    margin-top: 32px;
+    overflow: hidden;
+}
+
+.progress-bar-fill {
+    height: 100%;
+    width: 0%;
+    background-color: rgb(255, 200, 80);
+    border-radius: 3px;
+    transition-property: width;
+    transition-duration: 0.15s;
+    transition-timing-function: ease-out;
+}
+
+/* ── 팁 텍스트 ── */
+.tip-label {
+    color: rgba(200, 180, 120, 0.75);
+    font-size: 15px;
+    margin-top: 20px;
+    max-width: 480px;
+    white-space: normal;
+    -unity-text-align: middle-center;
+    -unity-font-style: italic;
+}

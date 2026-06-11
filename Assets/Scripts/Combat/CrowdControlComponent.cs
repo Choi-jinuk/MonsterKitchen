@@ -198,6 +198,8 @@ namespace MonsterKitchen.Combat
                 CCType.Knockback => data.ImmuneToKnockback,
                 CCType.Stun      => data.ImmuneToStun,
                 CCType.PullIn    => data.ImmuneToPullIn,
+                CCType.Sleep     => false,
+                CCType.Hypnosis  => false,
                 _                => false,
             };
         }

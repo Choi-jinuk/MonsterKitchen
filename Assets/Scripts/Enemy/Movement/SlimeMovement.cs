@@ -1,4 +1,5 @@
 using MonsterKitchen.Core;
+using MonsterKitchen.Navigation;
 using UnityEngine;
 
 namespace MonsterKitchen.Enemy
@@ -9,7 +10,7 @@ namespace MonsterKitchen.Enemy
     //  ▶ 정지 → 윈드업 → 대시 사이클 (Patrol / Chase 공용)
     //    쿨다운 대기:  완전 정지
     //    윈드업:       목표 방향 잠금 후 정지
-    //    대시:         잠금된 방향으로 dashSpeed 이동
+    //    대시:         잠금된 방향으로 MoveSpeed 이동
     //
     //  ▶ Nav 통합
     //    윈드업 시작 시 GetNavDirection 으로 A* 경로의 첫 경유지 방향을 잠근다.
@@ -24,10 +25,8 @@ namespace MonsterKitchen.Enemy
         [Header("Dash")]
         [Tooltip("대시 전 목표 방향 잠금 후 정지 대기 시간 (초).")]
         [SerializeField] float m_DashWindupDuration = 0.55f;
-        [Tooltip("대시 이동 속도.")]
-        [SerializeField] float m_DashSpeed          = 7f;
         [Tooltip("대시 이동 지속 시간 (초).")]
-        [SerializeField] float m_DashDuration       = 0.35f;
+        [SerializeField] float m_DashDuration       = 0.55f;
         [Tooltip("대시 종료 후 다음 대시까지 대기 시간 (초).")]
         [SerializeField] float m_DashCooldown       = 0.6f;
 
@@ -68,6 +67,31 @@ namespace MonsterKitchen.Enemy
         }
 
         // ================================================================
+        //  대시 반사각 계산
+        // ================================================================
+
+        /// <summary>
+        /// 벽 충돌 시 대시 방향을 반사한다.
+        /// X/Y 축 별로 막힘을 검사해 법선 방향을 결정한다.
+        /// </summary>
+        static Vector2 ReflectDashDir(Vector2 dir, Vector2 from, float step)
+        {
+            bool xBlocked = Mathf.Abs(dir.x) > 0.001f
+                            && !NavAgent.IsValid(new Vector2(from.x + dir.x * step, from.y));
+            bool yBlocked = Mathf.Abs(dir.y) > 0.001f
+                            && !NavAgent.IsValid(new Vector2(from.x, from.y + dir.y * step));
+
+            Vector2 reflected = dir;
+            if (xBlocked)  reflected.x = -reflected.x;
+            if (yBlocked)  reflected.y = -reflected.y;
+
+            // 대각선 코너 (x·y 모두 통과했지만 합성이 막힘) → 역방향
+            if (!xBlocked && !yBlocked) reflected = -dir;
+
+            return reflected.sqrMagnitude > 0.001f ? reflected.normalized : -dir;
+        }
+
+        // ================================================================
         //  대시 사이클 (Patrol / Chase 공용)
         // ================================================================
 
@@ -88,7 +112,18 @@ namespace MonsterKitchen.Enemy
                     return;
                 }
 
-                Move(m_Sep != null ? m_Sep.ApplySeparation(m_DashDir) * m_DashSpeed : m_DashDir * m_DashSpeed);
+                // 슬라이딩 없는 직선 이동 — 벽 충돌 시 반사각으로 윈드업 재시작
+                Vector2 dashDir = m_Sep != null
+                    ? m_Sep.ApplySeparation(m_DashDir)
+                    : m_DashDir;
+
+                bool moved = DirectStepMove(dashDir, m_MoveSpeed, dt);
+                if (!moved)
+                {
+                    m_IsDashing       = false;
+                    m_DashDir         = ReflectDashDir(m_DashDir, m_Rb.position, m_MoveSpeed * dt);
+                    m_DashWindupTimer = m_DashWindupDuration; // 반사 방향으로 윈드업 재시작
+                }
                 return;
             }
 
@@ -110,8 +145,15 @@ namespace MonsterKitchen.Enemy
             if (m_DashCoolTimer <= 0f)
             {
                 // Nav: A* 경로 첫 경유지 방향을 잠근다.
-                // NavGrid 없으면 GetNavDirection 이 직선 방향으로 폴백.
-                m_DashDir         = GetNavDirection(target);
+                // 경로를 못 찾으면(zero) 쿨다운을 짧게 재설정하고 대기.
+                var navDir = GetNavDirection(target);
+                if (navDir == Vector2.zero)
+                {
+                    m_DashCoolTimer = 0.3f; // 경로 미확보 시 짧게 재시도
+                    Stop();
+                    return;
+                }
+                m_DashDir         = navDir;
                 m_DashWindupTimer = m_DashWindupDuration;
                 Stop();
             }

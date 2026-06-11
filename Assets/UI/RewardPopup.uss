@@ -1,0 +1,145 @@
+/* ── 오버레이 ───────────────────────────────────────────────────── */
+.reward-overlay {
+    flex-grow: 1;
+    background-color: rgba(0, 0, 0, 0.65);
+    align-items: center;
+    justify-content: center;
+}
+
+/* ── 패널 본체 ─────────────────────────────────────────────────── */
+.reward-panel {
+    width: 360px;
+    min-height: 200px;
+    max-height: 520px;
+    background-color: rgb(22, 17, 12);
+    border-radius: 14px;
+    border-width: 2px;
+    border-color: rgb(200, 170, 80);
+    padding: 24px 20px 20px;
+    flex-direction: column;
+    align-items: stretch;
+    transition-property: scale, opacity;
+    transition-duration: 0.18s;
+    transition-timing-function: ease-out;
+}
+
+/* ── 제목 ──────────────────────────────────────────────────────── */
+.reward-title {
+    font-size: 24px;
+    -unity-font-style: bold;
+    color: rgb(255, 220, 100);
+    -unity-text-align: middle-center;
+    margin-bottom: 12px;
+}
+
+/* ── 구분선 ────────────────────────────────────────────────────── */
+.reward-divider {
+    height: 1px;
+    background-color: rgb(80, 62, 35);
+    margin-top: 4px;
+    margin-bottom: 12px;
+}
+
+/* ── 보상 목록 스크롤 ──────────────────────────────────────────── */
+.reward-scroll {
+    flex-grow: 1;
+    max-height: 300px;
+}
+
+/* ── 보상 목록 컨테이너 ────────────────────────────────────────── */
+.reward-list {
+    flex-direction: column;
+    padding: 0 4px;
+}
+
+/* ── 보상 행 ───────────────────────────────────────────────────── */
+.reward-row {
+    flex-direction: row;
+    align-items: center;
+    padding: 8px 10px;
+    margin-bottom: 4px;
+    background-color: rgb(32, 25, 16);
+    border-radius: 8px;
+    border-width: 1px;
+    border-color: rgb(60, 48, 30);
+}
+
+.reward-row:hover {
+    background-color: rgb(44, 35, 22);
+}
+
+/* ── 아이콘 ─────────────────────────────────────────────────────── */
+.reward-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 6px;
+    background-color: rgb(45, 36, 22);
+    border-width: 1px;
+    border-color: rgb(80, 62, 35);
+    margin-right: 12px;
+    flex-shrink: 0;
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+/* 골드 아이콘 — 배경 색으로 구분 (스프라이트 없을 때) */
+.reward-icon-gold {
+    background-color: rgb(60, 50, 10);
+    border-color: rgb(200, 170, 60);
+}
+
+/* 경험치 아이콘 */
+.reward-icon-exp {
+    background-color: rgb(10, 40, 70);
+    border-color: rgb(80, 160, 240);
+}
+
+/* ── 보상 이름 ─────────────────────────────────────────────────── */
+.reward-entry-name {
+    flex-grow: 1;
+    font-size: 16px;
+    color: rgb(220, 200, 160);
+}
+
+/* ── 보상 수량 ─────────────────────────────────────────────────── */
+.reward-entry-amount {
+    font-size: 18px;
+    -unity-font-style: bold;
+    color: rgb(180, 155, 100);
+    -unity-text-align: middle-right;
+    min-width: 56px;
+}
+
+.reward-entry-amount-positive {
+    color: rgb(140, 220, 100);
+}
+
+/* ── 빈 메시지 ─────────────────────────────────────────────────── */
+.reward-empty-msg {
+    font-size: 14px;
+    color: rgb(120, 100, 70);
+    -unity-text-align: middle-center;
+    padding: 24px;
+}
+
+/* ── 확인 버튼 ─────────────────────────────────────────────────── */
+.reward-confirm-btn {
+    font-size: 16px;
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+    height: 42px;
+    border-radius: 10px;
+    border-width: 2px;
+    color: rgb(25, 18, 8);
+    background-color: rgb(210, 175, 70);
+    border-color: rgb(245, 215, 100);
+    margin-top: 4px;
+}
+
+.reward-confirm-btn:hover {
+    background-color: rgb(240, 205, 95);
+    border-color: rgb(255, 235, 120);
+}
+
+.reward-confirm-btn:active {
+    background-color: rgb(185, 155, 60);
+}

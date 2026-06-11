@@ -1,5 +1,6 @@
 using System;
 using MonsterKitchen.Combat;
+using MonsterKitchen.Core;
 using MonsterKitchen.Data;
 using UnityEngine;
 
@@ -143,29 +144,29 @@ namespace MonsterKitchen.Player
             // 기본 장착 — 무기·스킬 모두 DataRegistry 를 통해 ID/문자열로 조회
             if (data.DefaultWeaponId != 0)
             {
-                var weapon = DataRegistry.Instance?.GetWeapon(data.DefaultWeaponId);
+                var weapon = DataRegistry.Instance?.Weapons?.Get(data.DefaultWeaponId);
                 if (weapon != null) EquipWeapon(weapon);
-                else Debug.LogWarning($"[PlayerStats] defaultWeaponId={data.DefaultWeaponId} 를 TableData 에서 찾지 못했습니다.");
+                else DebugUtil.LogWarning($"[PlayerStats] defaultWeaponId={data.DefaultWeaponId} 를 TableData 에서 찾지 못했습니다.");
             }
 
             var dr = DataRegistry.Instance;
             if (!string.IsNullOrEmpty(data.SkillGroupId1))
             {
-                var sg = dr?.FindSkillGroupByStringId(data.SkillGroupId1);
+                var sg = dr?.SkillGroups.FindByStringId(data.SkillGroupId1);
                 if (sg != null) EquipSkill(1, sg);
-                else Debug.LogWarning($"[PlayerStats] skillGroupId1='{data.SkillGroupId1}' 를 SkillGroups 에서 찾지 못했습니다.");
+                else DebugUtil.LogWarning($"[PlayerStats] skillGroupId1='{data.SkillGroupId1}' 를 SkillGroups 에서 찾지 못했습니다.");
             }
             if (!string.IsNullOrEmpty(data.SkillGroupId2))
             {
-                var sg = dr?.FindSkillGroupByStringId(data.SkillGroupId2);
+                var sg = dr?.SkillGroups.FindByStringId(data.SkillGroupId2);
                 if (sg != null) EquipSkill(2, sg);
-                else Debug.LogWarning($"[PlayerStats] skillGroupId2='{data.SkillGroupId2}' 를 SkillGroups 에서 찾지 못했습니다.");
+                else DebugUtil.LogWarning($"[PlayerStats] skillGroupId2='{data.SkillGroupId2}' 를 SkillGroups 에서 찾지 못했습니다.");
             }
             if (!string.IsNullOrEmpty(data.UltimateSkillGroupId))
             {
-                var sg = dr?.FindSkillGroupByStringId(data.UltimateSkillGroupId);
+                var sg = dr?.SkillGroups.FindByStringId(data.UltimateSkillGroupId);
                 if (sg != null) EquipSkill(3, sg);
-                else Debug.LogWarning($"[PlayerStats] ultimateSkillGroupId='{data.UltimateSkillGroupId}' 를 SkillGroups 에서 찾지 못했습니다.");
+                else DebugUtil.LogWarning($"[PlayerStats] ultimateSkillGroupId='{data.UltimateSkillGroupId}' 를 SkillGroups 에서 찾지 못했습니다.");
             }
         }
 
@@ -202,7 +203,7 @@ namespace MonsterKitchen.Player
             {
                 if (!skill.IsCompatibleWith(EquippedWeapon.WeaponType))
                 {
-                    Debug.LogWarning($"[PlayerStats] 슬롯{slot}: '{skill.SkillName}' 은 " +
+                    DebugUtil.LogWarning($"[PlayerStats] 슬롯{slot}: '{skill.SkillName}' 은 " +
                                      $"{EquippedWeapon.WeaponType} 무기와 호환되지 않아 장착 거부.");
                     return false;
                 }
@@ -214,7 +215,7 @@ namespace MonsterKitchen.Player
                 case 2: SkillSlot2   = skill; break;
                 case 3: UltimateSlot = skill; break;
                 default:
-                    Debug.LogWarning($"[PlayerStats] 잘못된 슬롯 번호: {slot}");
+                    DebugUtil.LogWarning($"[PlayerStats] 잘못된 슬롯 번호: {slot}");
                     return false;
             }
 
@@ -279,7 +280,7 @@ namespace MonsterKitchen.Player
             {
                 m_UltimateReady = true;
                 OnUltimateReady?.Invoke();
-                Debug.Log("[PlayerStats] 궁극기 게이지 MAX — 궁극기 사용 가능");
+                DebugUtil.Log("[PlayerStats] 궁극기 게이지 MAX — 궁극기 사용 가능");
             }
         }
 
@@ -294,7 +295,7 @@ namespace MonsterKitchen.Player
             if (EquippedWeapon.DecayMode != DurabilityDecayMode.PerHit) return;
             m_WeaponDurability = Mathf.Max(0, m_WeaponDurability - 1);
             if (m_WeaponDurability == 0)
-                Debug.Log($"[PlayerStats] 무기 '{EquippedWeapon.WeaponName}' 내구도 소진");
+                DebugUtil.Log($"[PlayerStats] 무기 '{EquippedWeapon.WeaponName}' 내구도 소진");
         }
 
         /// <summary>처치 시 PlayerController 에서 호출. PerKill 무기만 소모.</summary>
@@ -304,7 +305,7 @@ namespace MonsterKitchen.Player
             if (EquippedWeapon.DecayMode != DurabilityDecayMode.PerKill) return;
             m_WeaponDurability = Mathf.Max(0, m_WeaponDurability - 1);
             if (m_WeaponDurability == 0)
-                Debug.Log($"[PlayerStats] 무기 '{EquippedWeapon.WeaponName}' 내구도 소진");
+                DebugUtil.Log($"[PlayerStats] 무기 '{EquippedWeapon.WeaponName}' 내구도 소진");
         }
 
         /// <summary>채집 성공 시 ResourceNode 에서 호출.</summary>
@@ -313,7 +314,7 @@ namespace MonsterKitchen.Player
             if (m_GatheringTool == null || m_GatheringTool.MaxDurability == 0) return;
             m_GatheringToolDurability = Mathf.Max(0, m_GatheringToolDurability - 1);
             if (m_GatheringToolDurability == 0)
-                Debug.Log($"[PlayerStats] 채집 도구 '{m_GatheringTool.ToolName}' 내구도 소진");
+                DebugUtil.Log($"[PlayerStats] 채집 도구 '{m_GatheringTool.ToolName}' 내구도 소진");
         }
 
         // ================================================================

@@ -1,3 +1,4 @@
+using MonsterKitchen.Core;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.Tilemaps;
@@ -73,7 +74,7 @@ namespace MonsterKitchen.Navigation
         {
             if (m_FloorTilemap == null)
             {
-                Debug.LogError("[NavGrid] m_FloorTilemap 이 설정되지 않았습니다.");
+                DebugUtil.LogError("[NavGrid] m_FloorTilemap 이 설정되지 않았습니다.");
                 return;
             }
 
@@ -108,7 +109,7 @@ namespace MonsterKitchen.Navigation
                 m_Walkable[x, y] = hasFloor && !hasWall;
             }
 
-            Debug.Log($"[NavGrid] 베이크 완료  {Width}×{Height}  origin={m_Origin}");
+            DebugUtil.Log($"[NavGrid] 베이크 완료  {Width}×{Height}  origin={m_Origin}");
         }
 
         // ================================================================
@@ -162,6 +163,67 @@ namespace MonsterKitchen.Navigation
         {
             if (!IsWalkable(worldPos)) return false;
             return !NavObstacleLayer.IsBlocked(worldPos);
+        }
+
+        /// <summary>
+        /// 비-walkable 위치에서 BFS 로 가장 가까운 walkable 셀(타일맵 기준)의 월드 좌표를 반환한다.
+        /// NavObstacleLayer 는 검사하지 않는다 — 동적 장애물 포함 검증은 GetNearestValid 사용.
+        /// </summary>
+        public Vector2 GetNearestWalkable(Vector2 worldPos, int searchRadius = 5)
+        {
+            if (m_FloorTilemap == null) return worldPos;
+
+            Vector3Int cell = m_FloorTilemap.WorldToCell(worldPos);
+            int cx = Mathf.Clamp(cell.x - m_Origin.x, 0, Width  - 1);
+            int cy = Mathf.Clamp(cell.y - m_Origin.y, 0, Height - 1);
+
+            if (IsWalkableGrid(cx, cy)) return GridToWorld(cx, cy);
+
+            for (int r = 1; r <= searchRadius; r++)
+            {
+                for (int dx = -r; dx <= r; dx++)
+                for (int dy = -r; dy <= r; dy++)
+                {
+                    if (Mathf.Abs(dx) != r && Mathf.Abs(dy) != r) continue;
+                    int nx = cx + dx, ny = cy + dy;
+                    if (IsWalkableGrid(nx, ny))
+                        return GridToWorld(nx, ny);
+                }
+            }
+
+            return worldPos;
+        }
+
+        /// <summary>
+        /// 비유효 위치에서 BFS 로 가장 가까운 유효 위치(PointIsValid 기준)를 반환한다.
+        /// IsWalkable(타일맵) AND NavObstacleLayer 장애물 없음 을 동시에 검사한다.
+        /// </summary>
+        public Vector2 GetNearestValid(Vector2 worldPos, int searchRadius = 5)
+        {
+            if (m_FloorTilemap == null) return worldPos;
+
+            Vector3Int cell = m_FloorTilemap.WorldToCell(worldPos);
+            int cx = Mathf.Clamp(cell.x - m_Origin.x, 0, Width  - 1);
+            int cy = Mathf.Clamp(cell.y - m_Origin.y, 0, Height - 1);
+
+            Vector2 center = GridToWorld(cx, cy);
+            if (PointIsValid(center)) return center;
+
+            for (int r = 1; r <= searchRadius; r++)
+            {
+                for (int dx = -r; dx <= r; dx++)
+                for (int dy = -r; dy <= r; dy++)
+                {
+                    if (Mathf.Abs(dx) != r && Mathf.Abs(dy) != r) continue;
+                    int nx = cx + dx, ny = cy + dy;
+                    if (nx < 0 || ny < 0 || nx >= Width || ny >= Height) continue;
+                    Vector2 candidate = GridToWorld(nx, ny);
+                    if (PointIsValid(candidate))
+                        return candidate;
+                }
+            }
+
+            return worldPos;
         }
 
         // ================================================================

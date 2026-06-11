@@ -92,7 +92,7 @@ namespace MonsterKitchen.AI.BehaviorTree.Monster
                 var skill = groups[i]?.GetStep(0);
                 if (skill == null)               continue;
                 if (s.SkillTimers[i] > 0f)       continue;
-                if (dist > skill.SearchRange)    continue;
+                if (dist > skill.AttackRange)    continue;
 
                 FireSkill(s, i, skill, toPlayer, data, dist, player);
                 break;
@@ -102,21 +102,22 @@ namespace MonsterKitchen.AI.BehaviorTree.Monster
         void FireSkill(State s, int index, SkillData skill, Vector2 toPlayer,
                        MonsterData data, float dist, Transform player)
         {
-            s.SkillTimers[index] = skill.Cooltime;
-
-            int triggerHash = string.IsNullOrEmpty(skill.AnimTriggerOverride)
-                ? s_HashAttack
-                : Animator.StringToHash(skill.AnimTriggerOverride);
-            s.Anim?.SetTrigger(triggerHash);
-
             int           baseDmg = data != null ? data.Attack : 5;
             int           damage  = Mathf.Max(1, Mathf.RoundToInt(baseDmg * skill.DamageMultiplier));
             AttributeType attr    = data != null ? data.Attribute : AttributeType.None;
 
             if (skill.IsProjectile)
                 s.Ctrl?.FireProjectile(skill, damage, attr, toPlayer);
-            else if (dist <= skill.AttackRange)
+            else
                 player.GetComponent<Health>()?.TakeDamage(damage, attr);
+
+            // 공격 실행 후 쿨타임 설정
+            s.SkillTimers[index] = skill.Cooltime;
+
+            int triggerHash = string.IsNullOrEmpty(skill.AnimTriggerOverride)
+                ? s_HashAttack
+                : Animator.StringToHash(skill.AnimTriggerOverride);
+            s.Anim?.SetTrigger(triggerHash);
         }
 
         static void TickSkillTimers(State s, float dt)

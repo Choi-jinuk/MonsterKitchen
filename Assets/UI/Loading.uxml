@@ -1,0 +1,20 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" editor-extension-mode="False">
+    <Style src="Loading.uss"/>
+    <ui:VisualElement name="loading-root" class="loading-root">
+
+        <ui:Label name="loading-text" text="Loading..." class="loading-text"
+            style="-unity-font-definition: url(&quot;project://database/Assets/TextMesh%20Pro/Fonts/GowunDodum-Regular.ttf?fileID=12800000&amp;guid=35231759caa53a64da6b9ef68c3011d2&amp;type=3#GowunDodum-Regular&quot;);"/>
+
+        <ui:VisualElement name="spinner" class="spinner"/>
+
+        <!-- 프로그레스 바 -->
+        <ui:VisualElement name="progress-bar-bg" class="progress-bar-bg">
+            <ui:VisualElement name="progress-bar-fill" class="progress-bar-fill"/>
+        </ui:VisualElement>
+
+        <!-- 팁 텍스트 -->
+        <ui:Label name="tip-label" text="" class="tip-label"
+            style="-unity-font-definition: url(&quot;project://database/Assets/TextMesh%20Pro/Fonts/GowunDodum-Regular.ttf?fileID=12800000&amp;guid=35231759caa53a64da6b9ef68c3011d2&amp;type=3#GowunDodum-Regular&quot;);"/>
+
+    </ui:VisualElement>
+</ui:UXML>

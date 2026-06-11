@@ -55,6 +55,28 @@ namespace MonsterKitchen.Data
         void OnValidate() => Core.PerspectiveManager.NotifyTiltChanged();
 #endif
 
+        // ── Cooking — Grade ───────────────────────────────────────────
+        [Header("Cooking — Grade")]
+        [Tooltip("Raw 재료 상태 배율")]
+        public float GradeMultiplierRaw      = 1.0f;
+        [Tooltip("Cooked 재료 상태 배율")]
+        public float GradeMultiplierCooked   = 1.2f;
+        [Tooltip("Spoiled 재료 상태 배율")]
+        public float GradeMultiplierSpoiled  = 0.5f;
+
+        [Tooltip("이 값 이상이면 Good 등급")]
+        public float GradeThresholdGood      = 1.0f;
+        [Tooltip("이 값 이상이면 Perfect 등급")]
+        public float GradeThresholdPerfect   = 2.5f;
+        [Tooltip("이 값 이상이면 Legendary 등급")]
+        public float GradeThresholdLegendary = 4.0f;
+
+        // ── Save ─────────────────────────────────────────────────────────
+        [Header("Save")]
+        [Tooltip("자동 저장 주기 (초). 0 이면 자동 저장 비활성.")]
+        [SerializeField] int m_AutoSaveIntervalSeconds = 30;
+        public int AutoSaveIntervalSeconds => m_AutoSaveIntervalSeconds;
+
         // ── 향후 확장 예정 (주석 해제해서 추가) ──────────────────────
         // [Header("Camera")]
         // [Tooltip("Perspective 카메라 FOV.")]
