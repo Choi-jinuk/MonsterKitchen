@@ -287,7 +287,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::MonsterKitchen.UI.InteractionPrompt
   m_PromptRoot: {fileID: 567635212}
   m_Label: {fileID: 2000446501}
-  m_ActionKey: UI_INTERACT
+  m_ActionKey: UI_ENTER_DUNGEON
 --- !u!114 &8631947
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -300,6 +300,52 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f7eb69a9cf605254c82e51cd1e7be5a7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MonsterKitchen.Core.PerspectiveEntityTilt
+--- !u!1 &20656167
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 20656169}
+  - component: {fileID: 20656168}
+  m_Layer: 0
+  m_Name: PartyPanelOpener
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &20656168
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 20656167}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 57fe779af17103e4db437d18af663864, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: MonsterKitchen::MonsterKitchen.UI.PartyPanelOpener
+  m_Panel: {fileID: 44278148}
+  m_ToggleKey: 30
+--- !u!4 &20656169
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 20656167}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &42895440
 GameObject:
   m_ObjectHideFlags: 0
@@ -323,6 +369,74 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 42895440}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &44278148
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 44278151}
+  - component: {fileID: 44278150}
+  - component: {fileID: 44278149}
+  m_Layer: 0
+  m_Name: PartySelectPanel
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 0
+--- !u!114 &44278149
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 44278148}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ee4bdbc7e0ca14a469dc45cf775dbaa4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: MonsterKitchen::MonsterKitchen.UI.PartySelectPanel
+--- !u!114 &44278150
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 44278148}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 19102, guid: 0000000000000000e000000000000000, type: 0}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.dll::UnityEngine.UIElements.UIDocument
+  m_PanelSettings: {fileID: 11400000, guid: 809134cccc8c0ed40ad6bc4171280fff, type: 2}
+  m_ParentUI: {fileID: 0}
+  sourceAsset: {fileID: 9197481963319205126, guid: 00622496d50af8444ac5a2ee4796244f, type: 3}
+  m_SortingOrder: 0
+  m_Position: 0
+  m_WorldSpaceSizeMode: 1
+  m_WorldSpaceWidth: 1920
+  m_WorldSpaceHeight: 1080
+  m_PivotReferenceSize: 0
+  m_Pivot: 0
+  m_WorldSpaceCollider: {fileID: 0}
+--- !u!4 &44278151
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 44278148}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
@@ -1576,7 +1690,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::MonsterKitchen.UI.InteractionPrompt
   m_PromptRoot: {fileID: 509556040}
   m_Label: {fileID: 545857664}
-  m_ActionKey: UI_INTERACT
+  m_ActionKey: UI_START_EVENING
 --- !u!114 &674964630
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1797,6 +1911,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 26ad1f7f0a77a9d4cbda09d9d7eb2bdd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MonsterKitchen.Management.ManagementSceneController
+  m_PlayerSpawnPoint: {fileID: 42895441}
 --- !u!4 &899109018
 Transform:
   m_ObjectHideFlags: 0
@@ -2904,3 +3019,5 @@ SceneRoots:
   - {fileID: 42895441}
   - {fileID: 899109018}
   - {fileID: 592691091}
+  - {fileID: 44278151}
+  - {fileID: 20656169}
