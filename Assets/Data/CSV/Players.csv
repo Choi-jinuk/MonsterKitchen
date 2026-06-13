@@ -9,6 +9,14 @@
 ; ultimateSkillGroupId: 궁극기 SkillGroupData.skillGroupId 문자열
 ; maxUltimateGauge: 궁극기 게이지 최대치
 ; gaugeOnHit/Kill: 피격/처치 시 게이지 증가량
-#TYPE,string,uint,string,string,string,int,int,float,int,AttributeType,uint,string,string,string,float,float,float
-_key,Id,DisplayName,PrefabAddress,BtAssetAddress,BaseMaxHp,BaseAttack,BaseMoveSpeed,BaseDefense,AttackAttribute,DefaultWeaponId,SkillGroupId1,SkillGroupId2,UltimateSkillGroupId,MaxUltimateGauge,GaugeOnHit,GaugeOnKill
-PLR_001,9001,기본 플레이어,,bt/player/9001,100,10,5.0,0,None,7001,SGD_010,,SGD_020,100,15,25
+; charClass: 클래스 = 장착 가능 WeaponType (1:1)
+; natalStars: 태생 성급 1~3
+; cookSpeed/serveSpeed: 작업 스탯 배율 기준 (1.0 = 표준) — 근무지 배치 모듈에서 적용
+; PLR_002/003: 테스트 캐릭터 — 전용 아트 미존재, 9001 프리팹/BT 재사용 (Bow/Staff 무기는 무기 모듈에서 추가)
+#TYPE,string,uint,string,string,string,int,int,float,int,AttributeType,uint,string,string,string,float,float,float,WeaponType,int,float,float
+_key,Id,DisplayName,PrefabAddress,BtAssetAddress,BaseMaxHp,BaseAttack,BaseMoveSpeed,BaseDefense,AttackAttribute,DefaultWeaponId,SkillGroupId1,SkillGroupId2,UltimateSkillGroupId,MaxUltimateGauge,GaugeOnHit,GaugeOnKill,CharClass,NatalStars,CookSpeed,ServeSpeed
+PLR_001,9001,기본 플레이어,,bt/player/9001,100,10,5.0,0,None,7001,SGD_010,,SGD_020,100,15,25,Sword,1,1.0,1.0
+PLR_002,9002,견습 궁수,prefab/player/9001,bt/player/9001,80,12,5.5,0,None,0,SGD_010,,SGD_020,100,15,25,Bow,2,1.2,0.8
+PLR_003,9003,견습 마법사,prefab/player/9001,bt/player/9001,70,14,4.5,0,None,0,SGD_010,,SGD_020,100,15,25,Staff,3,0.8,1.2
+PLR_004,9004,훈련병 전사,prefab/player/9001,bt/player/9001,120,9,4.8,2,None,0,SGD_010,,SGD_020,100,15,25,Sword,1,1.0,1.0
+PLR_005,9005,수습 사제,prefab/player/9001,bt/player/9001,90,8,5.2,0,None,0,SGD_010,,SGD_020,100,15,25,Staff,2,0.9,1.1
