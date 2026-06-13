@@ -28,6 +28,7 @@ namespace MonsterKitchen.Data
         public long   SavedAtUtc;           // DateTime.UtcNow.Ticks
         public int    DayCount      = 1;
         public uint   SelectedCharId = 9001;
+        public List<uint> PartyCompanionIds = new();   // AI 동료 (max 2)
 
         // ── 경제 ──────────────────────────────────────────────────────
         public int Gold;
@@ -47,6 +48,10 @@ namespace MonsterKitchen.Data
         public List<InventoryEntry> Ingredients = new();
         public List<FoodEntry>      Foods       = new();
 
+        // ── 품질/등급 (v2 추가 — v1 세이브는 빈 리스트로 로드되어 Normal/품질없음 처리) ──
+        public List<IngredientQualityEntry> IngredientQualities = new();
+        public List<FoodGradeEntry>         FoodGrades          = new();
+
         // ── 요리 마스터리 (List 직렬화 — JsonUtility는 Dictionary 불가) ──
         public List<CookCountEntry> RecipeCookCounts = new();
     }
@@ -63,7 +68,25 @@ namespace MonsterKitchen.Data
     {
         public uint Id;
         public int  Qty;
-        // FoodGrade Queue 는 직렬화 불가 → 로드 시 Normal 등급으로 복원
+        // 등급 상세는 FoodGradeEntry 리스트로 별도 저장 (v2)
+    }
+
+    /// <summary>재료 품질별 보유 수량. (Id, Quality) 조합당 1엔트리.</summary>
+    [Serializable]
+    public class IngredientQualityEntry
+    {
+        public uint Id;
+        public int  Quality;   // (int)IngredientQuality
+        public int  Count;
+    }
+
+    /// <summary>음식 등급별 보유 수량. (Id, Grade) 조합당 1엔트리.</summary>
+    [Serializable]
+    public class FoodGradeEntry
+    {
+        public uint Id;
+        public int  Grade;     // (int)FoodGrade
+        public int  Count;
     }
 
     [Serializable]

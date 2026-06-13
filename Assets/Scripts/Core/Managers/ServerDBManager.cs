@@ -1,5 +1,6 @@
 using MonsterKitchen.Core;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using MonsterKitchen.Data;
 using UnityEngine;
@@ -30,7 +31,7 @@ namespace MonsterKitchen.Core
         public static ServerDBManager Instance { get; private set; }
 
         const string SaveFileName   = "save.json";
-        const int    CurrentVersion = 1;
+        const int    CurrentVersion = 2;   // v2: IngredientQualities + FoodGrades 추가
 
         string SavePath => Path.Combine(Application.persistentDataPath, SaveFileName);
 
@@ -110,6 +111,7 @@ namespace MonsterKitchen.Core
                 SavedAtUtc        = DateTime.UtcNow.Ticks,
                 DayCount          = day?.CurrentDay ?? 1,
                 SelectedCharId    = pm?.SelectedCharId ?? 9001,
+                PartyCompanionIds = pm != null ? new List<uint>(pm.PartyCompanionIds) : new List<uint>(),
                 Gold              = coin?.Gold ?? 0,
                 ToolDamageLevel   = upg?.ToolDamageLevel   ?? 0,
                 ToolRangeLevel    = upg?.ToolRangeLevel    ?? 0,
@@ -126,6 +128,14 @@ namespace MonsterKitchen.Core
 
                 foreach (var kv in inv.AllFoods)
                     save.Foods.Add(new FoodEntry { Id = kv.Key, Qty = kv.Value });
+
+                foreach (var (id, quality, count) in inv.AllIngredientQualities())
+                    save.IngredientQualities.Add(new IngredientQualityEntry
+                        { Id = id, Quality = (int)quality, Count = count });
+
+                foreach (var (id, grade, count) in inv.AllFoodGrades())
+                    save.FoodGrades.Add(new FoodGradeEntry
+                        { Id = id, Grade = (int)grade, Count = count });
             }
 
             var mastery = pm?.Mastery;

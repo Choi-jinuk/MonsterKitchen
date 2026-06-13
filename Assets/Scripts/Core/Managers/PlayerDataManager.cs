@@ -46,6 +46,16 @@ namespace MonsterKitchen.Core
         /// <summary>현재 선택된 플레이어 캐릭터 ID. ServerDB 저장/로드 시 사용.</summary>
         public uint SelectedCharId { get; set; } = 9001;
 
+        /// <summary>AI 동료 파티 (max 2). 읽기 직접 허용, 변경은 NetworkManager.RequestSetParty 경유.</summary>
+        public List<uint> PartyCompanionIds { get; private set; } = new();
+
+        /// <summary>파티 동료 ID 목록을 교체한다. NetworkManager 가 검증 후 호출.</summary>
+        public void ApplyParty(IEnumerable<uint> ids)
+        {
+            PartyCompanionIds.Clear();
+            if (ids != null) PartyCompanionIds.AddRange(ids);
+        }
+
         // ================================================================
         //  생명주기
         // ================================================================
@@ -101,6 +111,7 @@ namespace MonsterKitchen.Core
             }
 
             SelectedCharId = save.SelectedCharId;
+            ApplyParty(save.PartyCompanionIds);
             Coin.SetGold(save.Gold);
             Upgrades.LoadLevels(
                 save.ToolDamageLevel, save.ToolRangeLevel, save.ToolCooldownLevel,
@@ -108,6 +119,8 @@ namespace MonsterKitchen.Core
 
             Inventory.LoadIngredients(FlatEntries(save.Ingredients));
             Inventory.LoadFoods(FlatEntries(save.Foods));
+            Inventory.LoadIngredientQualities(QualityEntries(save.IngredientQualities));
+            Inventory.LoadFoodGrades(GradeEntries(save.FoodGrades));
 
             if (save.RecipeCookCounts != null)
             {
@@ -132,6 +145,20 @@ namespace MonsterKitchen.Core
         {
             if (list == null) yield break;
             foreach (var e in list) yield return (e.Id, e.Qty);
+        }
+
+        static IEnumerable<(uint id, IngredientQuality quality, int count)> QualityEntries(
+            List<IngredientQualityEntry> list)
+        {
+            if (list == null) yield break;
+            foreach (var e in list) yield return (e.Id, (IngredientQuality)e.Quality, e.Count);
+        }
+
+        static IEnumerable<(uint id, FoodGrade grade, int count)> GradeEntries(
+            List<FoodGradeEntry> list)
+        {
+            if (list == null) yield break;
+            foreach (var e in list) yield return (e.Id, (FoodGrade)e.Grade, e.Count);
         }
     }
 }
