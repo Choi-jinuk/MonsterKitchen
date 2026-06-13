@@ -153,7 +153,8 @@ namespace MonsterKitchen.Enemy
                     Stop();
                     return;
                 }
-                m_DashDir         = navDir;
+                // 군집 보정: 이웃 밀집 시 dash 방향을 빈쪽으로 조향
+                m_DashDir         = m_Sep != null ? m_Sep.ApplySeparation(navDir) : navDir;
                 m_DashWindupTimer = m_DashWindupDuration;
                 Stop();
             }
