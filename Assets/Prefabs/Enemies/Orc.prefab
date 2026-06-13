@@ -20,9 +20,9 @@ GameObject:
   - component: {fileID: 4745114982048035818}
   - component: {fileID: 734749195336839959}
   - component: {fileID: 4940764961351813988}
-  - component: {fileID: 8585949829578150238}
+  - component: {fileID: 3129263573966646982}
   m_Layer: 8
-  m_Name: Slime
+  m_Name: Orc
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -314,7 +314,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f7eb69a9cf605254c82e51cd1e7be5a7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MonsterKitchen.Core.PerspectiveEntityTilt
---- !u!114 &8585949829578150238
+--- !u!114 &3129263573966646982
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -323,9 +323,6 @@ MonoBehaviour:
   m_GameObject: {fileID: 5250572445987000973}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5520701b7953be44eb72ec8d813fc82b, type: 3}
+  m_Script: {fileID: 11500000, guid: 155542dec430d294387060fc42f4c3c2, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::MonsterKitchen.Enemy.SlimeMovement
-  m_DashWindupDuration: 0.55
-  m_DashDuration: 1
-  m_DashCooldown: 0.6
+  m_EditorClassIdentifier: MonsterKitchen::MonsterKitchen.Enemy.ContinuousMovement

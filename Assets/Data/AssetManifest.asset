@@ -55,3 +55,9 @@ MonoBehaviour:
     Asset: {fileID: 746618591605813280, guid: fbf2b1f655b05cf4bb9de20510668c97, type: 3}
   - Key: prefab/ui/recipebookui
     Asset: {fileID: 4821569037241985632, guid: c9f3b2a1d4e8f501b26739a0c15482e3, type: 3}
+  - Key: prefab/monster/1006
+    Asset: {fileID: 5250572445987000973, guid: 5829d12035972cc43adb24145022a2d8, type: 3}
+  - Key: sprite/monster/1006
+    Asset: {fileID: -7282886668606283007, guid: 4f4247ec0a7c4b648b37352cf74ceb1a, type: 3}
+  - Key: bt/monster/1006
+    Asset: {fileID: 11400000, guid: 83770707d836a2849a8924867c84900f, type: 2}
