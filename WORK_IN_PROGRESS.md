@@ -3,6 +3,29 @@
 > **운영 규칙 (2026-06-12)**: 사용자 지시사항은 작업 시작 전 이 파일의 `### 지시` 항목에 먼저 기입.
 > 처리 내용은 진행 순서대로 즉시 기록 (몰아서 쓰지 않기). 세션 단절 시 이어서 작업 가능하게.
 
+## 진행 중 (Editor 트리/배치 + 시각 검증 대기): 동료 파티 시스템 첫 슬라이스 (2026-06-13)
+
+### 지시 (2026-06-13)
+- 동료 AI 배치 + 테스트 캐릭터 추가 + 배치 UI. 본 파티 시스템 시작(태그전환 제외). 동료 스폰 시점 주의.
+- 스펙: `docs/superpowers/specs/2026-06-13-companion-party-foundation-design.md`
+- 플랜: `docs/superpowers/plans/2026-06-13-companion-party-foundation.md`
+
+### 처리 내역 (브랜치 `feature/monster-flocking-encircle`)
+- ✅ ServerSaveData.PartyCompanionIds + PlayerDataManager.ApplyParty + ServerDB 저장/로드
+- ✅ NetworkManager.RequestSetParty + SanitizeParty(리더제외/중복제거/무효드롭/최대2)
+- ✅ PlayerController: IFlockAgent, InitAsCompanion(BT override), 블랙보드 Leader/FollowDistance/DetectRange
+- ✅ CompanionStateDecision + BTAction_CompanionFollow/Engage (FlockSteering 재사용, SetBtMoveDir/FindNearestEnemy/ExecuteAutoAttack 재사용)
+- ✅ CompanionManager: DungeonMapController.OnInit→InitAsync **NavGrid.Bake() 직후** 스폰(InstantiateDisabled→InitAsCompanion→SetActive). 리더 배치+NavGrid 둘 다 충족 시점.
+- ✅ PartySelectPanel UI(uxml/uss/cs)
+- ✅ PLR_004/005 + CompanionBT.asset(자동화) + 매니페스트 bt/companion/9001
+- ✅ 버그차단: FlockManager DontDestroyOnLoad(영속 리더 등록 유지)
+- ✅ 검증: EditMode 121/121, PlayMode 동료 smoke 통과, 실패 0
+
+### 남은 작업 (인터랙티브 Editor)
+- [ ] CompanionBT 트리 구성: 루트 Selector → [Companion/Action/Engage, Companion/Action/Follow] (현재 PlayerBT 복제본 상태)
+- [ ] ManagementScene: PartySelectPanel UIDocument(비활성) + "파티 편성" 오픈 버튼 배치
+- [ ] 시각 검증: 파티 선택 → 던전 동반 → 추종/적 둘러싸기/디스폰
+
 ## 완료 (Editor 에셋 + 시각 검증 대기): 몬스터 군집 이동 & 둘러싸기 (2026-06-13)
 
 ### 지시 (2026-06-13)
