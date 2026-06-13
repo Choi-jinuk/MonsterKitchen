@@ -1,4 +1,5 @@
 using MonsterKitchen.Core;
+using MonsterKitchen.AI;
 using MonsterKitchen.AI.BehaviorTree;
 using MonsterKitchen.Combat;
 using MonsterKitchen.Data;
@@ -16,7 +17,7 @@ namespace MonsterKitchen.Enemy
     [RequireComponent(typeof(BTRunner))]
     [RequireComponent(typeof(Rigidbody2D))]
     [RequireComponent(typeof(Animator))]
-    public class BTMonsterController : MonsterBase, IBTBlackboardInitializer, IMonsterSeparation, IMonsterFlockAgent
+    public class BTMonsterController : MonsterBase, IBTBlackboardInitializer, IMonsterSeparation, IFlockAgent
     {
         [Header("Movement")]
         [SerializeField] float m_DetectRangeBonus = 1.5f;
@@ -45,7 +46,7 @@ namespace MonsterKitchen.Enemy
         public FlockWeights         FlockWeights   => m_FlockWeights;
         public Vector2[]            NeighborBuffer => m_NeighborBuffer;
 
-        // ── IMonsterFlockAgent ──────────────────────────────────────────
+        // ── IFlockAgent ─────────────────────────────────────────────────
         public Vector2   FlockPosition  => transform.position;
         public Transform FlockTransform => transform;
 
@@ -53,13 +54,13 @@ namespace MonsterKitchen.Enemy
         protected override void OnEnable()
         {
             base.OnEnable();
-            MonsterFlockManager.GetOrCreate().Register(this);
+            FlockManager.GetOrCreate().Register(this);
         }
 
         protected override void OnDisable()
         {
             base.OnDisable();
-            MonsterFlockManager.Instance?.Unregister(this);
+            FlockManager.Instance?.Unregister(this);
         }
 
         void OnValidate()
@@ -157,7 +158,7 @@ namespace MonsterKitchen.Enemy
 
         public Vector2 ApplySeparation(Vector2 desiredDir)
         {
-            var mgr = MonsterFlockManager.Instance;
+            var mgr = FlockManager.Instance;
             if (mgr == null) return desiredDir;
 
             int count = mgr.QueryNeighbors(

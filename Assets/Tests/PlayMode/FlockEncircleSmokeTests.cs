@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.TestTools;
-using MonsterKitchen.Enemy;
+using MonsterKitchen.AI;
 
 namespace MonsterKitchen.Tests.PlayMode
 {
@@ -12,7 +12,7 @@ namespace MonsterKitchen.Tests.PlayMode
     // ====================================================================
     public class FlockEncircleSmokeTests
     {
-        sealed class DummyAgent : MonoBehaviour, IMonsterFlockAgent
+        sealed class DummyAgent : MonoBehaviour, IFlockAgent
         {
             public Vector2   FlockPosition  => transform.position;
             public Transform FlockTransform => transform;
@@ -21,7 +21,7 @@ namespace MonsterKitchen.Tests.PlayMode
         [UnityTest]
         public IEnumerator Agents_SeparateOverTime()
         {
-            var mgr = MonsterFlockManager.GetOrCreate();
+            var mgr = FlockManager.GetOrCreate();
 
             var agents = new List<DummyAgent>();
             for (int i = 0; i < 20; i++)

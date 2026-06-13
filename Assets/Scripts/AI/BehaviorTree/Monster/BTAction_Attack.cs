@@ -61,7 +61,7 @@ namespace MonsterKitchen.AI.BehaviorTree.Monster
             if (s.Ctrl != null)
             {
                 float moveSpeed = ctx.Blackboard.Get<float>("MoveSpeed");
-                var   mgr       = MonsterKitchen.Enemy.MonsterFlockManager.Instance;
+                var   mgr       = MonsterKitchen.AI.FlockManager.Instance;
                 var   weights   = s.Ctrl.FlockWeights;
 
                 int count = mgr != null
@@ -69,7 +69,7 @@ namespace MonsterKitchen.AI.BehaviorTree.Monster
                                          ctx.Owner.transform, s.Ctrl.NeighborBuffer)
                     : 0;
 
-                Vector2 encircle = MonsterKitchen.Enemy.FlockSteering.ComputeEncircle(
+                Vector2 encircle = MonsterKitchen.AI.FlockSteering.ComputeEncircle(
                     ctx.Owner.transform.position, player.position, prefDist,
                     s.Ctrl.NeighborBuffer, count, moveSpeed, weights);
 

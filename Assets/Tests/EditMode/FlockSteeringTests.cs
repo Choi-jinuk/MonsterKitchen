@@ -1,6 +1,6 @@
 using NUnit.Framework;
 using UnityEngine;
-using MonsterKitchen.Enemy;
+using MonsterKitchen.AI;
 
 namespace MonsterKitchen.Tests
 {

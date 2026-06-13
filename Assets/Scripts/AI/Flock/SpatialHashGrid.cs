@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace MonsterKitchen.Enemy
+namespace MonsterKitchen.AI
 {
     // ====================================================================
     //  SpatialHashGrid — 순수 2D 공간 해시 (이웃 위치 질의)

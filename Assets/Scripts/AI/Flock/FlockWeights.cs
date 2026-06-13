@@ -1,7 +1,7 @@
-namespace MonsterKitchen.Enemy
+namespace MonsterKitchen.AI
 {
     // ====================================================================
-    //  FlockWeights — 군집 스티어링 가중치/반경 설정값
+    //  FlockWeights — 군집 스티어링 가중치/반경 설정값 (몬스터·동료 공용)
     // ====================================================================
     [System.Serializable]
     public struct FlockWeights

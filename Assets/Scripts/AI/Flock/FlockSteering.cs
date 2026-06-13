@@ -1,9 +1,10 @@
 using UnityEngine;
 
-namespace MonsterKitchen.Enemy
+namespace MonsterKitchen.AI
 {
     // ====================================================================
     //  FlockSteering — 순수 군집 스티어링 함수 (부수효과 없음, 테스트 가능)
+    //                  몬스터·동료(컴패니언) 등 모든 AI 에이전트 공용.
     //
     //  ▶ neighbors: self 제외한 이웃 위치 배열. count 만큼만 유효.
     //  ▶ 모든 함수는 desired velocity(또는 force) 를 반환만 한다.

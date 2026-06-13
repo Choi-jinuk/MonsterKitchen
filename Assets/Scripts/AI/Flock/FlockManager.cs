@@ -1,29 +1,30 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace MonsterKitchen.Enemy
+namespace MonsterKitchen.AI
 {
     // ====================================================================
-    //  MonsterFlockManager — 군집 이웃 질의 싱글톤
+    //  FlockManager — 군집 이웃 질의 싱글톤 (몬스터·동료 공용 단일 그리드)
     //
-    //  ▶ 등록된 IMonsterFlockAgent 를 매 FixedUpdate SpatialHashGrid 에 재배치.
+    //  ▶ 등록된 IFlockAgent 를 매 FixedUpdate SpatialHashGrid 에 재배치.
     //  ▶ QueryNeighbors 로 self 제외 반경 내 이웃 위치를 버퍼에 채운다.
+    //  ▶ 진영 구분 없이 모든 에이전트가 단일 그리드에서 겹침 회피(WC3 방식).
     //  ▶ 첫 Register 시 lazy 부트스트랩 — 씬 사전 배치 불필요.
     // ====================================================================
-    public sealed class MonsterFlockManager : MonoBehaviour
+    public sealed class FlockManager : MonoBehaviour
     {
-        public static MonsterFlockManager Instance { get; private set; }
+        public static FlockManager Instance { get; private set; }
 
         const float CellSize = 0.9f;  // = 기본 SepRadius
 
-        readonly List<IMonsterFlockAgent> m_Agents = new List<IMonsterFlockAgent>(128);
+        readonly List<IFlockAgent> m_Agents = new List<IFlockAgent>(128);
         SpatialHashGrid m_Grid;
 
-        public static MonsterFlockManager GetOrCreate()
+        public static FlockManager GetOrCreate()
         {
             if (Instance != null) return Instance;
-            var go = new GameObject("[MonsterFlockManager]");
-            return Instance = go.AddComponent<MonsterFlockManager>();
+            var go = new GameObject("[FlockManager]");
+            return Instance = go.AddComponent<FlockManager>();
         }
 
         void Awake()
@@ -35,13 +36,13 @@ namespace MonsterKitchen.Enemy
 
         void OnDestroy() { if (Instance == this) Instance = null; }
 
-        public void Register(IMonsterFlockAgent agent)
+        public void Register(IFlockAgent agent)
         {
             if (agent == null || m_Agents.Contains(agent)) return;
             m_Agents.Add(agent);
         }
 
-        public void Unregister(IMonsterFlockAgent agent) => m_Agents.Remove(agent);
+        public void Unregister(IFlockAgent agent) => m_Agents.Remove(agent);
 
         void FixedUpdate()
         {
