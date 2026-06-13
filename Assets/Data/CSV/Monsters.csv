@@ -17,3 +17,4 @@ MON_002,1002,,,35,8,2,10,Fire,Common,5002,SGD_101,false,false,false,prefab/monst
 MON_003,1003,,,45,10,5,10,None,Uncommon,5003,SGD_102,false,false,false,prefab/monster/1003,sprite/monster/1003,bt/monster/1003
 MON_004,1004,,,60,8,8,10,Poison,Uncommon,5004,SGD_103,false,false,false,prefab/monster/1004,sprite/monster/1004,bt/monster/1004
 MON_005,1005,,,200,18,10,10,Earth,Rare,5005,SGD_104|SGD_105,false,true,false,prefab/monster/1005,sprite/monster/1005,bt/monster/1005
+MON_006,1006,,,50,7,3,3,None,Common,5001,SGD_101,false,false,false,prefab/monster/1006,sprite/monster/1006,bt/monster/1006
