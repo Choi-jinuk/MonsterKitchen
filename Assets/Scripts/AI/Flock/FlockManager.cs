@@ -32,6 +32,9 @@ namespace MonsterKitchen.AI
             if (Instance != null && Instance != this) { Destroy(gameObject); return; }
             Instance = this;
             m_Grid   = new SpatialHashGrid(CellSize);
+            // 영속 단일 그리드 — DontDestroyOnLoad 플레이어(리더)가 OnEnable 에서 1회만
+            // 등록하므로, 씬 전환에도 매니저가 살아남아야 리더가 그리드에 유지된다.
+            DontDestroyOnLoad(gameObject);
         }
 
         void OnDestroy() { if (Instance == this) Instance = null; }
