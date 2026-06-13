@@ -1,3 +1,4 @@
+using MonsterKitchen.AI;
 using MonsterKitchen.AI.BehaviorTree;
 using MonsterKitchen.Combat;
 using MonsterKitchen.Core;
@@ -28,7 +29,7 @@ namespace MonsterKitchen.Player
     [RequireComponent(typeof(Rigidbody2D))]
     [RequireComponent(typeof(Animator))]
     [RequireComponent(typeof(PlayerStats))]
-    public class PlayerController : MonoBehaviour, IBTBlackboardInitializer
+    public class PlayerController : MonoBehaviour, IBTBlackboardInitializer, IFlockAgent
     {
         [Header("Layer")]
         [SerializeField] LayerMask m_EnemyLayer;
@@ -124,6 +125,14 @@ namespace MonsterKitchen.Player
         public bool             IsInDungeon      => m_IsInDungeon;
         public float            AutoChaseRange   => m_AutoChaseRange;
 
+        // ── 동료(컴패니언) 역할 ─────────────────────────────────────────
+        public bool      IsCompanion { get; private set; }
+        public Transform Leader      { get; private set; }
+
+        // ── IFlockAgent (리더·동료 공통, 단일 그리드) ───────────────────
+        public Vector2   FlockPosition  => transform.position;
+        public Transform FlockTransform => transform;
+
         // ================================================================
         //  IBTBlackboardInitializer
         // ================================================================
@@ -139,6 +148,15 @@ namespace MonsterKitchen.Player
             bb.Set("Skill2Requested",    false);
             bb.Set("UltimateRequested",  false);
             bb.Set("IsInDungeon",        m_IsInDungeon);
+
+            // 동료: companion BT 가 읽는 키. InitAsCompanion 이 SetActive 전에 호출되므로
+            // IsCompanion/Leader 는 이 콜백 시점에 이미 세팅돼 있다.
+            if (IsCompanion)
+            {
+                bb.Set("Leader",         Leader);
+                bb.Set("FollowDistance", 1.5f);
+                bb.Set("DetectRange",    6f);
+            }
         }
 
         // ================================================================
@@ -168,6 +186,8 @@ namespace MonsterKitchen.Player
 
             SceneManager.sceneLoaded += OnSceneLoaded;
             UpdateDungeonState(SceneManager.GetActiveScene().name);
+
+            FlockManager.GetOrCreate().Register(this);
         }
 
         void OnDisable()
@@ -192,6 +212,8 @@ namespace MonsterKitchen.Player
                 m_Stats.OnWeaponChanged -= OnWeaponChanged;
 
             SceneManager.sceneLoaded -= OnSceneLoaded;
+
+            FlockManager.Instance?.Unregister(this);
         }
 
         void Start()
@@ -204,19 +226,21 @@ namespace MonsterKitchen.Player
         //  Init — SpawnManager 패턴
         // ================================================================
 
-        public void Init(PlayerCharData data)
+        public void Init(PlayerCharData data, string btAddressOverride = null)
         {
             m_Stats.Init(data);
 
             m_WeaponSocket?.SetWeapon(m_Stats.EquippedWeapon);
             m_WeaponSocket?.SetFacingDirection(m_FacingDir);
 
-            // BTRunner 에 PlayerBT 에셋 설정
-            // 우선순위: data.BtAssetAddress (CSV 데이터) → m_BtAssetAddress (Inspector 폴백)
+            // BTRunner 에 BT 에셋 설정
+            // 우선순위: btAddressOverride (동료 BT) → data.BtAssetAddress (CSV) → m_BtAssetAddress (Inspector)
             m_BtRunner = GetComponent<BTRunner>();
-            string btKey = (data != null && !string.IsNullOrEmpty(data.BtAssetAddress))
-                ? data.BtAssetAddress
-                : m_BtAssetAddress;
+            string btKey = !string.IsNullOrEmpty(btAddressOverride)
+                ? btAddressOverride
+                : (data != null && !string.IsNullOrEmpty(data.BtAssetAddress))
+                    ? data.BtAssetAddress
+                    : m_BtAssetAddress;
 
             if (m_BtRunner != null && !string.IsNullOrEmpty(btKey))
             {
@@ -230,6 +254,17 @@ namespace MonsterKitchen.Player
             m_Initialized = true;
 
             DebugUtil.Log("[PlayerController] Init 완료 (BT 구동)");
+        }
+
+        /// <summary>
+        /// 동료로 초기화한다. 반드시 SetActive(true) 전에 호출해야
+        /// BTRunner.Start 가 companion BT 로 시작되고 블랙보드에 Leader 가 주입된다.
+        /// </summary>
+        public void InitAsCompanion(PlayerCharData data, Transform leader, string companionBtAddress)
+        {
+            IsCompanion = true;
+            Leader      = leader;
+            Init(data, companionBtAddress);
         }
 
 #if UNITY_EDITOR
@@ -360,6 +395,25 @@ namespace MonsterKitchen.Player
         }
 
         /// <summary>
+        /// 교전 거리 정책 — 투사체는 SearchRange(발사 가능 거리), 근접은 AttackRange(실제 타격 거리).
+        /// BT 가 이 거리 안에서만 공격 브랜치로 전환해야 근접 허공 공격 교착이 없다.
+        /// </summary>
+        public static float EngageRangeOf(SkillData skill, float fallback)
+        {
+            if (skill == null) return fallback;
+            return skill.IsProjectile ? skill.SearchRange : skill.AttackRange;
+        }
+
+        /// <summary>현재 콤보 스텝의 실효 교전 거리. BT 공격 전환 판정용.</summary>
+        public float GetCurrentEngageRange()
+        {
+            var group = m_Stats?.NormalAttackGroup;
+            if (group == null || group.ChainLength == 0) return m_FallbackAttackRange;
+            int  step  = Mathf.Clamp(m_ComboStep, 0, group.ChainLength - 1);
+            return EngageRangeOf(group.GetStep(step), m_FallbackAttackRange);
+        }
+
+        /// <summary>
         /// 타겟 방향으로 페이싱 갱신 후 콤보 공격을 실행한다.
         /// BTAction_PlayerAutoAttack 에서 호출.
         /// </summary>
@@ -419,7 +473,7 @@ namespace MonsterKitchen.Player
         {
             if (!m_Initialized || m_IsDashing || m_DashCooldownTimer > 0f) return;
             if (UI.UIManager.Instance != null && UI.UIManager.Instance.HasOpenPopup) return;
-            if (SceneManager.GetActiveScene().name == "KitchenScene") return;
+            if (SceneManager.GetActiveScene().name == CommonString.SceneKitchen) return;
 
             m_Blackboard?.Set("DashRequested", true);
         }
@@ -609,10 +663,7 @@ namespace MonsterKitchen.Player
                 ? ((Vector2)(target.position - transform.position)).normalized
                 : m_FacingDir;
 
-            var go   = new GameObject(skill.IsAoe ? "AoEProjectile" : "Projectile");
-            go.transform.position = transform.position;
-
-            var proj = go.AddComponent<Projectile>();
+            var proj = Projectile.Spawn(transform.position);
             proj.Init(
                 damage:        dmg,
                 attr:          attr,
@@ -673,24 +724,48 @@ namespace MonsterKitchen.Player
             nodeFilter.useTriggers = true;
             int hitCount = Physics2D.OverlapCircle(transform.position, attackRange, nodeFilter, s_OverlapBuffer);
 
-            ResourceNode nearest = null;
-            float        minDist = float.MaxValue;
+            ResourceNode nearestNode = null;
+            DungeonGate  nearestGate = null;
+            float        minDist     = float.MaxValue;
             for (int i = 0; i < hitCount; i++)
             {
-                var node = s_OverlapBuffer[i].GetComponent<ResourceNode>();
-                if (node == null || node.Depleted) continue;
                 float d = Vector2.Distance(transform.position, s_OverlapBuffer[i].transform.position);
-                if (d < minDist) { minDist = d; nearest = node; }
+                if (d >= minDist) continue;
+
+                var node = s_OverlapBuffer[i].GetComponent<ResourceNode>();
+                if (node != null && !node.Depleted)
+                {
+                    minDist = d; nearestNode = node; nearestGate = null;
+                    continue;
+                }
+
+                var gate = s_OverlapBuffer[i].GetComponent<DungeonGate>();
+                if (gate != null && !gate.IsDestroyed)
+                {
+                    minDist = d; nearestGate = gate; nearestNode = null;
+                }
             }
-            if (nearest == null) return;
+            if (nearestNode == null && nearestGate == null) return;
+
+            Vector3 targetPos = nearestNode != null
+                ? nearestNode.transform.position
+                : nearestGate.transform.position;
 
             int dmg = m_Stats != null ? m_Stats.FinalAttack : 10;
             m_AtkTimer  = GetCurrentCooltime();
-            m_FacingDir = ((Vector2)(nearest.transform.position - transform.position)).normalized;
+            m_FacingDir = ((Vector2)(targetPos - transform.position)).normalized;
             m_WeaponSocket?.SetFacingDirection(m_FacingDir);
             m_Anim.SetTrigger(s_HashAttack);
-            nearest.TakeHarvestDamage(dmg, m_Stats);
-            m_Stats?.ConsumeWeaponDurabilityOnHit();
+
+            if (nearestNode != null)
+            {
+                nearestNode.TakeHarvestDamage(dmg, m_Stats);
+                m_Stats?.ConsumeWeaponDurabilityOnHit();
+            }
+            else
+            {
+                nearestGate.TakeGateDamage(dmg);
+            }
         }
 
         float GetCurrentCooltime()
@@ -714,7 +789,7 @@ namespace MonsterKitchen.Player
 
         void UpdateDungeonState(string sceneName)
         {
-            m_IsInDungeon = sceneName == "DungeonScene";
+            m_IsInDungeon = sceneName == CommonString.SceneDungeon;
             m_Blackboard?.Set("IsInDungeon", m_IsInDungeon);
         }
 
@@ -768,6 +843,24 @@ namespace MonsterKitchen.Player
 
             if (m_IsInDungeon)
                 StartCoroutine(DungeonDeathCoroutine());
+            else
+                StartCoroutine(GenericDeathCoroutine());
+        }
+
+        /// <summary>비던전 씬 사망 — 페널티 없이 현재 씬 스폰 포인트에서 부활.</summary>
+        System.Collections.IEnumerator GenericDeathCoroutine()
+        {
+            m_IsDead = true;
+
+            if (m_Rb != null)
+                m_Rb.linearVelocity = Vector2.zero;
+
+            yield return new WaitForSeconds(1.5f);
+
+            m_Health?.Revive();
+            m_IsDead = false;
+            Core.PlayerManager.Instance?.RepositionInScene();
+            DebugUtil.Log("[PlayerController] 비던전 사망 → 스폰 포인트 부활");
         }
 
         System.Collections.IEnumerator DungeonDeathCoroutine()
@@ -788,7 +881,7 @@ namespace MonsterKitchen.Player
             m_Health?.Revive();
 
             DebugUtil.Log("[PlayerController] 던전 사망 → ManagementScene 복귀");
-            SceneLoader.Instance?.LoadScene("ManagementScene");
+            SceneLoader.Instance?.LoadScene(CommonString.SceneManagement);
         }
 
         void OnWeaponChanged(Data.WeaponData weapon) => m_WeaponSocket?.SetWeapon(weapon);
