@@ -61,3 +61,5 @@ MonoBehaviour:
     Asset: {fileID: -7282886668606283007, guid: 4f4247ec0a7c4b648b37352cf74ceb1a, type: 3}
   - Key: bt/monster/1006
     Asset: {fileID: 11400000, guid: 83770707d836a2849a8924867c84900f, type: 2}
+  - Key: bt/companion/9001
+    Asset: {fileID: 11400000, guid: b7e4a7287d243024087b353a0b7f9759, type: 2}

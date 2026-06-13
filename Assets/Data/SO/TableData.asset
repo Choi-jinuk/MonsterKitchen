@@ -1564,7 +1564,7 @@ MonoBehaviour:
         WeaponAnimAddress: anim/weapon/7003
   PlayersChar:
     m_Dict:
-      m_Keys: 292300002a2300002b230000
+      m_Keys: 292300002a2300002b2300002c2300002d230000
       m_Values:
       - Id: 9001
         DisplayName: "\uAE30\uBCF8 \uD50C\uB808\uC774\uC5B4"
@@ -1626,3 +1626,43 @@ MonoBehaviour:
         NatalStars: 3
         CookSpeed: 0.8
         ServeSpeed: 1.2
+      - Id: 9004
+        DisplayName: "\uD6C8\uB828\uBCD1 \uC804\uC0AC"
+        PrefabAddress: prefab/player/9001
+        BtAssetAddress: bt/player/9001
+        BaseMaxHp: 120
+        BaseAttack: 9
+        BaseMoveSpeed: 4.8
+        BaseDefense: 2
+        AttackAttribute: 0
+        DefaultWeaponId: 0
+        SkillGroupId1: SGD_010
+        SkillGroupId2: 
+        UltimateSkillGroupId: SGD_020
+        MaxUltimateGauge: 100
+        GaugeOnHit: 15
+        GaugeOnKill: 25
+        CharClass: 0
+        NatalStars: 1
+        CookSpeed: 1
+        ServeSpeed: 1
+      - Id: 9005
+        DisplayName: "\uC218\uC2B5 \uC0AC\uC81C"
+        PrefabAddress: prefab/player/9001
+        BtAssetAddress: bt/player/9001
+        BaseMaxHp: 90
+        BaseAttack: 8
+        BaseMoveSpeed: 5.2
+        BaseDefense: 0
+        AttackAttribute: 0
+        DefaultWeaponId: 0
+        SkillGroupId1: SGD_010
+        SkillGroupId2: 
+        UltimateSkillGroupId: SGD_020
+        MaxUltimateGauge: 100
+        GaugeOnHit: 15
+        GaugeOnKill: 25
+        CharClass: 7
+        NatalStars: 2
+        CookSpeed: 0.9
+        ServeSpeed: 1.1
