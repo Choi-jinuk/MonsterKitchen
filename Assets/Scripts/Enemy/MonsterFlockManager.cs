@@ -47,11 +47,22 @@ namespace MonsterKitchen.Enemy
         {
             if (m_Grid == null) return;
             m_Grid.Clear();
-            for (int i = 0; i < m_Agents.Count; i++)
+
+            // 역순 순회 — 파괴된 에이전트는 자동 정리.
+            // 주의: 파괴된 MonoBehaviour 는 C# null 이 아니므로 멤버 접근(.FlockTransform)이
+            //       MissingReferenceException 을 던진다. Unity 오버로드 == 로 먼저 걸러낸다.
+            for (int i = m_Agents.Count - 1; i >= 0; i--)
             {
                 var a = m_Agents[i];
-                if (a?.FlockTransform == null) continue;
-                m_Grid.Insert(a.FlockPosition, a.FlockTransform.GetInstanceID());
+                if (a == null || (a is Object uo && uo == null))
+                {
+                    m_Agents.RemoveAt(i);
+                    continue;
+                }
+
+                var t = a.FlockTransform;
+                if (t == null) continue;
+                m_Grid.Insert(a.FlockPosition, t.GetInstanceID());
             }
         }
 

@@ -61,7 +61,14 @@ namespace MonsterKitchen.Tests.PlayMode
             }
             float avgMin = sumMin / agents.Count;
 
-            foreach (var a in agents) Object.Destroy(a.gameObject);
+            // 정리: unregister 후 파괴, 매니저 GO 도 파괴 (후속 테스트 오염 방지)
+            foreach (var a in agents)
+            {
+                mgr.Unregister(a);
+                Object.Destroy(a.gameObject);
+            }
+            if (mgr != null) Object.Destroy(mgr.gameObject);
+            yield return null;
 
             Assert.Greater(avgMin, 0.3f, "2초 후 평균 최근접 이웃거리가 겹침 수준보다 커야 함");
         }
