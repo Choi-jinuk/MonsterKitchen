@@ -16,15 +16,13 @@ namespace MonsterKitchen.Enemy
     [RequireComponent(typeof(BTRunner))]
     [RequireComponent(typeof(Rigidbody2D))]
     [RequireComponent(typeof(Animator))]
-    public class BTMonsterController : MonsterBase, IBTBlackboardInitializer, IMonsterSeparation
+    public class BTMonsterController : MonsterBase, IBTBlackboardInitializer, IMonsterSeparation, IMonsterFlockAgent
     {
         [Header("Movement")]
         [SerializeField] float m_DetectRangeBonus = 1.5f;
 
-        [Header("Separation Steering")]
-        [SerializeField] float     m_SeparationRadius = 0.9f;
-        [SerializeField] float     m_SeparationWeight = 2.0f;
-        [SerializeField] LayerMask m_MonsterLayer;
+        [Header("Flock Steering")]
+        [SerializeField] FlockWeights m_FlockWeights = FlockWeights.Default;
 
         [Header("Projectile (원거리 스킬 전용)")]
         [SerializeField] LayerMask m_PlayerLayer;
@@ -36,7 +34,7 @@ namespace MonsterKitchen.Enemy
         Transform            m_PlayerRef;
         MonsterMovementBase  m_Movement;
 
-        readonly Collider2D[] m_SepBuffer = new Collider2D[12];
+        readonly Vector2[] m_NeighborBuffer = new Vector2[16];
 
         static readonly int s_HashDie = Animator.StringToHash("Die");
 
@@ -44,6 +42,30 @@ namespace MonsterKitchen.Enemy
 
         public Rigidbody2D          Rb       => m_Rb;
         public MonsterMovementBase  Movement => m_Movement;
+        public FlockWeights         FlockWeights   => m_FlockWeights;
+        public Vector2[]            NeighborBuffer => m_NeighborBuffer;
+
+        // ── IMonsterFlockAgent ──────────────────────────────────────────
+        public Vector2   FlockPosition  => transform.position;
+        public Transform FlockTransform => transform;
+
+        // ── 등록/해제 + 가중치 검증 ─────────────────────────────────────
+        protected override void OnEnable()
+        {
+            base.OnEnable();
+            MonsterFlockManager.GetOrCreate().Register(this);
+        }
+
+        protected override void OnDisable()
+        {
+            base.OnDisable();
+            MonsterFlockManager.Instance?.Unregister(this);
+        }
+
+        void OnValidate()
+        {
+            if (m_FlockWeights.SepRadius <= 0f) m_FlockWeights = FlockWeights.Default;
+        }
 
         // ================================================================
         //  Init — SpawnManager 패턴
@@ -135,29 +157,19 @@ namespace MonsterKitchen.Enemy
 
         public Vector2 ApplySeparation(Vector2 desiredDir)
         {
-            int count = Physics2D.OverlapCircle(
-                transform.position, m_SeparationRadius,
-                new ContactFilter2D { layerMask = m_MonsterLayer, useLayerMask = true },
-                m_SepBuffer);
+            var mgr = MonsterFlockManager.Instance;
+            if (mgr == null) return desiredDir;
 
+            int count = mgr.QueryNeighbors(
+                transform.position, m_FlockWeights.SepRadius, transform, m_NeighborBuffer);
             if (count == 0) return desiredDir;
 
-            Vector2 separation = Vector2.zero;
-            for (int i = 0; i < count; i++)
-            {
-                if (m_SepBuffer[i] == null || m_SepBuffer[i].gameObject == gameObject) continue;
-                Vector2 away = (Vector2)transform.position - (Vector2)m_SepBuffer[i].transform.position;
-                float   dist = away.magnitude;
-                if (dist < 0.001f) continue;
-                separation += away.normalized / (dist * dist);
-            }
+            Vector2 sep = FlockSteering.Separation(
+                transform.position, m_NeighborBuffer, count,
+                m_FlockWeights.SepRadius, m_FlockWeights.SepWeight);
 
-            if (separation.sqrMagnitude < 0.0001f) return desiredDir;
-
-            Vector2 perp    = new Vector2(-desiredDir.y, desiredDir.x);
-            float   slide   = Vector2.Dot(separation.normalized, perp);
-            Vector2 blended = desiredDir + perp * (slide * m_SeparationWeight);
-            return blended.sqrMagnitude > 0.001f ? blended.normalized : desiredDir;
+            Vector2 blended = desiredDir.normalized + sep;
+            return blended.sqrMagnitude > 0.0001f ? blended.normalized : desiredDir;
         }
 
         // ================================================================
