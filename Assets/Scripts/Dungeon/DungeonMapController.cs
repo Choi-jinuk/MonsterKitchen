@@ -65,7 +65,7 @@ namespace MonsterKitchen.Dungeon
         protected override void OnInit()
         {
             MobileHUD.Instance?.SetContext(MobileContext.Dungeon);
-            GlobalController.Instance?.Player?.RepositionInScene();
+            GlobalController.Instance?.Player?.RepositionInScene(m_PlayerSpawnPoint);
             StartCoroutine(InitAsync());
         }
 
@@ -79,6 +79,9 @@ namespace MonsterKitchen.Dungeon
 
             // NavGrid 베이크
             NavGrid.Instance?.Bake();
+
+            // 동료 스폰 — 선행조건 충족 시점: 리더 리포지션(OnInit) + NavGrid 베이크 완료.
+            CompanionManager.GetOrCreate().SpawnParty();
 
             // 카메라 경계 갱신
             m_CameraConfiner?.Refresh();
