@@ -1,0 +1,20 @@
+.party-root {
+    width: 520px;
+    padding: 16px;
+    background-color: rgba(20, 20, 28, 0.95);
+    align-self: center;
+}
+.party-title { font-size: 22px; -unity-font-style: bold; color: white; }
+.party-leader { color: rgb(200, 200, 120); margin-top: 6px; }
+.party-count { color: rgb(180, 180, 180); margin-top: 6px; margin-bottom: 6px; }
+.party-roster { flex-direction: row; flex-wrap: wrap; height: 200px; }
+.card {
+    width: 110px;
+    height: 130px;
+    margin: 6px;
+    white-space: normal;
+    background-color: rgba(50, 50, 70, 0.9);
+    color: white;
+}
+.card.selected { background-color: rgba(80, 120, 200, 0.95); }
+.party-buttons { flex-direction: row; justify-content: center; margin-top: 10px; }

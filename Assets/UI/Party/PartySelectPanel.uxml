@@ -1,0 +1,12 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+  <ui:VisualElement name="root" class="party-root">
+    <ui:Label name="title" text="파티 편성" class="party-title"/>
+    <ui:Label name="leader-label" class="party-leader"/>
+    <ui:Label name="count-label" class="party-count"/>
+    <ui:ScrollView name="roster" class="party-roster"/>
+    <ui:VisualElement class="party-buttons">
+      <ui:Button name="save-btn" text="저장"/>
+      <ui:Button name="close-btn" text="닫기"/>
+    </ui:VisualElement>
+  </ui:VisualElement>
+</ui:UXML>
