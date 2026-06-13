@@ -21,10 +21,12 @@
 - ✅ 버그차단: FlockManager DontDestroyOnLoad(영속 리더 등록 유지)
 - ✅ 검증: EditMode 121/121, PlayMode 동료 smoke 통과, 실패 0
 
-### 남은 작업 (인터랙티브 Editor)
-- [ ] CompanionBT 트리 구성: 루트 Selector → [Companion/Action/Engage, Companion/Action/Follow] (현재 PlayerBT 복제본 상태)
-- [ ] ManagementScene: PartySelectPanel UIDocument(비활성) + "파티 편성" 오픈 버튼 배치
-- [ ] 시각 검증: 파티 선택 → 던전 동반 → 추종/적 둘러싸기/디스폰
+### Editor 작업 (MCP 로 완료)
+- ✅ CompanionBT 트리 = Selector[Companion/Action/Engage, Companion/Action/Follow] (CompanionAutomation.BuildCompanionTree)
+- ✅ ManagementScene: PartySelectPanel UIDocument(HUDPanelSettings, 비활성) + PartyPanelOpener(P키 토글, 패널 참조) 배치, 씬 저장
+
+### 남은 작업
+- [ ] 시각 검증(플레이): ManagementScene 에서 **P키**로 파티 패널 열기 → 동료 선택/저장 → 던전 진입 → 추종/적 둘러싸기/디스폰 확인
 
 ## 완료 (Editor 에셋 + 시각 검증 대기): 몬스터 군집 이동 & 둘러싸기 (2026-06-13)
 
