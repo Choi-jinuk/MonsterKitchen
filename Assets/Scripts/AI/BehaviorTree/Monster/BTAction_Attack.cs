@@ -57,13 +57,23 @@ namespace MonsterKitchen.AI.BehaviorTree.Monster
 
             if (dist > prefDist) return BTStatus.Failure;
 
-            // 너무 붙으면 살짝 밀어내며 공격 유지
+            // 둘러싸기: 멈추지 않고 링 주위 빈칸을 향해 미끄러지며 공격 유지
             if (s.Ctrl != null)
             {
                 float moveSpeed = ctx.Blackboard.Get<float>("MoveSpeed");
-                s.Ctrl.Rb.linearVelocity = dist < prefDist * 0.5f
-                    ? s.Ctrl.ApplySeparation(-toPlayer) * (moveSpeed * 0.5f)
-                    : Vector2.zero;
+                var   mgr       = MonsterKitchen.Enemy.MonsterFlockManager.Instance;
+                var   weights   = s.Ctrl.FlockWeights;
+
+                int count = mgr != null
+                    ? mgr.QueryNeighbors(ctx.Owner.transform.position, weights.SepRadius,
+                                         ctx.Owner.transform, s.Ctrl.NeighborBuffer)
+                    : 0;
+
+                Vector2 encircle = MonsterKitchen.Enemy.FlockSteering.ComputeEncircle(
+                    ctx.Owner.transform.position, player.position, prefDist,
+                    s.Ctrl.NeighborBuffer, count, moveSpeed, weights);
+
+                s.Ctrl.Rb.linearVelocity = encircle;
             }
 
             TickSkillTimers(s, ctx.DeltaTime);
