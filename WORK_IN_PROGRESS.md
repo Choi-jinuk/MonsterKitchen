@@ -29,7 +29,17 @@
 - ✅ **빌드깨짐 방지**: Slime/Orc 프리팹 BTMonsterController.m_FlockWeights=Default 직렬화 기입 (신규 필드라 기존 프리팹은 default 0 으로 로드됨)
 - ✅ 새 .cs .meta + 자동화 스크립트 커밋
 
+### 일반화 (2026-06-13 추가 지시): 동료 AI 공용화
+- 지시: 플레이어 동료(컴패니언)도 AI로 작동 → 이동 로직을 몬스터 전용 아닌 공용으로.
+- ✅ 공유 레이어 `Assets/Scripts/AI/Flock/`, 네임스페이스 `MonsterKitchen.AI` 로 이동: FlockSteering·SpatialHashGrid·FlockWeights
+- ✅ `IMonsterFlockAgent`→`IFlockAgent`, `MonsterFlockManager`→`FlockManager` 리네임
+- ✅ separation 범위 = 전체 공용 단일 그리드 (진영 구분 없이 모두 겹침 회피, WC3 방식)
+- ✅ 컴패니언은 향후 `IFlockAgent` 구현 + `FlockSteering` 직접 호출로 재사용 (ContinuousMovement/IMonsterSeparation 은 몬스터측 잔류, YAGNI)
+- ✅ 소비자(BTMonsterController/BTAction_Attack/테스트/FlockAutomation) 전부 갱신, 잔여 참조 0
+- 검증: 일반화는 순수 이동/리네임 (로직 무변) — EditMode 재실행 대기 (사용자 Editor 락으로 batchmode 보류)
+
 ### 남은 작업
+- [ ] EditMode/PlayMode 재실행 (사용자 Editor 닫으면 batchmode, 또는 Test Runner)
 - [ ] DungeonScene 다수 스폰 **시각 검증** (겹침 0 + 둘러싸기 형성, 영상 대조) — 인터랙티브 플레이 필요, 사용자 확인
 
 ## 진행 중 (브레인스토밍 — 일시 중단): 무기 장비 시스템 (2026-06-13)
