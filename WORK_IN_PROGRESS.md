@@ -22,12 +22,15 @@
 - ✅ 검증: EditMode 114/114 통과, PlayMode 6통과(+1 기존 ignore), 실패 0
 - ✅ 버그픽스: 파괴된 MonoBehaviour는 C# null 아님 → FlockTransform 가드가 throw → 후속 테스트 오염. Unity == 가드 + 테스트 teardown 으로 해결.
 
-### 남은 작업 (Editor GUI 필요)
-- [ ] DataManagerWindow Sync → TableData.asset MON_006 반영
-- [ ] 오크 프리팹 `prefab/monster/1006` 생성 (SlimeMovement→ContinuousMovement), BTAsset `bt/monster/1006`, AssetManifest 등록
-- [ ] Project Settings > Physics 2D > Layer Collision Matrix: Enemy↔Enemy 해제
-- [ ] DungeonScene 다수 스폰 시각 검증 (겹침 0 + 둘러싸기 형성, 영상 대조)
-- [ ] 새 .cs 파일 .meta 커밋 (Editor import 후)
+### Editor 에셋 자동화 (batchmode -executeMethod FlockAutomation.Run 로 처리, 완료)
+- ✅ SyncAllSO → TableData.asset MON_006 반영 (Monster 6개, 유효성 통과)
+- ✅ 오크 프리팹 `Assets/Prefabs/Enemies/Orc.prefab` 생성 (SlimeMovement→ContinuousMovement), AssetManifest `prefab/monster/1006`·`sprite/monster/1006`(슬라임 재사용)·`bt/monster/1006`(MonsterBT 공유) 등록
+- ✅ Physics2D Layer Collision Matrix: Enemy↔Enemy 해제 (Physics2DSettings.asset)
+- ✅ **빌드깨짐 방지**: Slime/Orc 프리팹 BTMonsterController.m_FlockWeights=Default 직렬화 기입 (신규 필드라 기존 프리팹은 default 0 으로 로드됨)
+- ✅ 새 .cs .meta + 자동화 스크립트 커밋
+
+### 남은 작업
+- [ ] DungeonScene 다수 스폰 **시각 검증** (겹침 0 + 둘러싸기 형성, 영상 대조) — 인터랙티브 플레이 필요, 사용자 확인
 
 ## 진행 중 (브레인스토밍 — 일시 중단): 무기 장비 시스템 (2026-06-13)
 
