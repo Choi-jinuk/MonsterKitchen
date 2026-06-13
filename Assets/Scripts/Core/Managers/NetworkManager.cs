@@ -43,6 +43,39 @@ namespace MonsterKitchen.Core
         //  골드
         // ================================================================
 
+        // ── 파티 편성 ────────────────────────────────────────────────────
+
+        /// <summary>요청 파티를 정제: 리더 제외, 중복 제거, 무효 ID 드롭, 최대 2명.</summary>
+        public static List<uint> SanitizeParty(uint leaderId, IReadOnlyList<uint> requested, Func<uint, bool> isValidId)
+        {
+            var result = new List<uint>(2);
+            if (requested == null) return result;
+            foreach (var id in requested)
+            {
+                if (result.Count >= 2)                   break;
+                if (id == leaderId)                      continue;
+                if (result.Contains(id))                 continue;
+                if (isValidId != null && !isValidId(id)) continue;
+                result.Add(id);
+            }
+            return result;
+        }
+
+        /// <summary>파티(동료) 구성을 요청한다. 검증 후 PlayerDataManager 반영 + dirty.</summary>
+        public void RequestSetParty(IReadOnlyList<uint> ids, Action onResult = null)
+        {
+            var  pm     = PlayerDataManager.Instance;
+            var  chars  = DataRegistry.Instance?.PlayerChars;
+            uint leader = pm?.SelectedCharId ?? 9001;
+
+            var clean = SanitizeParty(leader, ids,
+                id => chars != null && chars.Get(id) != null);
+
+            pm?.ApplyParty(clean);
+            GlobalController.Instance?.SaveSched.MarkDirty();
+            onResult?.Invoke();
+        }
+
         /// <summary>
         /// 골드 획득을 서버에 요청한다.
         /// 성공 시 onResult(newGold) 호출.
@@ -61,7 +94,7 @@ namespace MonsterKitchen.Core
 
             PlayerDataManager.Instance.ApplyGold(newGold);
             DebugUtil.Log(StringUtil.Format("[Network] EarnGold +{0}G → 총 {1}G", amount, newGold));
-            GlobalController.Instance?.SaveSched.ForceSave();
+            GlobalController.Instance?.SaveSched.MarkDirty();
             onResult?.Invoke(newGold);
         }
 
@@ -212,7 +245,7 @@ namespace MonsterKitchen.Core
 
             var (grade, remaining) = PlayerDataManager.Instance.ApplyFoodConsume(foodId);
             DebugUtil.Log(StringUtil.Format("[Network] ServeFood id:{0} [{1}] 잔여:{2}", foodId, grade, remaining));
-            GlobalController.Instance?.SaveSched.ForceSave();
+            GlobalController.Instance?.SaveSched.MarkDirty();
             onResult?.Invoke(true, grade, remaining);
         }
 
