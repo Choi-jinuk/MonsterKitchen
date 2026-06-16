@@ -39,8 +39,9 @@ namespace MonsterKitchen.Core
         /// <summary>
         /// ManagementSceneController.OnInit() 에서 첫 진입 시 1회 호출.
         /// 플레이어 데이터 로드 + 스폰 + 현재 씬 스폰 포인트 위치 설정.
+        /// spawnPoint: SceneController 가 Inspector 로 연결한 스폰 위치. null 이면 이름 검색 폴백.
         /// </summary>
-        public void Start()
+        public void Start(Transform spawnPoint = null)
         {
             if (IsStarted) return;
             IsStarted = true;
@@ -50,17 +51,17 @@ namespace MonsterKitchen.Core
                 DebugUtil.LogError($"[PlayerManager] Players 테이블에서 id={DefaultPlayerId} 를 찾을 수 없습니다. " +
                                    "Players.csv 를 확인하고 Sync All SO 를 실행하세요.");
 
-            SpawnOrReposition();
+            SpawnOrReposition(spawnPoint);
         }
 
         /// <summary>
         /// 씬 전환 후 각 SceneController.OnInit() 에서 명시적으로 호출.
-        /// 현재 씬의 PlayerSpawnPoint 로 플레이어를 이동시킨다.
+        /// 현재 씬의 스폰 포인트로 플레이어를 이동시킨다.
         /// </summary>
-        public void RepositionInScene()
+        public void RepositionInScene(Transform spawnPoint = null)
         {
             if (!IsStarted || Player == null) return;
-            SpawnOrReposition();
+            SpawnOrReposition(spawnPoint);
         }
 
         /// <summary>GlobalController.OnDestroy() 에서 호출.</summary>
@@ -70,7 +71,7 @@ namespace MonsterKitchen.Core
         //  내부
         // ================================================================
 
-        void SpawnOrReposition()
+        void SpawnOrReposition(Transform spawnPoint)
         {
             if (m_PlayerData == null)
             {
@@ -78,8 +79,8 @@ namespace MonsterKitchen.Core
                 return;
             }
 
-            var spawnPoint = FindSpawnPoint();
-            Vector3 pos    = spawnPoint != null ? spawnPoint.position : Vector3.zero;
+            if (spawnPoint == null) spawnPoint = FindSpawnPointFallback();
+            Vector3 pos = spawnPoint != null ? spawnPoint.position : Vector3.zero;
 
             if (Player == null || Player.gameObject == null)
             {
@@ -92,9 +93,13 @@ namespace MonsterKitchen.Core
             }
         }
 
-        static Transform FindSpawnPoint()
+        /// <summary>SceneController 가 스폰 포인트를 연결하지 않은 경우의 이름 검색 폴백.</summary>
+        static Transform FindSpawnPointFallback()
         {
             var go = GameObject.Find("PlayerSpawnPoint");
+            if (go == null)
+                DebugUtil.LogWarning("[PlayerManager] PlayerSpawnPoint 미발견 — (0,0,0) 스폰. " +
+                                     "SceneController 의 m_PlayerSpawnPoint 연결 권장.");
             return go != null ? go.transform : null;
         }
 
@@ -114,16 +119,17 @@ namespace MonsterKitchen.Core
                 return null;
             }
 
-            bool wasActive = prefab.gameObject.activeSelf;
-            prefab.gameObject.SetActive(false);
+            // 비활성 부모 밑에 Instantiate — Awake/OnEnable 억제. 프리팹 에셋의 activeSelf 는 건드리지 않는다.
+            var holder = new GameObject("PlayerSpawnHolder");
+            holder.SetActive(false);
 
-            var player = Object.Instantiate(prefab, pos, Quaternion.identity);
-
-            prefab.gameObject.SetActive(wasActive);
-
+            var player = Object.Instantiate(prefab, pos, Quaternion.identity, holder.transform);
             player.Init(m_PlayerData);
-            player.gameObject.SetActive(true);
+
+            // 부모 분리 → 하이어라키 활성화 → Awake/OnEnable 실행
+            player.transform.SetParent(null, worldPositionStays: true);
             Object.DontDestroyOnLoad(player.gameObject);
+            Object.Destroy(holder);
 
             DebugUtil.Log($"[PlayerManager] Player '{m_PlayerData.DisplayName}' 스폰 완료: {pos}");
             return player;

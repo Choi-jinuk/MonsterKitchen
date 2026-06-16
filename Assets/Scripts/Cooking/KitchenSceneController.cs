@@ -23,7 +23,7 @@ namespace MonsterKitchen.Kitchen
         protected override void OnInit()
         {
             MobileHUD.Instance?.SetContext(MobileContext.Exploration);
-            GlobalController.Instance?.Player?.RepositionInScene();
+            GlobalController.Instance?.Player?.RepositionInScene(m_PlayerSpawnPoint);
             CompleteInit();
         }
     }

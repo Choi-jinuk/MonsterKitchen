@@ -52,9 +52,9 @@ namespace MonsterKitchen.AI.BehaviorTree.Player
                 return BTStatus.Running;
             }
 
-            // 공격 실행
-            float  searchRange = s.Ctrl.GetCurrentSearchRange();
-            var    target      = s.Ctrl.FindNearestEnemy(searchRange);
+            // 공격 실행 — Condition 과 동일한 교전 거리 기준으로 타겟 선정
+            float  engageRange = s.Ctrl.GetCurrentEngageRange();
+            var    target      = s.Ctrl.FindNearestEnemy(engageRange);
 
             if (target != null)
                 s.Ctrl.ExecuteAutoAttack(target);

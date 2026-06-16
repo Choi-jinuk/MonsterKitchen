@@ -67,3 +67,12 @@ crashlytics-build.properties
 # Packed Addressables
 /[Aa]ssets/[Aa]ddressable[Aa]ssets[Dd]ata/**/[Bb]uildProcessorCache
 /[Aa]ssets/[Aa]ddressable[Aa]ssets[Dd]ata/**/AddressablesBuildTEP.json
+
+# Agent / skill tooling artifacts
+.agents/
+.superpowers/
+.understand-anything/
+.claude/skills/
+.claude/worktrees/
+skills-lock.json
+data/

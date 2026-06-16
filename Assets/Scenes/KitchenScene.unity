@@ -179,6 +179,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a5ab79d9185d4c24f92d88290a377005, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MonsterKitchen.Kitchen.KitchenSceneController
+  m_PlayerSpawnPoint: {fileID: 3823060}
 --- !u!4 &223796300
 Transform:
   m_ObjectHideFlags: 0
@@ -893,7 +894,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::MonsterKitchen.UI.InteractionPrompt
   m_PromptRoot: {fileID: 1247132992}
   m_Label: {fileID: 946233947}
-  m_ActionKey: UI_INTERACT
+  m_ActionKey: UI_COOKING_START
 --- !u!114 &1322621839
 MonoBehaviour:
   m_ObjectHideFlags: 0

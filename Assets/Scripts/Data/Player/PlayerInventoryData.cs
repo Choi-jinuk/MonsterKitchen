@@ -201,11 +201,39 @@ namespace MonsterKitchen.Data
         public void LoadIngredients(IEnumerable<(uint id, int qty)> entries)
         {
             m_Ingredients.Clear();
+            m_IngredientQualities.Clear();
             foreach (var (id, qty) in entries)
                 if (qty > 0) m_Ingredients[id] = qty;
         }
 
-        /// <summary>저장 데이터 복원 시 ServerDBManager 가 호출. FoodGrade 는 Normal 로 복원.</summary>
+        /// <summary>저장 데이터 복원 시 품질 카운트를 복원한다. LoadIngredients 이후 호출.</summary>
+        public void LoadIngredientQualities(IEnumerable<(uint id, IngredientQuality quality, int count)> entries)
+        {
+            m_IngredientQualities.Clear();
+            foreach (var (id, quality, count) in entries)
+            {
+                if (count <= 0) continue;
+                if (!m_IngredientQualities.TryGetValue(id, out var qDict))
+                {
+                    qDict = new Dictionary<IngredientQuality, int>();
+                    m_IngredientQualities[id] = qDict;
+                }
+                qDict[quality] = count;
+            }
+        }
+
+        /// <summary>저장용 품질 카운트 열거. ServerDBManager 전용.</summary>
+        public IEnumerable<(uint id, IngredientQuality quality, int count)> AllIngredientQualities()
+        {
+            foreach (var kv in m_IngredientQualities)
+                foreach (var q in kv.Value)
+                    yield return (kv.Key, q.Key, q.Value);
+        }
+
+        /// <summary>
+        /// 저장 데이터 복원 시 ServerDBManager 가 호출.
+        /// 등급 큐는 일단 Normal 로 채우고, 이후 LoadFoodGrades() 가 실 등급으로 교체한다.
+        /// </summary>
         public void LoadFoods(IEnumerable<(uint id, int qty)> entries)
         {
             m_Foods.Clear();
@@ -217,6 +245,49 @@ namespace MonsterKitchen.Data
                 var q = new Queue<FoodGrade>();
                 for (int i = 0; i < qty; i++) q.Enqueue(FoodGrade.Normal);
                 m_FoodGrades[id] = q;
+            }
+        }
+
+        /// <summary>저장 데이터 복원 시 등급 큐를 실 등급으로 교체. LoadFoods 이후 호출.</summary>
+        public void LoadFoodGrades(IEnumerable<(uint id, FoodGrade grade, int count)> entries)
+        {
+            m_FoodGrades.Clear();
+            foreach (var (id, grade, count) in entries)
+            {
+                if (count <= 0 || !m_Foods.ContainsKey(id)) continue;
+                if (!m_FoodGrades.TryGetValue(id, out var q))
+                {
+                    q = new Queue<FoodGrade>();
+                    m_FoodGrades[id] = q;
+                }
+                for (int i = 0; i < count; i++) q.Enqueue(grade);
+            }
+
+            // 수량 대비 등급 데이터 부족분은 Normal 패딩 (구버전 세이브 호환)
+            foreach (var kv in m_Foods)
+            {
+                if (!m_FoodGrades.TryGetValue(kv.Key, out var q))
+                {
+                    q = new Queue<FoodGrade>();
+                    m_FoodGrades[kv.Key] = q;
+                }
+                while (q.Count < kv.Value) q.Enqueue(FoodGrade.Normal);
+            }
+        }
+
+        /// <summary>저장용 음식 등급 카운트 열거 ((id, grade) 별 집계). ServerDBManager 전용.</summary>
+        public IEnumerable<(uint id, FoodGrade grade, int count)> AllFoodGrades()
+        {
+            foreach (var kv in m_FoodGrades)
+            {
+                var counts = new Dictionary<FoodGrade, int>();
+                foreach (var g in kv.Value)
+                {
+                    counts.TryGetValue(g, out int c);
+                    counts[g] = c + 1;
+                }
+                foreach (var c in counts)
+                    yield return (kv.Key, c.Key, c.Value);
             }
         }
     }

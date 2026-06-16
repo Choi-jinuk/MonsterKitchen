@@ -29,6 +29,9 @@ namespace MonsterKitchen.Core
 
         public SceneState State { get; private set; } = SceneState.Init;
 
+        /// <summary>씬의 플레이어 스폰 위치. Inspector 연결 — 미연결 시 PlayerManager 가 이름 검색 폴백.</summary>
+        [SerializeField] protected Transform m_PlayerSpawnPoint;
+
         // ── Unity ────────────────────────────────────────────────────
         void Start()
         {

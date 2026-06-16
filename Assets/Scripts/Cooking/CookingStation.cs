@@ -13,7 +13,7 @@ namespace MonsterKitchen.Cooking
     /// 플레이어가 접근해 Interact 키 → CookingUI 열기 → 레시피 선택 → 요리.
     /// 요리 요청은 NetworkManager.RequestCook() 을 통해 서버에 전달된다.
     /// </summary>
-    public class CookingStation : MonoBehaviour
+    public class CookingStation : InteractableBehaviour
     {
         [Header("Settings")]
         [SerializeField] float m_CookDuration = 1.5f;
@@ -25,25 +25,15 @@ namespace MonsterKitchen.Cooking
 
         bool m_IsCooking;
 
-        void OnTriggerEnter2D(Collider2D other)
-        {
-            if (!other.CompareTag("Player")) return;
-            if (InputManager.Instance != null)
-                InputManager.Instance.OnInteract += TryOpenUI;
-        }
+        public override bool CanInteract => !m_IsCooking;
 
-        void OnTriggerExit2D(Collider2D other)
-        {
-            if (!other.CompareTag("Player")) return;
-            if (InputManager.Instance != null)
-                InputManager.Instance.OnInteract -= TryOpenUI;
-            UIManager.Instance?.Close("CookingUI");
-        }
+        public override void Interact() => TryOpenUI();
 
-        void OnDisable()
+        protected override void OnPlayerExit() => UIManager.Instance?.Close("CookingUI");
+
+        protected override void OnDisable()
         {
-            if (InputManager.Instance != null)
-                InputManager.Instance.OnInteract -= TryOpenUI;
+            base.OnDisable();
 
             if (PlayerDataManager.Instance?.Mastery != null)
                 PlayerDataManager.Instance.Mastery.OnLevelUp -= OnMasteryLevelUp;
@@ -75,16 +65,31 @@ namespace MonsterKitchen.Cooking
             ui.OpenFor(this);
         }
 
-        /// <summary>CookingUI에서 선택된 레시피로 조리 시작. 등급은 현재 재료 품질에서 도출.</summary>
+        /// <summary>CookingUI에서 선택된 레시피로 조리 시작.</summary>
         public void CookRecipe(RecipeData recipe)
         {
             if (m_IsCooking || recipe == null) return;
 
-            var mastery = PlayerDataManager.Instance?.Mastery;
+            // 마스터리 조리 속도 적용
+            var   mastery       = PlayerDataManager.Instance?.Mastery;
+            float baseDuration  = recipe.CookTimeSeconds > 0 ? recipe.CookTimeSeconds : m_CookDuration;
+            float speedMult     = mastery?.GetSpeedMultiplier(recipe.Id) ?? 1f;
+            float finalDuration = baseDuration * speedMult;
 
-            // 요리 전 인벤토리 품질로 등급 결정 (소모 전 미리 계산)
-            FoodGrade grade = PlayerDataManager.Instance?.Inventory
-                                  .CalculateCookingGrade(recipe) ?? FoodGrade.Normal;
+            StartCoroutine(CookRoutine(recipe, finalDuration));
+        }
+
+        IEnumerator CookRoutine(RecipeData recipe, float duration)
+        {
+            m_IsCooking = true;
+            DebugUtil.Log($"[CookingStation] 조리 시작: {recipe.DisplayName} ({duration:F1}s)");
+
+            yield return new WaitForSeconds(duration);
+
+            // 등급은 재료 소모 시점의 인벤토리 품질로 결정 — 조리 중 변동과 불일치 방지
+            var       mastery = PlayerDataManager.Instance?.Mastery;
+            FoodGrade grade   = PlayerDataManager.Instance?.Inventory
+                                    .CalculateCookingGrade(recipe) ?? FoodGrade.Normal;
 
             // 마스터리 등급 상향 확률 적용
             float gradeUpChance = mastery?.GetGradeUpChance(recipe.Id) ?? 0f;
@@ -94,70 +99,55 @@ namespace MonsterKitchen.Cooking
                 DebugUtil.Log($"[CookingStation] 마스터리 등급 상향! → {grade}");
             }
 
-            // 마스터리 조리 속도 적용
-            float baseDuration  = recipe.CookTimeSeconds > 0 ? recipe.CookTimeSeconds : m_CookDuration;
-            float speedMult     = mastery?.GetSpeedMultiplier(recipe.Id) ?? 1f;
-            float finalDuration = baseDuration * speedMult;
-
-            StartCoroutine(CookRoutine(recipe, grade, finalDuration));
-        }
-
-        IEnumerator CookRoutine(RecipeData recipe, FoodGrade grade, float duration)
-        {
-            m_IsCooking = true;
-            DebugUtil.Log($"[CookingStation] 조리 시작: {recipe.DisplayName} [{grade}] ({duration:F1}s)");
-
-            yield return new WaitForSeconds(duration);
-
-            // 요리 요청 → 서버(스텁)에서 재료 검증·소모 + 음식 추가
-            bool cookSuccess = false;
-            FoodData resultFood = null;
-
-            NetworkManager.Instance?.RequestCook(recipe, grade, (success, food) =>
+            if (NetworkManager.Instance == null)
             {
-                cookSuccess = success;
-                resultFood  = food;
-            });
-
-            if (!cookSuccess || resultFood == null)
-            {
-                GameHUD.Instance?.ShowNotification("재료가 부족합니다.", 2f);
-                DebugUtil.LogWarning("[CookingStation] 요리 실패 또는 결과 음식 null.");
+                DebugUtil.LogError("[CookingStation] NetworkManager 없음 — 요리 중단.");
                 m_IsCooking = false;
                 yield break;
             }
 
-            if (cookSuccess)
+            // 후처리는 전부 콜백 내부에서 수행 — 서버가 비동기로 바뀌어도 동작 보장
+            NetworkManager.Instance.RequestCook(recipe, grade,
+                (success, food) => OnCookResult(recipe, grade, success, food));
+        }
+
+        void OnCookResult(RecipeData recipe, FoodGrade grade, bool success, FoodData food)
+        {
+            m_IsCooking = false;
+
+            if (!success || food == null)
             {
-                // 마스터리 기록
-                PlayerDataManager.Instance?.Mastery?.RecordCook(recipe.Id);
-
-                // 재료 절약 확률 — 성공 시 랜덤 재료 1개 환급
-                float saveChance = PlayerDataManager.Instance?.Mastery?.GetIngredientSaveChance(recipe.Id) ?? 0f;
-                if (saveChance > 0f && UnityEngine.Random.value < saveChance
-                    && recipe.Ingredients?.Length > 0)
-                {
-                    int  idx     = UnityEngine.Random.Range(0, recipe.Ingredients.Length);
-                    uint savedId = recipe.Ingredients[idx].IngredientId;
-                    if (savedId != 0u)
-                    {
-                        NetworkManager.Instance?.RequestAddIngredient(savedId, 1);
-                        DebugUtil.Log($"[CookingStation] 재료 절약! ID:{savedId} 1개 환급");
-                    }
-                }
-
-                if (VFXManager.Instance != null)
-                    VFXManager.Instance.PlayCookComplete(transform.position);
-                else if (m_CookCompleteVFX != null)
-                    m_CookCompleteVFX.Play();
-
-                DebugUtil.Log($"[CookingStation] 완성! {resultFood?.DisplayName ?? "???"} [{grade}] → FoodInventory 추가");
-                OnCookComplete?.Invoke(recipe, resultFood);
-
-                ShowCookRewardPopup(resultFood);
+                GameHUD.Instance?.ShowNotification("재료가 부족합니다.", 2f);
+                DebugUtil.LogWarning("[CookingStation] 요리 실패 또는 결과 음식 null.");
+                return;
             }
 
-            m_IsCooking = false;
+            // 마스터리 기록
+            PlayerDataManager.Instance?.Mastery?.RecordCook(recipe.Id);
+
+            // 재료 절약 확률 — 성공 시 랜덤 재료 1개 환급
+            float saveChance = PlayerDataManager.Instance?.Mastery?.GetIngredientSaveChance(recipe.Id) ?? 0f;
+            if (saveChance > 0f && UnityEngine.Random.value < saveChance
+                && recipe.Ingredients?.Length > 0)
+            {
+                int  idx     = UnityEngine.Random.Range(0, recipe.Ingredients.Length);
+                uint savedId = recipe.Ingredients[idx].IngredientId;
+                if (savedId != 0u)
+                {
+                    NetworkManager.Instance?.RequestAddIngredient(savedId, 1);
+                    DebugUtil.Log($"[CookingStation] 재료 절약! ID:{savedId} 1개 환급");
+                }
+            }
+
+            if (VFXManager.Instance != null)
+                VFXManager.Instance.PlayCookComplete(transform.position);
+            else if (m_CookCompleteVFX != null)
+                m_CookCompleteVFX.Play();
+
+            DebugUtil.Log($"[CookingStation] 완성! {food.DisplayName} [{grade}] → FoodInventory 추가");
+            OnCookComplete?.Invoke(recipe, food);
+
+            ShowCookRewardPopup(food);
         }
 
         static void ShowCookRewardPopup(FoodData food)

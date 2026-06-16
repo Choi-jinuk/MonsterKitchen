@@ -27,13 +27,13 @@ namespace MonsterKitchen.Editor
         //   Monsters 의 skillGroups 는 SyncAllSO 의 ResolveAllReferences() 에서 해결된다.
         static readonly string[] TABLE_LABELS = {
             "Monsters", "Ingredients", "Recipes", "Foods", "Drop Tables", "Dungeon Spawn Tables",
-            "Skill Steps", "Skill Groups", "Weapons", "Gathering Tools", "Resource Nodes", "Players", "UI Panels", "Strings"
+            "Skill Steps", "Skill Groups", "Weapons", "Gathering Tools", "Resource Nodes", "Players", "UI Panels"
         };
         static readonly string[] TABLE_FILES  = {
             "Monsters.csv", "Ingredients.csv", "Recipes.csv", "Foods.csv",
             "DropTables.csv", "DungeonSpawnTables.csv",
             "SkillSteps.csv", "SkillGroups.csv", "Weapons.csv", "GatheringTools.csv", "ResourceNodes.csv", "Players.csv",
-            "UIData.csv", "StringData.csv"
+            "UIData.csv"
         };
 
         static readonly string[][] DEFAULT_HEADERS =
@@ -61,11 +61,9 @@ namespace MonsterKitchen.Editor
             // 10: Resource Nodes
             new[] { "_key","Id","NameKey","DisplayName","NodeType","DropIngredientId","DropMin","DropMax","MaxHp","RespawnSeconds","NodeSpriteAddress" },
             // 11: Players
-            new[] { "_key","Id","DisplayName","PrefabAddress","BaseMaxHp","BaseAttack","BaseMoveSpeed","BaseDefense","AttackAttribute","DefaultWeaponId","SkillGroupId1","SkillGroupId2","UltimateSkillGroupId","MaxUltimateGauge","GaugeOnHit","GaugeOnKill" },
+            new[] { "_key","Id","DisplayName","PrefabAddress","BtAssetAddress","BaseMaxHp","BaseAttack","BaseMoveSpeed","BaseDefense","AttackAttribute","DefaultWeaponId","SkillGroupId1","SkillGroupId2","UltimateSkillGroupId","MaxUltimateGauge","GaugeOnHit","GaugeOnKill","CharClass","NatalStars","CookSpeed","ServeSpeed" },
             // 12: UI Panels
             new[] { "_key","Id","PanelId","DisplayName","PrefabAddress","ToggleKey" },
-            // 12: Strings
-            new[] { "_key","Id","StringId","Ko","En" },
         };
 
         // ── 창 상태 ──────────────────────────────────────────────────
@@ -246,7 +244,6 @@ namespace MonsterKitchen.Editor
                10 => ScriptableObjectSync.Sync<ResourceNodeData>      (parsed, td.ResourceNodes,      td, ResourceNodeMapper),
                11 => ScriptableObjectSync.Sync<PlayerCharData>        (parsed, td.PlayersChar,        td, PlayerMapper),
                12 => ScriptableObjectSync.Sync<UIData>                (parsed, td.UIPanels,           td, UIDataMapper),
-               13 => ScriptableObjectSync.Sync<StringData>            (parsed, td.Strings,            td, StringDataMapper),
                 _ => 0,
             };
         }
@@ -445,13 +442,6 @@ namespace MonsterKitchen.Editor
         {
             if (string.IsNullOrEmpty(d.PrefabAddress) && !string.IsNullOrEmpty(d.PanelId))
                 d.PrefabAddress = AssetKeys.UIPanelPrefab(d.PanelId);
-        }
-
-        static void StringDataMapper(StringData d, Dictionary<string, string> row)
-        {
-            // StringId 비어있으면 _key 에서 자동 생성
-            if (string.IsNullOrEmpty(d.StringId) && row.TryGetValue("_key", out string key))
-                d.StringId = key;
         }
 
         /// <summary>GatheringToolData: compatibleNodeTypes 배열 파싱 ("Tree|Rock|Ore" 형식)</summary>
@@ -961,7 +951,6 @@ namespace MonsterKitchen.Editor
                 case 10: ScriptableObjectSync.Sync<ResourceNodeData>      (_parsed, td.ResourceNodes,      td, ResourceNodeMapper);                             break;
                 case 11: ScriptableObjectSync.Sync<PlayerCharData>        (_parsed, td.PlayersChar,        td, PlayerMapper);                                   break;
                 case 12: ScriptableObjectSync.Sync<UIData>                (_parsed, td.UIPanels,           td, UIDataMapper);                                   break;
-                case 13: ScriptableObjectSync.Sync<StringData>            (_parsed, td.Strings,            td, StringDataMapper);                               break;
             }
             AssetDatabase.SaveAssets();
 

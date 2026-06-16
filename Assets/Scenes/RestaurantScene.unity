@@ -869,6 +869,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 032ba670dbef39c499db23929e6353fd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MonsterKitchen.Restaurant.RestaurantSceneController
+  m_PlayerSpawnPoint: {fileID: 2028076319}
   m_GuestSpawnPoint: {fileID: 10192657}
   m_Tables:
   - {fileID: 0}

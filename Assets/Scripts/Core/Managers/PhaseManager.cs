@@ -24,29 +24,29 @@ namespace MonsterKitchen.Core
         public void EnterDungeon()
         {
             SetPhase(Phase.Dungeon);
-            SceneLoader.Instance?.LoadScene("DungeonScene");
+            SceneLoader.Instance?.LoadScene(CommonString.SceneDungeon);
         }
 
         /// <summary>DungeonScene → ManagementScene 복귀.</summary>
         public void ReturnFromDungeon()
         {
             SetPhase(Phase.Morning);
-            SceneLoader.Instance?.LoadScene("ManagementScene");
+            SceneLoader.Instance?.LoadScene(CommonString.SceneManagement);
         }
 
         /// <summary>ManagementScene → KitchenScene → RestaurantScene 진입.</summary>
         public void StartEvening()
         {
             SetPhase(Phase.Evening);
-            SceneLoader.Instance?.LoadScene("KitchenScene");
+            SceneLoader.Instance?.LoadScene(CommonString.SceneKitchen);
         }
 
-        /// <summary>영업 종료 후 다음 날 KitchenScene 으로.</summary>
+        /// <summary>영업 종료 후 다음 날 아침 — ManagementScene 복귀.</summary>
         public void EndDay()
         {
             DayManager.Instance?.AdvanceToNextDay();
             SetPhase(Phase.Morning);
-            SceneLoader.Instance?.LoadScene("KitchenScene");
+            SceneLoader.Instance?.LoadScene(CommonString.SceneManagement);
         }
 
         void SetPhase(Phase phase)

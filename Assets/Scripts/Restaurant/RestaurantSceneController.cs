@@ -44,7 +44,7 @@ namespace MonsterKitchen.Restaurant
             MobileHUD.Instance?.SetContext(MobileContext.Exploration);
 
             // 2. 플레이어 위치 재조정
-            GlobalController.Instance?.Player?.RepositionInScene();
+            GlobalController.Instance?.Player?.RepositionInScene(m_PlayerSpawnPoint);
 
             // 3. 일일 메뉴 초기화 (명성 기반 슬롯 수)
             int slotCount = PlayerDataManager.Instance?.Fame?.MenuSlotCount() ?? 3;

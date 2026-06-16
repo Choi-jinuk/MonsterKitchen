@@ -7,34 +7,14 @@ namespace MonsterKitchen.Management
     /// 영업 시작 트리거.
     /// 플레이어가 Trigger 안에 있는 동안 Interact 키를 누르면 PhaseManager.StartEvening() 호출.
     /// </summary>
-    public class EveningStarter : MonoBehaviour
+    public class EveningStarter : InteractableBehaviour
     {
-        void OnTriggerEnter2D(Collider2D other)
-        {
-            if (!other.CompareTag("Player")) return;
-            if (InputManager.Instance != null)
-                InputManager.Instance.OnInteract += TryStart;
-        }
-
-        void OnTriggerExit2D(Collider2D other)
-        {
-            if (!other.CompareTag("Player")) return;
-            if (InputManager.Instance != null)
-                InputManager.Instance.OnInteract -= TryStart;
-        }
-
-        void OnDisable()
-        {
-            if (InputManager.Instance != null)
-                InputManager.Instance.OnInteract -= TryStart;
-        }
-
-        void TryStart()
+        public override void Interact()
         {
             if (PhaseManager.Instance != null)
                 PhaseManager.Instance.StartEvening();
             else
-                SceneLoader.Instance?.LoadScene("KitchenScene");
+                SceneLoader.Instance?.LoadScene(CommonString.SceneKitchen);
         }
     }
 }

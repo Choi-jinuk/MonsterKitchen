@@ -1,0 +1,320 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5b11a58205ec3474ca216360e9fa74a8, type: 3}
+  m_Name: Strings Shared Data
+  m_EditorClassIdentifier: Unity.Localization::UnityEngine.Localization.Tables.SharedTableData
+  m_TableCollectionName: Strings
+  m_TableCollectionNameGuidString: 544fd673867a0bb4f8e02143cf5e4c77
+  m_Entries:
+  - m_Id: 8001
+    m_Key: MON_001_NAME
+    m_Metadata:
+      m_Items: []
+  - m_Id: 8002
+    m_Key: MON_001_DESC
+    m_Metadata:
+      m_Items: []
+  - m_Id: 8003
+    m_Key: MON_002_NAME
+    m_Metadata:
+      m_Items: []
+  - m_Id: 8004
+    m_Key: MON_002_DESC
+    m_Metadata:
+      m_Items: []
+  - m_Id: 8005
+    m_Key: MON_003_NAME
+    m_Metadata:
+      m_Items: []
+  - m_Id: 8006
+    m_Key: MON_003_DESC
+    m_Metadata:
+      m_Items: []
+  - m_Id: 8007
+    m_Key: MON_004_NAME
+    m_Metadata:
+      m_Items: []
+  - m_Id: 8008
+    m_Key: MON_004_DESC
+    m_Metadata:
+      m_Items: []
+  - m_Id: 8009
+    m_Key: MON_005_NAME
+    m_Metadata:
+      m_Items: []
+  - m_Id: 8010
+    m_Key: MON_005_DESC
+    m_Metadata:
+      m_Items: []
+  - m_Id: 8011
+    m_Key: ING_001_NAME
+    m_Metadata:
+      m_Items: []
+  - m_Id: 8012
+    m_Key: ING_001_DESC
+    m_Metadata:
+      m_Items: []
+  - m_Id: 8013
+    m_Key: ING_002_NAME
+    m_Metadata:
+      m_Items: []
+  - m_Id: 8014
+    m_Key: ING_002_DESC
+    m_Metadata:
+      m_Items: []
+  - m_Id: 8015
+    m_Key: ING_003_NAME
+    m_Metadata:
+      m_Items: []
+  - m_Id: 8016
+    m_Key: ING_003_DESC
+    m_Metadata:
+      m_Items: []
+  - m_Id: 8017
+    m_Key: ING_004_NAME
+    m_Metadata:
+      m_Items: []
+  - m_Id: 8018
+    m_Key: ING_004_DESC
+    m_Metadata:
+      m_Items: []
+  - m_Id: 8019
+    m_Key: ING_005_NAME
+    m_Metadata:
+      m_Items: []
+  - m_Id: 8020
+    m_Key: ING_005_DESC
+    m_Metadata:
+      m_Items: []
+  - m_Id: 8021
+    m_Key: ING_006_NAME
+    m_Metadata:
+      m_Items: []
+  - m_Id: 8022
+    m_Key: ING_006_DESC
+    m_Metadata:
+      m_Items: []
+  - m_Id: 8023
+    m_Key: ING_007_NAME
+    m_Metadata:
+      m_Items: []
+  - m_Id: 8024
+    m_Key: ING_007_DESC
+    m_Metadata:
+      m_Items: []
+  - m_Id: 8025
+    m_Key: ING_008_NAME
+    m_Metadata:
+      m_Items: []
+  - m_Id: 8026
+    m_Key: ING_008_DESC
+    m_Metadata:
+      m_Items: []
+  - m_Id: 8027
+    m_Key: FOOD_001_NAME
+    m_Metadata:
+      m_Items: []
+  - m_Id: 8028
+    m_Key: FOOD_001_DESC
+    m_Metadata:
+      m_Items: []
+  - m_Id: 8029
+    m_Key: FOOD_002_NAME
+    m_Metadata:
+      m_Items: []
+  - m_Id: 8030
+    m_Key: FOOD_002_DESC
+    m_Metadata:
+      m_Items: []
+  - m_Id: 8031
+    m_Key: FOOD_003_NAME
+    m_Metadata:
+      m_Items: []
+  - m_Id: 8032
+    m_Key: FOOD_003_DESC
+    m_Metadata:
+      m_Items: []
+  - m_Id: 8033
+    m_Key: FOOD_004_NAME
+    m_Metadata:
+      m_Items: []
+  - m_Id: 8034
+    m_Key: FOOD_004_DESC
+    m_Metadata:
+      m_Items: []
+  - m_Id: 8035
+    m_Key: FOOD_005_NAME
+    m_Metadata:
+      m_Items: []
+  - m_Id: 8036
+    m_Key: FOOD_005_DESC
+    m_Metadata:
+      m_Items: []
+  - m_Id: 8037
+    m_Key: RCP_001_NAME
+    m_Metadata:
+      m_Items: []
+  - m_Id: 8038
+    m_Key: RCP_001_DESC
+    m_Metadata:
+      m_Items: []
+  - m_Id: 8039
+    m_Key: RCP_002_NAME
+    m_Metadata:
+      m_Items: []
+  - m_Id: 8040
+    m_Key: RCP_002_DESC
+    m_Metadata:
+      m_Items: []
+  - m_Id: 8041
+    m_Key: RCP_003_NAME
+    m_Metadata:
+      m_Items: []
+  - m_Id: 8042
+    m_Key: RCP_003_DESC
+    m_Metadata:
+      m_Items: []
+  - m_Id: 8043
+    m_Key: RCP_004_NAME
+    m_Metadata:
+      m_Items: []
+  - m_Id: 8044
+    m_Key: RCP_004_DESC
+    m_Metadata:
+      m_Items: []
+  - m_Id: 8045
+    m_Key: RCP_005_NAME
+    m_Metadata:
+      m_Items: []
+  - m_Id: 8046
+    m_Key: RCP_005_DESC
+    m_Metadata:
+      m_Items: []
+  - m_Id: 8047
+    m_Key: UI_INTERACT
+    m_Metadata:
+      m_Items: []
+  - m_Id: 8048
+    m_Key: UI_ENTER_DUNGEON
+    m_Metadata:
+      m_Items: []
+  - m_Id: 8049
+    m_Key: UI_ENTER_KITCHEN
+    m_Metadata:
+      m_Items: []
+  - m_Id: 8050
+    m_Key: UI_ENTER_RESTAURANT
+    m_Metadata:
+      m_Items: []
+  - m_Id: 8051
+    m_Key: UI_TALK
+    m_Metadata:
+      m_Items: []
+  - m_Id: 8052
+    m_Key: UI_PICK_UP
+    m_Metadata:
+      m_Items: []
+  - m_Id: 8053
+    m_Key: UI_OPEN
+    m_Metadata:
+      m_Items: []
+  - m_Id: 8054
+    m_Key: UI_COOKING_TITLE
+    m_Metadata:
+      m_Items: []
+  - m_Id: 8055
+    m_Key: UI_COOKING_SLOTS
+    m_Metadata:
+      m_Items: []
+  - m_Id: 8056
+    m_Key: UI_COOKING_START
+    m_Metadata:
+      m_Items: []
+  - m_Id: 8057
+    m_Key: UI_COOKING_SLOT_EMPTY
+    m_Metadata:
+      m_Items: []
+  - m_Id: 8058
+    m_Key: UI_COOKING_SELECT
+    m_Metadata:
+      m_Items: []
+  - m_Id: 8059
+    m_Key: UI_COOKING_NO_MATCH
+    m_Metadata:
+      m_Items: []
+  - m_Id: 8060
+    m_Key: UI_COOKING_RECIPE_PREFIX
+    m_Metadata:
+      m_Items: []
+  - m_Id: 8061
+    m_Key: UI_COOKING_NO_INGREDIENTS
+    m_Metadata:
+      m_Items: []
+  - m_Id: 8062
+    m_Key: UI_INVENTORY
+    m_Metadata:
+      m_Items: []
+  - m_Id: 8063
+    m_Key: UI_INGREDIENTS
+    m_Metadata:
+      m_Items: []
+  - m_Id: 8064
+    m_Key: UI_FOOD
+    m_Metadata:
+      m_Items: []
+  - m_Id: 8065
+    m_Key: UI_CONFIRM
+    m_Metadata:
+      m_Items: []
+  - m_Id: 8066
+    m_Key: UI_START_EVENING
+    m_Metadata:
+      m_Items: []
+  - m_Id: 8067
+    m_Key: UI_SAVING
+    m_Metadata:
+      m_Items: []
+  - m_Id: 8068
+    m_Key: MON_006_NAME
+    m_Metadata:
+      m_Items: []
+  - m_Id: 8069
+    m_Key: MON_006_DESC
+    m_Metadata:
+      m_Items: []
+  - m_Id: 8070
+    m_Key: MON_007_NAME
+    m_Metadata:
+      m_Items: []
+  - m_Id: 8071
+    m_Key: MON_007_DESC
+    m_Metadata:
+      m_Items: []
+  - m_Id: 8072
+    m_Key: MON_008_NAME
+    m_Metadata:
+      m_Items: []
+  - m_Id: 8073
+    m_Key: MON_008_DESC
+    m_Metadata:
+      m_Items: []
+  m_Metadata:
+    m_Items: []
+  m_KeyGenerator:
+    rid: 7470716691809828988
+  references:
+    version: 2
+    RefIds:
+    - rid: 7470716691809828988
+      type: {class: DistributedUIDGenerator, ns: UnityEngine.Localization.Tables, asm: Unity.Localization}
+      data:
+        m_CustomEpoch: 1781233428193

@@ -40,9 +40,6 @@ namespace MonsterKitchen.Data
         public WeaponTable Weapons = new();
         public PlayerCharTable PlayersChar = new();
 
-        [Header("CSV Synced — 로컬라이제이션")]
-        public StringTable Strings = new();
-
         // ── 일괄 처리 ─────────────────────────────────────────────────────
         /// <summary>
         /// 모든 테이블을 순서대로 반환한다.
@@ -64,7 +61,6 @@ namespace MonsterKitchen.Data
             yield return SkillGroups;
             yield return Weapons;
             yield return PlayersChar;
-            yield return Strings;
         }
     }
 }

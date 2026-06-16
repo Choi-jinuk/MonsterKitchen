@@ -5,7 +5,11 @@
         "Unity.InputSystem",
         "Unity.TextMeshPro",
         "Unity.Cinemachine",
-        "ZString"
+        "Unity.RenderPipelines.Universal.Runtime",
+        "Unity.RenderPipelines.Universal.2D.Runtime",
+        "ZString",
+        "Unity.Localization",
+        "Unity.ResourceManager"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

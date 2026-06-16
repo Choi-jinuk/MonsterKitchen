@@ -55,7 +55,7 @@
 | Phase | 역할 | 현재 |
 |---|---|---|
 | 1. SdkInit | Analytics/Firebase/Crash SDK 초기화 | Stub (TODO) |
-| 2. DataLoad | `DataRegistry.Load()` — TableData SO 로드 | 구현 완료 |
+| 2. DataLoad | Localization 초기화 → `DataRegistry.Load()` — TableData SO 로드 | 구현 완료 |
 | 3. ServerConnect | 서버 인증 & WebSocket 핸드셰이크 | Stub (TODO) |
 | 4. SaveLoad | `ServerDB.Load()` — 플레이어 세이브 로드 | 구현 완료 |
 
@@ -106,7 +106,6 @@ ManagementScene 생성 → 씬 전환 후 유지. 중복 인스턴스 → `Destr
 | `NetworkManager` | `Core/Managers/NetworkManager.cs` | 서버 중계 |
 | `ServerDBManager` | `Core/Managers/ServerDBManager.cs` | 저장/로드 |
 | `DataRegistry` | `Data/Table/DataRegistry.cs` | ID→데이터 조회 (pure C# class) |
-| `LocaleManager` | `Core/LocaleManager.cs` | 다국어 문자열 관리 |
 
 **주의**: `DayManager` DontDestroyOnLoad → RestaurantScene서 GameManager 중복 파괴됨.
 `RestaurantOpener`(StartDay) → GameManager 아닌 별도 오브젝트(RestaurantSetup)에 배치.
@@ -137,15 +136,14 @@ Assets/Scripts/
 │   ├── Rendering/   PerspectiveManager, PerspectiveEntityTilt, PerspectiveMapTilt,
 │   │                PerspectiveCameraSync
 │   ├── Pool/        ObjectPool, PooledList
-│   ├── LocaleManager.cs          (다국어 문자열 싱글톤)
-│   └── Util/        FontPreloader, CommonString, RandomUtil, DebugUtil, StringUtil
+│   └── Util/        FontPreloader, CommonString, RandomUtil, DebugUtil, StringUtil, Loc
 │
 ├── Data/
 │   ├── Table/       TableData, DataRegistry, GameEnums, GameConfig, AbilEntry
 │   │                MonsterTable, IngredientTable, RecipeTable, FoodTable,
 │   │                DropTable, WeaponTable, SkillStepTable, SkillGroupTable,
 │   │                DungeonSpawnTable, PlayerCharTable, GatheringToolTable,
-│   │                ResourceNodeTable, StringTable, UITable
+│   │                ResourceNodeTable, UITable
 │   ├── Player/      PlayerCoinData, PlayerInventoryData, PlayerUpgradeData  [Layer 2]
 │   ├── Server/      ServerSaveData  [Layer 3]
 │   ├── Util/        DataTable<T>, SerializedDictionary
@@ -338,6 +336,7 @@ CsvParser: `;` 주석, `_` 컬럼 무시, `#TYPE` 타입 지정, `|` 배열 구�
 | 패키지 | 용도 |
 |---|---|
 | `com.unity.addressables` | 에셋 로딩 |
+| `com.unity.localization` | 다국어 (Strings 컬렉션 + CSV Import) |
 | `com.unity.cinemachine` | 카메라 전환 |
 | `com.unity.inputsystem` | 플레이어 입력 |
 | `com.unity.2d.animation` | 2D 스켈레탈 애니메이션 |
@@ -463,7 +462,10 @@ CsvParser: `;` 주석, `_` 컬럼 무시, `#TYPE` 타입 지정, `|` 배열 구�
 - **식당**: 손님 AI(FSM), 서빙(E키), Perfect 서빙 30% 팁
 - **저장**: SaveScheduler (dirty flag + 주기 저장 + ForceSave), ServerDBManager JSON
 - **UI**: GameHUD (UIToolkit) — 골드, Day, HP바, 스킬 쿨타임, RewardPopup
-- **다국어**: LocaleManager + StringTable SO
+- **다국어**: Unity Localization (`com.unity.localization`) — `Strings` 컬렉션, ko 기본/en + en→ko 폴백,
+  미등록 키는 키 자체 표시. 코드: `Loc.Create(key)` / `Loc.Get(ref cache, key)`, UI 는 `StringChanged` 자가 갱신.
+  문자열 편집: `Assets/Data/CSV/StringData.csv` (포맷 `Key,Id,Shared Comments,Korean(ko),English(en)`)
+  → 메뉴 `MonsterKitchen/Localization/Import CSV`
 - **다음 우선 작업**: 던전 리워크 (모듈 5-2, 5-4, 5-5, 5-6)
 
 ---

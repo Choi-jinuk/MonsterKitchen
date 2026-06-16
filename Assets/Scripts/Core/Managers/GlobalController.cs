@@ -58,7 +58,6 @@ namespace MonsterKitchen.Core
         public ServerDBManager   ServerDB     { get; private set; }
         public SaveScheduler     SaveSched    { get; private set; }
         public DataRegistry      Registry     { get; private set; }
-        public LocaleManager     Locale       { get; private set; }
         public GameStartup       Startup      { get; private set; }
 
         // ── 편의 접근자 ───────────────────────────────────────────────────
@@ -123,7 +122,6 @@ namespace MonsterKitchen.Core
             ServerDB    = new ServerDBManager();
             SaveSched   = new SaveScheduler();
             Registry    = new DataRegistry();
-            Locale      = new LocaleManager();
             Startup     = new GameStartup();
         }
 
@@ -145,7 +143,6 @@ namespace MonsterKitchen.Core
             ServerDB.Init();     // Instance 설정
             SaveSched.Init();    // Instance 설정
             Registry.Init();     // Instance 설정 (Load 는 GameStartup Phase 2)
-            Locale.Init();       // Instance 설정 (Load 는 DataRegistry.Load 이후)
         }
 
 #if UNITY_EDITOR

@@ -108,27 +108,39 @@ namespace MonsterKitchen.Core
 
         IEnumerator SpawnGuestsRoutine()
         {
-            while (m_GuestsArrived < m_GuestsForToday)
+            while (IsOpen && m_GuestsArrived < m_GuestsForToday)
             {
                 yield return new WaitForSeconds(m_GuestsArrived == 0 ? 1f : TIME_BETWEEN_GUESTS);
+                if (!IsOpen) yield break;
+
+                // 스폰 환경 소실 (씬 이탈로 스폰포인트 파괴 등) → 영업 강제 종료.
+                // IsOpen 을 닫지 않으면 다음 StartDay() 가 영구 차단된다.
+                if (m_CustomerPrefab == null || m_GuestSpawnPoint == null)
+                {
+                    DebugUtil.LogWarning("[DayManager] 손님 스폰 환경 소실 — 영업 강제 종료.");
+                    IsOpen = false;
+                    yield break;
+                }
 
                 var table = FindFreeTable();
                 if (table == null) { yield return new WaitForSeconds(2f); continue; }
 
-                SpawnGuest(table);
-                m_GuestsArrived++;
+                // 스폰 성공 시에만 도착 수 증가 — 실패 카운트로 인한 정산 소프트락 방지
+                if (SpawnGuest(table))
+                    m_GuestsArrived++;
             }
         }
 
-        void SpawnGuest(RestaurantTable table)
+        bool SpawnGuest(RestaurantTable table)
         {
-            if (m_CustomerPrefab == null || m_GuestSpawnPoint == null) return;
+            if (m_CustomerPrefab == null || m_GuestSpawnPoint == null) return false;
 
             var go = UnityEngine.Object.Instantiate(
                 m_CustomerPrefab, m_GuestSpawnPoint.position, Quaternion.identity);
             go.gameObject.SetActive(true);
             go.Init(table);
             go.OnGuestFinished += HandleGuestFinished;
+            return true;
         }
 
         void HandleGuestFinished()
@@ -157,7 +169,7 @@ namespace MonsterKitchen.Core
             if (PhaseManager.Instance != null)
                 PhaseManager.Instance.EndDay();
             else
-                SceneLoader.Instance?.LoadScene("ManagementScene");
+                SceneLoader.Instance?.LoadScene(CommonString.SceneManagement);
         }
 
         RestaurantTable FindFreeTable()

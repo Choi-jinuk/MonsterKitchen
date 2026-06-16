@@ -3,6 +3,7 @@ using MonsterKitchen.Core;
 using MonsterKitchen.Data;
 using MonsterKitchen.UI;
 using UnityEngine;
+using UnityEngine.Localization;
 using UnityEngine.UIElements;
 
 namespace MonsterKitchen.Cooking
@@ -19,6 +20,14 @@ namespace MonsterKitchen.Cooking
     public class CookingUI : UIPanel
     {
         const int MAX_SLOTS = 3;
+
+        // ── 로컬라이즈 문자열 캐시 ───────────────────────────────────
+        static readonly LocalizedString s_LsCookStart     = Loc.Create("UI_COOKING_START");
+        static readonly LocalizedString s_LsNoIngredients = Loc.Create("UI_COOKING_NO_INGREDIENTS");
+        static readonly LocalizedString s_LsSlotEmpty     = Loc.Create("UI_COOKING_SLOT_EMPTY");
+        static readonly LocalizedString s_LsRecipePrefix  = Loc.Create("UI_COOKING_RECIPE_PREFIX");
+        static readonly LocalizedString s_LsNoMatch       = Loc.Create("UI_COOKING_NO_MATCH");
+        static readonly LocalizedString s_LsSelect        = Loc.Create("UI_COOKING_SELECT");
 
         // ── 슬롯 상태 ────────────────────────────────────────────────
         readonly List<uint> m_SlotIds = new();
@@ -67,7 +76,7 @@ namespace MonsterKitchen.Cooking
                 });
 
             m_CookBtn?.RegisterCallback<ClickEvent>(_ => TryCook());
-            if (m_CookBtn != null) m_CookBtn.text = LocaleManager.Get("UI_COOKING_START");
+            if (m_CookBtn != null) m_CookBtn.text = s_LsCookStart.GetLocalizedString();
         }
 
         // ── 외부 진입점 ──────────────────────────────────────────────
@@ -100,16 +109,6 @@ namespace MonsterKitchen.Cooking
 
         void HandleIngredientChanged(uint id, int qty) => BuildInventoryGrid();
 
-        // ── 로컬라이제이션 ──────────────────────────────────────────────
-
-        protected override void RefreshLocale()
-        {
-            base.RefreshLocale(); // LocalizedLabel 자동 갱신
-            if (m_CookBtn != null) m_CookBtn.text = LocaleManager.Get("UI_COOKING_START");
-            RefreshSlotDisplay();
-            RefreshRecipeMatch();
-        }
-
         // ── UI 갱신 ──────────────────────────────────────────────────
 
         void RefreshAll()
@@ -127,7 +126,7 @@ namespace MonsterKitchen.Cooking
             var all = PlayerDataManager.Instance?.Inventory.AllIngredients;
             if (all == null || all.Count == 0)
             {
-                m_InvGrid.Add(EmptyMsg(LocaleManager.Get("UI_COOKING_NO_INGREDIENTS")));
+                m_InvGrid.Add(EmptyMsg(s_LsNoIngredients.GetLocalizedString()));
                 return;
             }
 
@@ -200,7 +199,7 @@ namespace MonsterKitchen.Cooking
                 else
                 {
                     if (si != null) si.style.backgroundImage = StyleKeyword.None;
-                    if (sn != null) sn.text = LocaleManager.Get("UI_COOKING_SLOT_EMPTY");
+                    if (sn != null) sn.text = s_LsSlotEmpty.GetLocalizedString();
                     se.AddToClassList("cook-slot-empty");
                 }
             }
@@ -222,7 +221,7 @@ namespace MonsterKitchen.Cooking
                 m_CurrentGrade    = PlayerDataManager.Instance?.Inventory
                                         .CalculateCookingGrade(m_Matched) ?? FoodGrade.Normal;
                 string gradeSuffix = $"  [{m_CurrentGrade}]";
-                m_RecipeLabel.text = LocaleManager.Get("UI_COOKING_RECIPE_PREFIX")
+                m_RecipeLabel.text = s_LsRecipePrefix.GetLocalizedString()
                                      + m_Matched.DisplayName + gradeSuffix;
                 m_RecipeLabel.RemoveFromClassList("cook-recipe-matched");
                 m_RecipeLabel.AddToClassList("cook-recipe-matched");
@@ -233,8 +232,8 @@ namespace MonsterKitchen.Cooking
             {
                 m_CurrentGrade = FoodGrade.Normal;
                 m_RecipeLabel.text = m_SlotIds.Count > 0
-                    ? LocaleManager.Get("UI_COOKING_NO_MATCH")
-                    : LocaleManager.Get("UI_COOKING_SELECT");
+                    ? s_LsNoMatch.GetLocalizedString()
+                    : s_LsSelect.GetLocalizedString();
                 m_RecipeLabel.RemoveFromClassList("cook-recipe-matched");
                 m_CookBtn.RemoveFromClassList("cook-btn-enabled");
                 m_CookBtn.AddToClassList("cook-btn-disabled");
@@ -277,7 +276,7 @@ namespace MonsterKitchen.Cooking
 
             if (!RecipeMatcher.CanCook(m_Matched, PlayerDataManager.Instance?.Inventory))
             {
-                GameHUD.Instance?.ShowNotification(LocaleManager.Get("UI_COOKING_NO_INGREDIENTS"), 2f);
+                GameHUD.Instance?.ShowNotification(s_LsNoIngredients.GetLocalizedString(), 2f);
                 return;
             }
 

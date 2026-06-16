@@ -30,9 +30,9 @@ namespace MonsterKitchen.Management
             if (pm != null)
             {
                 if (!pm.IsStarted)
-                    pm.Start();              // 첫 진입: 데이터 로드 + 스폰
+                    pm.Start(m_PlayerSpawnPoint);              // 첫 진입: 데이터 로드 + 스폰
                 else
-                    pm.RepositionInScene();  // 재진입: 스폰 포인트로 이동
+                    pm.RepositionInScene(m_PlayerSpawnPoint);  // 재진입: 스폰 포인트로 이동
             }
             else
             {

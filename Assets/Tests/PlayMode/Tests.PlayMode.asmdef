@@ -1,0 +1,21 @@
+{
+    "name": "Tests.PlayMode",
+    "rootNamespace": "MonsterKitchen.Tests.PlayMode",
+    "references": [
+        "MonsterKitchen",
+        "Unity.Localization",
+        "Unity.ResourceManager"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": false,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false,
+    "optionalUnityReferences": [
+        "TestAssemblies"
+    ]
+}

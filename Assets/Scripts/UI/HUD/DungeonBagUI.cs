@@ -64,13 +64,13 @@ namespace MonsterKitchen.UI
                     m_WeightText.RemoveFromClassList("bag-weight-text--full");
             }
 
-            // 슬롯 목록 재빌드
+            // 슬롯 목록 재빌드 — (재료, 품질) 스택별 1행
             m_ItemList?.Clear();
             foreach (var kv in bag.Contents)
             {
-                uint              id      = kv.Key;
-                int               qty     = kv.Value.qty;
-                IngredientQuality quality = kv.Value.quality;
+                uint              id      = kv.Key.id;
+                IngredientQuality quality = kv.Key.quality;
+                int               qty     = kv.Value;
 
                 var data = DataRegistry.Instance?.Ingredients?.Get(id);
                 var slot = BuildSlot(id, qty, quality, data);
@@ -114,7 +114,7 @@ namespace MonsterKitchen.UI
             var discard = new Button();
             discard.text = "버리기";
             discard.AddToClassList("bag-discard-btn");
-            discard.RegisterCallback<ClickEvent>(_ => DungeonBag.Current?.Remove(id, qty));
+            discard.RegisterCallback<ClickEvent>(_ => DungeonBag.Current?.Remove(id, quality, qty));
             slot.Add(discard);
 
             return slot;

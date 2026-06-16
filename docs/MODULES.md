@@ -244,6 +244,7 @@
 | 5-6 | 던전 미니맵 (단일 맵 플레이어 도트 + 스폰 존 마커) | ✅ |
 | 5-7 | 플레이어 던전 사망 처리 (1.5초 연출 → DungeonBag.ClearAll → Health.Revive → ManagementScene 복귀) | ✅ |
 | 5-8 | ResourceNode 채집 시스템 (공격으로 채집, GatheringTool 보너스, 리스폰) | ✅ |
+| 5-9 | 맵 확장 — 허브+3갈래 깊이 진행형 60×48 (DungeonGate 하드 게이트, DungeonZoneTrigger, 절차 타일 페인트, 스폰존 4·노드 11) | ✅ (스펙: `2026-06-11-dungeon-map-expansion-design.md`) |
 
 ---
 
@@ -330,6 +331,7 @@
 | 9-9 | HUD — Day 카운터 | ✅ |
 | 9-10 | HUD — 스킬 쿨타임 UI (스킬 1·2·궁극기 아이콘 + 쿨다운 오버레이) | ✅ |
 | 9-11 | Save / Load (골드·명성·인벤토리·Day → JSON, 주기적 자동 저장 + 강제 저장) | ✅ |
+| 9-12 | 다국어 — Unity Localization 마이그레이션 (Strings 컬렉션, ko/en + en→ko 폴백, CSV Import 메뉴, Loc 헬퍼, LocalizedLabel 자가 갱신) | ✅ |
 
 ---
 

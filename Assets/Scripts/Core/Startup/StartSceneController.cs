@@ -80,7 +80,7 @@ namespace MonsterKitchen.Core
         {
             if (State != SceneState.Running) return;
             if (!AnyInputPressed()) return;
-            ExitScene("ManagementScene");
+            ExitScene(CommonString.SceneManagement);
         }
 
         // ================================================================

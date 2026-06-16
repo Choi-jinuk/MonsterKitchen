@@ -77,6 +77,21 @@ namespace MonsterKitchen.Data
 
         [Tooltip("처치 시 채워지는 게이지량.")]
         public float GaugeOnKill;
+
+        [Header("클래스/희귀도")]
+        [Tooltip("클래스 = 장착 가능 무기 타입 (1:1). 이 타입 무기만 장착 가능.")]
+        public WeaponType CharClass;
+
+        [Tooltip("태생 성급 1~3. 뽑기 풀 배정·획득 시 초기 성급.")]
+        [Range(1, 3)]
+        public int NatalStars = 1;
+
+        [Header("작업 스탯 — 근무지 배치 모듈(후속)에서 적용")]
+        [Tooltip("주방 배치 시 요리 속도 배율 기준 (1.0 = 표준).")]
+        public float CookSpeed = 1f;
+
+        [Tooltip("식당 배치 시 서빙/보조 속도 배율 기준 (1.0 = 표준).")]
+        public float ServeSpeed = 1f;
     }
 
     [Serializable]

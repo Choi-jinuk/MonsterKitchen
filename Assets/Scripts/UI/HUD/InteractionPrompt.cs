@@ -4,6 +4,7 @@ using MonsterKitchen.Dungeon;
 using MonsterKitchen.UI.Mobile;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.Localization;
 
 namespace MonsterKitchen.UI
 {
@@ -40,9 +41,10 @@ namespace MonsterKitchen.UI
         [SerializeField] TextMeshProUGUI m_Label;       // 프롬프트 전체 텍스트
 
         [Header("설정")]
-        [SerializeField] string m_ActionKey = "UI_INTERACT";  // StringData.StringId — LocaleManager 로 조회
+        [SerializeField] string m_ActionKey = "UI_INTERACT";  // Strings 테이블 키 — LocalizedString 으로 조회
 
-        bool m_PlayerInside;
+        bool            m_PlayerInside;
+        LocalizedString m_Localized;
 
         // ----------------------------------------------------------------
 
@@ -53,24 +55,21 @@ namespace MonsterKitchen.UI
 
         void OnEnable()
         {
-            LocaleManager.OnLanguageChanged += RefreshLabel;
-            // 이미 데이터가 로드된 상태라면 즉시 갱신
-            if (LocaleManager.Instance != null && LocaleManager.Instance.IsReady)
-                RefreshLabel();
+            if (m_Localized == null) m_Localized = Loc.Create(m_ActionKey);
+            m_Localized.StringChanged += OnActionTextChanged; // 구독 시 현재 값 즉시 콜백
         }
 
         void OnDisable()
         {
-            LocaleManager.OnLanguageChanged -= RefreshLabel;
+            if (m_Localized != null) m_Localized.StringChanged -= OnActionTextChanged;
         }
 
         // 현재 Interact 바인딩 키 이름을 읽어 레이블을 갱신한다.
-        void RefreshLabel()
+        void OnActionTextChanged(string actionText)
         {
             if (m_Label == null) return;
 
-            string keyName    = GetInteractKeyName();
-            string actionText = LocaleManager.Get(m_ActionKey);
+            string keyName = GetInteractKeyName();
             m_Label.text = keyName != null ? $"[{keyName}] {actionText}" : actionText;
         }
 
@@ -136,11 +135,11 @@ namespace MonsterKitchen.UI
         /// <summary>강제로 숨긴다 (요리 중, 컷씬 등).</summary>
         public void Hide() => m_PromptRoot?.SetActive(false);
 
-        /// <summary>StringData.StringId 를 변경하고 레이블을 즉시 갱신한다.</summary>
+        /// <summary>Strings 테이블 키를 변경하고 레이블을 즉시 갱신한다.</summary>
         public void SetActionKey(string stringId)
         {
             m_ActionKey = stringId;
-            RefreshLabel();
+            if (m_Localized != null) m_Localized.TableEntryReference = stringId; // setter 가 StringChanged 재발행
         }
     }
 }

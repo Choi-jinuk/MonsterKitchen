@@ -1,82 +1,74 @@
-; 로컬라이제이션 문자열 테이블
-; stringId: 코드 조회 키 (예: MON_001_NAME)
-; Ko: 한국어 (기본)
-; En: 영어 (비어있으면 Ko fallback)
-; id: uint (8001~)
-#TYPE,string,uint,string,string,string
-_key,Id,StringId,Ko,En
-; ── 몬스터 ─────────────────────────────────────────────────────────
-MON_001_NAME,8001,MON_001_NAME,초록 슬라임,Green Slime
-MON_001_DESC,8002,MON_001_DESC,에버그린 숲에 가장 흔히 출몰하는 젤리형 몬스터. 독성 점액을 분비한다.,A jelly-type monster commonly found in Evergreen Forest. Secretes toxic slime.
-MON_002_NAME,8003,MON_002_NAME,불꽃 슬라임,Flame Slime
-MON_002_DESC,8004,MON_002_DESC,용암 지대에서 흘러온 슬라임. 몸체가 뜨겁게 달아올라 있다.,A slime from the lava zone. Its body burns with intense heat.
-MON_003_NAME,8005,MON_003_NAME,숲 고블린,Forest Goblin
-MON_003_DESC,8006,MON_003_DESC,에버그린 숲을 근거지로 삼는 소형 인간형 몬스터. 뼈 몽둥이를 휘두른다.,A small humanoid monster that calls Evergreen Forest home. Wields a bone club.
-MON_004_NAME,8007,MON_004_NAME,거대 버섯인간,Giant Mushroom Man
-MON_004_DESC,8008,MON_004_DESC,숲 깊은 곳의 균류에서 태어난 몬스터. 포자를 뿜어 시야를 흐린다.,A monster born from fungi deep in the forest. Releases spores to obscure vision.
-MON_005_NAME,8009,MON_005_NAME,숲 보스 — 그린 웜,Forest Boss — Green Worm
-MON_005_DESC,8010,MON_005_DESC,에버그린 숲 지하에 서식하는 대형 지렁이 몬스터. 땅을 파고들어 기습한다.,A giant worm monster living beneath Evergreen Forest. Burrows underground to ambush prey.
-; ── 식재료 ─────────────────────────────────────────────────────────
-ING_001_NAME,8011,ING_001_NAME,슬라임 젤리,Slime Jelly
-ING_001_DESC,8012,ING_001_DESC,초록 슬라임에서 채취한 투명한 젤리. 탄력이 있고 달콤하다.,Translucent jelly harvested from green slimes. Elastic and sweet.
-ING_002_NAME,8013,ING_002_NAME,불꽃 슬라임 코어,Flame Slime Core
-ING_002_DESC,8014,ING_002_DESC,불꽃 슬라임의 핵심 부위. 식히면 매콤한 향이 난다.,The core of a flame slime. When cooled, it gives off a spicy aroma.
-ING_003_NAME,8015,ING_003_NAME,고블린 뼈,Goblin Bone
-ING_003_DESC,8016,ING_003_DESC,숲 고블린의 단단한 소형 뼈. 육수 재료로 활용된다.,Small dense bones from forest goblins. Used to make rich stock.
-ING_004_NAME,8017,ING_004_NAME,고블린 고기,Goblin Meat
-ING_004_DESC,8018,ING_004_DESC,숲 고블린의 살코기. 잡내가 있어 손질이 필요하다.,Flesh from forest goblins. Has a gamey smell and requires preparation.
-ING_005_NAME,8019,ING_005_NAME,버섯인간 갓,Mushroom Cap
-ING_005_DESC,8020,ING_005_DESC,거대 버섯인간의 우산 부위. 풍미가 깊고 두툼하다.,The cap of a giant mushroom man. Rich in flavor and satisfyingly thick.
-ING_006_NAME,8021,ING_006_NAME,버섯인간 포자,Mushroom Spore
-ING_006_DESC,8022,ING_006_DESC,버섯인간이 분비하는 포자. 소량이면 향신료로 쓸 수 있다.,Spores secreted by mushroom men. In small amounts they work as seasoning.
-ING_007_NAME,8023,ING_007_NAME,그린 웜 고기,Green Worm Meat
-ING_007_DESC,8024,ING_007_DESC,그린 웜의 대형 살코기. 쫄깃하고 영양이 풍부하다.,Large cuts of meat from the green worm. Chewy and highly nutritious.
-ING_008_NAME,8025,ING_008_NAME,그린 웜 껍질,Green Worm Hide
-ING_008_DESC,8026,ING_008_DESC,그린 웜의 두꺼운 외피. 오래 끓이면 국물이 진해진다.,The thick outer skin of a green worm. Long boiling creates a rich broth.
-; ── 완성 요리 ───────────────────────────────────────────────────────
-FOOD_001_NAME,8027,FOOD_001_NAME,슬라임 젤리 디저트,Slime Jelly Dessert
-FOOD_001_DESC,8028,FOOD_001_DESC,달콤한 슬라임 젤리를 굳혀 만든 디저트. 회복 효과가 있다.,A dessert made by setting sweet slime jelly. Has a restorative effect.
-FOOD_002_NAME,8029,FOOD_002_NAME,매콤 슬라임 볶음,Spicy Slime Stir-fry
-FOOD_002_DESC,8030,FOOD_002_DESC,불꽃 슬라임 코어를 볶아낸 매콤한 요리. 공격력이 오른다.,A spicy stir-fry made from flame slime cores. Increases attack power.
-FOOD_003_NAME,8031,FOOD_003_NAME,고블린 뼈 육수,Goblin Bone Broth
-FOOD_003_DESC,8032,FOOD_003_DESC,고블린 뼈를 우려낸 깊은 육수. 체력 회복에 탁월하다.,Rich stock simmered from goblin bones. Excellent for HP recovery.
-FOOD_004_NAME,8033,FOOD_004_NAME,버섯 갓 구이,Grilled Mushroom Cap
-FOOD_004_DESC,8034,FOOD_004_DESC,버섯인간의 갓을 두툼하게 썰어 구운 요리. 방어력이 오른다.,Thick slices of mushroom cap seared in a pan. Increases defense.
-FOOD_005_NAME,8035,FOOD_005_NAME,그린 웜 스테이크,Green Worm Steak
-FOOD_005_DESC,8036,FOOD_005_DESC,그린 웜 고기를 두껍게 썬 고급 스테이크. 모든 능력치가 상승한다.,A premium steak cut thick from green worm meat. Raises all stats.
-; ── 레시피 ─────────────────────────────────────────────────────────
-RCP_001_NAME,8037,RCP_001_NAME,슬라임 젤리 디저트 레시피,Slime Jelly Dessert Recipe
-RCP_001_DESC,8038,RCP_001_DESC,슬라임 젤리 2개를 틀에 굳혀 완성하는 기본 디저트.,A basic dessert. Set 2 slime jellies in a mold.
-RCP_002_NAME,8039,RCP_002_NAME,매콤 슬라임 볶음 레시피,Spicy Slime Stir-fry Recipe
-RCP_002_DESC,8040,RCP_002_DESC,불꽃 슬라임 코어 1개와 슬라임 젤리 1개를 볶는다.,Stir-fry 1 flame slime core with 1 slime jelly.
-RCP_003_NAME,8041,RCP_003_NAME,고블린 뼈 육수 레시피,Goblin Bone Broth Recipe
-RCP_003_DESC,8042,RCP_003_DESC,고블린 뼈 3개를 오래 끓여 육수를 낸다.,Simmer 3 goblin bones for a long time to extract rich broth.
-RCP_004_NAME,8043,RCP_004_NAME,버섯 갓 구이 레시피,Grilled Mushroom Cap Recipe
-RCP_004_DESC,8044,RCP_004_DESC,버섯인간 갓 2개를 팬에 굽는다.,Grill 2 mushroom caps in a pan.
-RCP_005_NAME,8045,RCP_005_NAME,그린 웜 스테이크 레시피,Green Worm Steak Recipe
-RCP_005_DESC,8046,RCP_005_DESC,그린 웜 고기 1개를 두껍게 썰어 굽는 고급 레시피.,A premium recipe. Cut 1 green worm meat thick and grill it.
-; ── UI 프롬프트 ─────────────────────────────────────────────────────
-UI_INTERACT,8047,UI_INTERACT,상호작용,Interact
-UI_ENTER_DUNGEON,8048,UI_ENTER_DUNGEON,던전 입장,Enter Dungeon
-UI_ENTER_KITCHEN,8049,UI_ENTER_KITCHEN,주방 입장,Enter Kitchen
-UI_ENTER_RESTAURANT,8050,UI_ENTER_RESTAURANT,식당 입장,Enter Restaurant
-UI_TALK,8051,UI_TALK,대화,Talk
-UI_PICK_UP,8052,UI_PICK_UP,줍기,Pick Up
-UI_OPEN,8053,UI_OPEN,열기,Open
-; ── 조리 UI ─────────────────────────────────────────────────────────
-UI_COOKING_TITLE,8054,UI_COOKING_TITLE,조리대,Kitchen
-UI_COOKING_SLOTS,8055,UI_COOKING_SLOTS,재료 슬롯,Ingredient Slots
-UI_COOKING_START,8056,UI_COOKING_START,요리 시작,Start Cooking
-UI_COOKING_SLOT_EMPTY,8057,UI_COOKING_SLOT_EMPTY,비어 있음,Empty
-UI_COOKING_SELECT,8058,UI_COOKING_SELECT,재료를 선택하세요,Select ingredients
-UI_COOKING_NO_MATCH,8059,UI_COOKING_NO_MATCH,재료 조합이 맞지 않습니다,No matching recipe
-UI_COOKING_RECIPE_PREFIX,8060,UI_COOKING_RECIPE_PREFIX,레시피: ,Recipe:
-UI_COOKING_NO_INGREDIENTS,8061,UI_COOKING_NO_INGREDIENTS,재료가 없습니다.,No ingredients.
-; ── 인벤토리 UI ──────────────────────────────────────────────────────
-UI_INVENTORY,8062,UI_INVENTORY,인벤토리,Inventory
-UI_INGREDIENTS,8063,UI_INGREDIENTS,재료,Ingredients
-UI_FOOD,8064,UI_FOOD,요리,Food
-; ── 공통 ─────────────────────────────────────────────────────────────
-UI_CONFIRM,8065,UI_CONFIRM,확인,Confirm
-UI_START_EVENING,8066,UI_START_EVENING,저녁 영업 시작,Start Evening
-UI_SAVING,8067,UI_SAVING,저장 중...,Saving...
+﻿Key,Id,Shared Comments,Korean(ko),English(en)
+MON_001_NAME,8001,,초록 슬라임,Green Slime
+MON_001_DESC,8002,,에버그린 숲에 가장 흔히 출몰하는 젤리형 몬스터. 독성 점액을 분비한다.,A jelly-type monster commonly found in Evergreen Forest. Secretes toxic slime.
+MON_002_NAME,8003,,불꽃 슬라임,Flame Slime
+MON_002_DESC,8004,,용암 지대에서 흘러온 슬라임. 몸체가 뜨겁게 달아올라 있다.,A slime from the lava zone. Its body burns with intense heat.
+MON_003_NAME,8005,,숲 고블린,Forest Goblin
+MON_003_DESC,8006,,에버그린 숲을 근거지로 삼는 소형 인간형 몬스터. 뼈 몽둥이를 휘두른다.,A small humanoid monster that calls Evergreen Forest home. Wields a bone club.
+MON_004_NAME,8007,,거대 버섯인간,Giant Mushroom Man
+MON_004_DESC,8008,,숲 깊은 곳의 균류에서 태어난 몬스터. 포자를 뿜어 시야를 흐린다.,A monster born from fungi deep in the forest. Releases spores to obscure vision.
+MON_005_NAME,8009,,숲 보스 — 그린 웜,Forest Boss — Green Worm
+MON_005_DESC,8010,,에버그린 숲 지하에 서식하는 대형 지렁이 몬스터. 땅을 파고들어 기습한다.,A giant worm monster living beneath Evergreen Forest. Burrows underground to ambush prey.
+ING_001_NAME,8011,,슬라임 젤리,Slime Jelly
+ING_001_DESC,8012,,초록 슬라임에서 채취한 투명한 젤리. 탄력이 있고 달콤하다.,Translucent jelly harvested from green slimes. Elastic and sweet.
+ING_002_NAME,8013,,불꽃 슬라임 코어,Flame Slime Core
+ING_002_DESC,8014,,불꽃 슬라임의 핵심 부위. 식히면 매콤한 향이 난다.,The core of a flame slime. When cooled, it gives off a spicy aroma.
+ING_003_NAME,8015,,고블린 뼈,Goblin Bone
+ING_003_DESC,8016,,숲 고블린의 단단한 소형 뼈. 육수 재료로 활용된다.,Small dense bones from forest goblins. Used to make rich stock.
+ING_004_NAME,8017,,고블린 고기,Goblin Meat
+ING_004_DESC,8018,,숲 고블린의 살코기. 잡내가 있어 손질이 필요하다.,Flesh from forest goblins. Has a gamey smell and requires preparation.
+ING_005_NAME,8019,,버섯인간 갓,Mushroom Cap
+ING_005_DESC,8020,,거대 버섯인간의 우산 부위. 풍미가 깊고 두툼하다.,The cap of a giant mushroom man. Rich in flavor and satisfyingly thick.
+ING_006_NAME,8021,,버섯인간 포자,Mushroom Spore
+ING_006_DESC,8022,,버섯인간이 분비하는 포자. 소량이면 향신료로 쓸 수 있다.,Spores secreted by mushroom men. In small amounts they work as seasoning.
+ING_007_NAME,8023,,그린 웜 고기,Green Worm Meat
+ING_007_DESC,8024,,그린 웜의 대형 살코기. 쫄깃하고 영양이 풍부하다.,Large cuts of meat from the green worm. Chewy and highly nutritious.
+ING_008_NAME,8025,,그린 웜 껍질,Green Worm Hide
+ING_008_DESC,8026,,그린 웜의 두꺼운 외피. 오래 끓이면 국물이 진해진다.,The thick outer skin of a green worm. Long boiling creates a rich broth.
+FOOD_001_NAME,8027,,슬라임 젤리 디저트,Slime Jelly Dessert
+FOOD_001_DESC,8028,,달콤한 슬라임 젤리를 굳혀 만든 디저트. 회복 효과가 있다.,A dessert made by setting sweet slime jelly. Has a restorative effect.
+FOOD_002_NAME,8029,,매콤 슬라임 볶음,Spicy Slime Stir-fry
+FOOD_002_DESC,8030,,불꽃 슬라임 코어를 볶아낸 매콤한 요리. 공격력이 오른다.,A spicy stir-fry made from flame slime cores. Increases attack power.
+FOOD_003_NAME,8031,,고블린 뼈 육수,Goblin Bone Broth
+FOOD_003_DESC,8032,,고블린 뼈를 우려낸 깊은 육수. 체력 회복에 탁월하다.,Rich stock simmered from goblin bones. Excellent for HP recovery.
+FOOD_004_NAME,8033,,버섯 갓 구이,Grilled Mushroom Cap
+FOOD_004_DESC,8034,,버섯인간의 갓을 두툼하게 썰어 구운 요리. 방어력이 오른다.,Thick slices of mushroom cap seared in a pan. Increases defense.
+FOOD_005_NAME,8035,,그린 웜 스테이크,Green Worm Steak
+FOOD_005_DESC,8036,,그린 웜 고기를 두껍게 썬 고급 스테이크. 모든 능력치가 상승한다.,A premium steak cut thick from green worm meat. Raises all stats.
+RCP_001_NAME,8037,,슬라임 젤리 디저트 레시피,Slime Jelly Dessert Recipe
+RCP_001_DESC,8038,,슬라임 젤리 2개를 틀에 굳혀 완성하는 기본 디저트.,A basic dessert. Set 2 slime jellies in a mold.
+RCP_002_NAME,8039,,매콤 슬라임 볶음 레시피,Spicy Slime Stir-fry Recipe
+RCP_002_DESC,8040,,불꽃 슬라임 코어 1개와 슬라임 젤리 1개를 볶는다.,Stir-fry 1 flame slime core with 1 slime jelly.
+RCP_003_NAME,8041,,고블린 뼈 육수 레시피,Goblin Bone Broth Recipe
+RCP_003_DESC,8042,,고블린 뼈 3개를 오래 끓여 육수를 낸다.,Simmer 3 goblin bones for a long time to extract rich broth.
+RCP_004_NAME,8043,,버섯 갓 구이 레시피,Grilled Mushroom Cap Recipe
+RCP_004_DESC,8044,,버섯인간 갓 2개를 팬에 굽는다.,Grill 2 mushroom caps in a pan.
+RCP_005_NAME,8045,,그린 웜 스테이크 레시피,Green Worm Steak Recipe
+RCP_005_DESC,8046,,그린 웜 고기 1개를 두껍게 썰어 굽는 고급 레시피.,A premium recipe. Cut 1 green worm meat thick and grill it.
+UI_INTERACT,8047,,상호작용,Interact
+UI_ENTER_DUNGEON,8048,,던전 입장,Enter Dungeon
+UI_ENTER_KITCHEN,8049,,주방 입장,Enter Kitchen
+UI_ENTER_RESTAURANT,8050,,식당 입장,Enter Restaurant
+UI_TALK,8051,,대화,Talk
+UI_PICK_UP,8052,,줍기,Pick Up
+UI_OPEN,8053,,열기,Open
+UI_COOKING_TITLE,8054,,조리대,Kitchen
+UI_COOKING_SLOTS,8055,,재료 슬롯,Ingredient Slots
+UI_COOKING_START,8056,,요리 시작,Start Cooking
+UI_COOKING_SLOT_EMPTY,8057,,비어 있음,Empty
+UI_COOKING_SELECT,8058,,재료를 선택하세요,Select ingredients
+UI_COOKING_NO_MATCH,8059,,재료 조합이 맞지 않습니다,No matching recipe
+UI_COOKING_RECIPE_PREFIX,8060,,레시피: ,Recipe:
+UI_COOKING_NO_INGREDIENTS,8061,,재료가 없습니다.,No ingredients.
+UI_INVENTORY,8062,,인벤토리,Inventory
+UI_INGREDIENTS,8063,,재료,Ingredients
+UI_FOOD,8064,,요리,Food
+UI_CONFIRM,8065,,확인,Confirm
+UI_START_EVENING,8066,,저녁 영업 시작,Start Evening
+UI_SAVING,8067,,저장 중...,Saving...
+MON_006_NAME,8068,,오크 졸병,Orc Grunt
+MON_006_DESC,8069,,에버그린 숲 외곽을 배회하는 하급 오크. 무리지어 달려든다.,A low-rank orc roaming the outskirts of Evergreen Forest. Charges in packs.
+MON_007_NAME,8070,,오크 전사,Orc Warrior
+MON_007_DESC,8071,,단단한 가죽 갑옷을 두른 오크 전사. 묵직한 강타로 적을 밀쳐낸다.,An orc warrior clad in tough leather armor. Knocks enemies back with heavy blows.
+MON_008_NAME,8072,,오크 광전사,Orc Berserker
+MON_008_DESC,8073,,분노에 휩싸인 오크. 무섭게 돌진해 적을 덮친다.,A rage-filled orc. Charges ferociously to overwhelm its prey.

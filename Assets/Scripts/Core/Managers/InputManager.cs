@@ -77,7 +77,13 @@ namespace MonsterKitchen.Core
                     UI.UIManager.Instance?.Toggle(kv.Value);
 
             if (kb.escapeKey.wasPressedThisFrame)
-                UI.UIManager.Instance?.PopPopup();
+            {
+                // 우선순위: 일시정지 닫기 → 팝업 닫기 → 일시정지 열기
+                if (UI.GameHUD.Instance != null && UI.GameHUD.Instance.IsPaused)
+                    UI.GameHUD.Instance.TogglePause();
+                else if (UI.UIManager.Instance == null || !UI.UIManager.Instance.PopPopup())
+                    UI.GameHUD.Instance?.TogglePause();
+            }
 
             if (kb.qKey.wasPressedThisFrame) OnSkill1?.Invoke();
             if (kb.rKey.wasPressedThisFrame) OnSkill2?.Invoke();

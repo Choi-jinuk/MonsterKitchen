@@ -19,7 +19,7 @@ namespace MonsterKitchen.Core
     {
         public static SceneLoader Instance { get; private set; }
 
-        const string LOADING_SCENE = "LoadingScene";
+        const string LOADING_SCENE = CommonString.SceneLoading;
 
         readonly MonoBehaviour m_Runner;
 

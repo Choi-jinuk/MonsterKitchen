@@ -62,11 +62,9 @@ namespace MonsterKitchen.UI.Mobile
 
         public void SetContext(MobileContext ctx)
         {
-            // 모바일 또는 에디터 ForceShow 일 때만 표시
+            // 표시 여부만 플랫폼에 따라 결정 — 슬롯 구성은 항상 갱신
             bool canShow = Application.isMobilePlatform || m_ForceShow;
-            if (!canShow) return;
-
-            gameObject.SetActive(true);
+            if (canShow) gameObject.SetActive(true);
 
             if (m_Slots == null || m_Configs == null) return;
 

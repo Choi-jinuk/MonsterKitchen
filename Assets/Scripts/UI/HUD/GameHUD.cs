@@ -469,6 +469,99 @@ namespace MonsterKitchen.UI
         }
 
         // ================================================================
+        //  일시정지 오버레이 — ESC (InputManager 가 호출)
+        // ================================================================
+
+        VisualElement m_PauseRoot;
+
+        public bool IsPaused => m_PauseRoot != null;
+
+        /// <summary>일시정지 토글. 열림: Time.timeScale = 0, 닫힘: 1.</summary>
+        public void TogglePause()
+        {
+            if (IsPaused) ClosePause();
+            else          OpenPause();
+        }
+
+        void OpenPause()
+        {
+            var root = GetComponent<UIDocument>()?.rootVisualElement;
+            if (root == null) return;
+
+            m_PauseRoot = new VisualElement();
+            m_PauseRoot.style.position        = Position.Absolute;
+            m_PauseRoot.style.top             = 0;
+            m_PauseRoot.style.left            = 0;
+            m_PauseRoot.style.right           = 0;
+            m_PauseRoot.style.bottom          = 0;
+            m_PauseRoot.style.backgroundColor = new StyleColor(new Color(0f, 0f, 0f, 0.65f));
+            m_PauseRoot.style.alignItems      = Align.Center;
+            m_PauseRoot.style.justifyContent  = Justify.Center;
+
+            var box = new VisualElement();
+            box.style.backgroundColor         = new StyleColor(new Color(0.12f, 0.12f, 0.16f, 0.97f));
+            box.style.borderTopLeftRadius     = 12;
+            box.style.borderTopRightRadius    = 12;
+            box.style.borderBottomLeftRadius  = 12;
+            box.style.borderBottomRightRadius = 12;
+            box.style.paddingTop              = 28;
+            box.style.paddingBottom           = 28;
+            box.style.paddingLeft             = 48;
+            box.style.paddingRight            = 48;
+            box.style.alignItems              = Align.Center;
+
+            var title = new Label("일시정지");
+            title.style.fontSize       = 26;
+            title.style.color          = new StyleColor(Color.white);
+            title.style.marginBottom   = 24;
+            title.style.unityTextAlign = TextAnchor.MiddleCenter;
+            box.Add(title);
+
+            box.Add(MakePauseButton("계속하기", ClosePause,
+                new Color(0.25f, 0.55f, 0.85f)));
+            box.Add(MakePauseButton("저장 후 종료", QuitGame,
+                new Color(0.65f, 0.25f, 0.25f)));
+
+            m_PauseRoot.Add(box);
+            root.Add(m_PauseRoot);
+
+            Time.timeScale = 0f;
+        }
+
+        void ClosePause()
+        {
+            m_PauseRoot?.RemoveFromHierarchy();
+            m_PauseRoot = null;
+            Time.timeScale = 1f;
+        }
+
+        static Button MakePauseButton(string text, System.Action onClick, Color bg)
+        {
+            var btn = new Button(onClick) { text = text };
+            btn.style.width                   = 200;
+            btn.style.height                  = 40;
+            btn.style.fontSize                = 16;
+            btn.style.marginBottom            = 10;
+            btn.style.backgroundColor         = new StyleColor(bg);
+            btn.style.color                   = new StyleColor(Color.white);
+            btn.style.borderTopLeftRadius     = 6;
+            btn.style.borderTopRightRadius    = 6;
+            btn.style.borderBottomLeftRadius  = 6;
+            btn.style.borderBottomRightRadius = 6;
+            return btn;
+        }
+
+        void QuitGame()
+        {
+            Time.timeScale = 1f;
+            SaveScheduler.Instance?.ForceSave();
+            Application.Quit();
+#if UNITY_EDITOR
+            UnityEditor.EditorApplication.isPlaying = false;
+#endif
+        }
+
+        // ================================================================
         //  상단 HUD 갱신
         // ================================================================
 

@@ -8,7 +8,7 @@ namespace MonsterKitchen.Restaurant
     /// 식당 테이블 1개. 착석 여부 + 청결 상태를 관리한다.
     /// 손님 퇴장 시 IsDirty=true. 플레이어 E키로 1.5초 청소 가능.
     /// </summary>
-    public class RestaurantTable : MonoBehaviour
+    public class RestaurantTable : InteractableBehaviour
     {
         [Header("References")]
         [SerializeField] Transform  m_SeatPoint;
@@ -48,31 +48,13 @@ namespace MonsterKitchen.Restaurant
                 m_DirtyOverlay.SetActive(dirty);
         }
 
-        // ── 플레이어 근접 청소 상호작용 ────────────────────────────────
+        // ── 플레이어 근접 청소 상호작용 (InteractableBehaviour) ───────
 
-        void OnTriggerEnter2D(Collider2D other)
-        {
-            if (!other.CompareTag("Player")) return;
-            if (InputManager.Instance != null)
-                InputManager.Instance.OnInteract += TryClean;
-        }
+        public override bool CanInteract => IsDirty && !IsOccupied && !m_IsCleaning;
 
-        void OnTriggerExit2D(Collider2D other)
+        public override void Interact()
         {
-            if (!other.CompareTag("Player")) return;
-            if (InputManager.Instance != null)
-                InputManager.Instance.OnInteract -= TryClean;
-        }
-
-        void OnDisable()
-        {
-            if (InputManager.Instance != null)
-                InputManager.Instance.OnInteract -= TryClean;
-        }
-
-        void TryClean()
-        {
-            if (!IsDirty || IsOccupied || m_IsCleaning) return;
+            if (!CanInteract) return;
             StartCoroutine(CleanRoutine());
         }
 

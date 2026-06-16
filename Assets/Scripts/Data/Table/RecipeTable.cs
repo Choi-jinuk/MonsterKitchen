@@ -1,5 +1,7 @@
 using System;
+using MonsterKitchen.Core;
 using UnityEngine;
+using UnityEngine.Localization;
 
 namespace MonsterKitchen.Data
 {
@@ -21,10 +23,13 @@ namespace MonsterKitchen.Data
         [Tooltip("로컬라이제이션 키. 예: RCP_001_DESC → StringData 조회")]
         public string DescKey;
 
-        /// <summary>현재 언어에 맞는 이름.</summary>
-        public string DisplayName => MonsterKitchen.Core.LocaleManager.Get(NameKey);
-        /// <summary>현재 언어에 맞는 설명.</summary>
-        public string Description => MonsterKitchen.Core.LocaleManager.Get(DescKey);
+        [NonSerialized] LocalizedString m_NameLs;
+        [NonSerialized] LocalizedString m_DescLs;
+
+        /// <summary>현재 언어에 맞는 이름. 미등록 키 → NameKey 반환.</summary>
+        public string DisplayName => Loc.Get(ref m_NameLs, NameKey);
+        /// <summary>현재 언어에 맞는 설명. 미등록 키 → DescKey 반환.</summary>
+        public string Description => Loc.Get(ref m_DescLs, DescKey);
 
         [Header("Recipe")]
         public RecipeIngredient[] Ingredients;

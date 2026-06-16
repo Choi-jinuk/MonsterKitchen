@@ -2,6 +2,7 @@ using MonsterKitchen.Core;
 using System;
 using System.Collections;
 using UnityEngine;
+using UnityEngine.Localization.Settings;
 
 namespace MonsterKitchen.Core
 {
@@ -109,11 +110,16 @@ namespace MonsterKitchen.Core
         // ================================================================
 
         /// <summary>
+        /// Unity Localization 초기화 + Strings 테이블 프리로드 후
         /// TableData SO 를 AssetManifest 에서 로드해 DataRegistry 에 등록한다.
         /// 실패 시 치명적 오류 — IsAborted = true.
         /// </summary>
         IEnumerator StepDataLoad()
         {
+            // Localization 초기화 (locale 선택 + 프리로드 플래그 테이블 로드)
+            // 이후 LocalizedString.GetLocalizedString() 동기 접근 안전.
+            yield return LocalizationSettings.InitializationOperation;
+
             GlobalController.Instance.Registry.Load();
 
             if (!GlobalController.Instance.Registry.IsReady)

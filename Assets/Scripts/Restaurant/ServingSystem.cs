@@ -6,28 +6,60 @@ namespace MonsterKitchen.Restaurant
 {
     /// <summary>
     /// 플레이어가 대기 중인 손님에게 음식을 서빙한다.
-    /// Interact 키를 누르면 근처 Waiting 손님에게 서빙.
+    /// InteractionHub 후보로 상시 등록 — E키 입력 시 반경 내 가장 가까운
+    /// Waiting 손님이 다른 후보(테이블 청소 등)보다 가까우면 서빙이 실행된다.
     /// 음식 소모 요청은 NetworkManager.RequestServeFood() 를 통해 서버에 전달된다.
     /// </summary>
-    public class ServingSystem : MonoBehaviour
+    public class ServingSystem : MonoBehaviour, IInteractable
     {
         static readonly Collider2D[] s_OverlapBuffer = new Collider2D[16];
 
         [SerializeField] float m_ServeRadius = 1.5f;
 
-        void OnEnable()
+        CustomerAI m_NearestWaiting;   // CanInteract 에서 갱신, Interact 에서 사용
+
+        // ── IInteractable ────────────────────────────────────────────
+
+        public bool CanInteract
         {
-            if (InputManager.Instance != null)
-                InputManager.Instance.OnInteract += TryServe;
+            get
+            {
+                m_NearestWaiting = FindNearestWaitingCustomer();
+                return m_NearestWaiting != null;
+            }
         }
 
-        void OnDisable()
+        public Vector3 InteractPosition =>
+            m_NearestWaiting != null ? m_NearestWaiting.transform.position : transform.position;
+
+        public void Interact()
         {
-            if (InputManager.Instance != null)
-                InputManager.Instance.OnInteract -= TryServe;
+            var customer = m_NearestWaiting;
+            if (customer == null || !customer.IsWaiting) return;
+
+            FoodData food = customer.OrderedFood;
+            if (food == null) return;
+
+            NetworkManager.Instance?.RequestServeFood(food.Id, (success, grade, _) =>
+            {
+                if (!success)
+                {
+                    DebugUtil.Log($"[Serving] {food.DisplayName} 재고 없음.");
+                    return;
+                }
+                customer.Serve(food, grade);
+                DebugUtil.Log($"[Serving] {food.DisplayName} 서빙 완료.");
+            });
         }
 
-        void TryServe()
+        // ── Mono ─────────────────────────────────────────────────────
+
+        void OnEnable()  => InteractionHub.Register(this);
+        void OnDisable() => InteractionHub.Unregister(this);
+
+        // ── 내부 ─────────────────────────────────────────────────────
+
+        CustomerAI FindNearestWaitingCustomer()
         {
             Vector2 origin = PlayerManager.Instance?.Player != null
                 ? (Vector2)PlayerManager.Instance.Player.transform.position
@@ -35,29 +67,18 @@ namespace MonsterKitchen.Restaurant
 
             var serveFilter = ContactFilter2D.noFilter;
             int hitCount = Physics2D.OverlapCircle(origin, m_ServeRadius, serveFilter, s_OverlapBuffer);
+
+            CustomerAI nearest = null;
+            float      minDist = float.MaxValue;
             for (int i = 0; i < hitCount; i++)
             {
-                var col      = s_OverlapBuffer[i];
-                var customer = col.GetComponent<CustomerAI>();
-                if (customer == null || !customer.IsWaiting) continue;
+                var customer = s_OverlapBuffer[i].GetComponent<CustomerAI>();
+                if (customer == null || !customer.IsWaiting || customer.OrderedFood == null) continue;
 
-                FoodData food = customer.OrderedFood;
-                if (food == null) continue;
-
-                NetworkManager.Instance?.RequestServeFood(food.Id, (success, grade, _) =>
-                {
-                    if (!success)
-                    {
-                        DebugUtil.Log($"[Serving] {food.DisplayName} 재고 없음.");
-                        return;
-                    }
-                    customer.Serve(food, grade);
-                    DebugUtil.Log($"[Serving] {food.DisplayName} 서빙 완료.");
-                });
-                return;
+                float d = ((Vector2)customer.transform.position - origin).sqrMagnitude;
+                if (d < minDist) { minDist = d; nearest = customer; }
             }
-
-            DebugUtil.Log("[Serving] 근처에 대기 중인 손님 없음.");
+            return nearest;
         }
 
         void OnDrawGizmosSelected()

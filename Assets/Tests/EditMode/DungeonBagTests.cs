@@ -59,21 +59,25 @@ namespace MonsterKitchen.Tests
         }
 
         [Test]
-        public void TryAdd_SameIngredient_MergesQty()
+        public void TryAdd_SameIngredientSameQuality_MergesQty()
         {
             m_Bag.TryAdd(2001u, 2, IngredientQuality.I, 1);
             m_Bag.TryAdd(2001u, 3, IngredientQuality.I, 1);
-            m_Bag.Contents.TryGetValue(2001u, out var entry);
-            Assert.AreEqual(5, entry.qty);
+            m_Bag.Contents.TryGetValue((2001u, IngredientQuality.I), out int qty);
+            Assert.AreEqual(5, qty);
         }
 
         [Test]
-        public void TryAdd_SameIngredient_KeepsBestQuality()
+        public void TryAdd_SameIngredientDifferentQuality_KeepsSeparateStacks()
         {
-            m_Bag.TryAdd(2001u, 1, IngredientQuality.I,   1);
+            m_Bag.TryAdd(2001u, 3, IngredientQuality.I,   1);
             m_Bag.TryAdd(2001u, 1, IngredientQuality.III, 1);
-            m_Bag.Contents.TryGetValue(2001u, out var entry);
-            Assert.AreEqual(IngredientQuality.III, entry.quality);
+
+            m_Bag.Contents.TryGetValue((2001u, IngredientQuality.I),   out int qtyI);
+            m_Bag.Contents.TryGetValue((2001u, IngredientQuality.III), out int qtyIII);
+
+            Assert.AreEqual(3, qtyI,   "I 등급 스택이 III 로 승급되면 안 된다");
+            Assert.AreEqual(1, qtyIII);
         }
 
         // ── IsFull ───────────────────────────────────────────────────
@@ -97,19 +101,19 @@ namespace MonsterKitchen.Tests
         [Test]
         public void Remove_DecreasesWeightAndQty()
         {
-            m_Bag.TryAdd(2001u, 4, IngredientQuality.I, 2);   // weight=8
-            m_Bag.Remove(2001u, 2);                             // remove 2 → weight=4
+            m_Bag.TryAdd(2001u, 4, IngredientQuality.I, 2);          // weight=8
+            m_Bag.Remove(2001u, IngredientQuality.I, 2);             // remove 2 → weight=4
             Assert.AreEqual(4, m_Bag.CurrentWeight);
-            m_Bag.Contents.TryGetValue(2001u, out var entry);
-            Assert.AreEqual(2, entry.qty);
+            m_Bag.Contents.TryGetValue((2001u, IngredientQuality.I), out int qty);
+            Assert.AreEqual(2, qty);
         }
 
         [Test]
         public void Remove_AllQty_RemovesKey()
         {
             m_Bag.TryAdd(2001u, 3, IngredientQuality.I, 1);
-            m_Bag.Remove(2001u, 3);
-            Assert.IsFalse(m_Bag.Contents.ContainsKey(2001u));
+            m_Bag.Remove(2001u, IngredientQuality.I, 3);
+            Assert.IsFalse(m_Bag.Contents.ContainsKey((2001u, IngredientQuality.I)));
             Assert.AreEqual(0, m_Bag.CurrentWeight);
         }
 
@@ -117,9 +121,22 @@ namespace MonsterKitchen.Tests
         public void Remove_MoreThanQty_ClampsToActualQty()
         {
             m_Bag.TryAdd(2001u, 2, IngredientQuality.I, 1);
-            m_Bag.Remove(2001u, 99);
-            Assert.IsFalse(m_Bag.Contents.ContainsKey(2001u));
+            m_Bag.Remove(2001u, IngredientQuality.I, 99);
+            Assert.IsFalse(m_Bag.Contents.ContainsKey((2001u, IngredientQuality.I)));
             Assert.AreEqual(0, m_Bag.CurrentWeight);
+        }
+
+        [Test]
+        public void Remove_OneQualityStack_DoesNotAffectOther()
+        {
+            m_Bag.TryAdd(2001u, 2, IngredientQuality.I,   1);
+            m_Bag.TryAdd(2001u, 2, IngredientQuality.III, 1);
+            m_Bag.Remove(2001u, IngredientQuality.I, 2);
+
+            Assert.IsFalse(m_Bag.Contents.ContainsKey((2001u, IngredientQuality.I)));
+            m_Bag.Contents.TryGetValue((2001u, IngredientQuality.III), out int qtyIII);
+            Assert.AreEqual(2, qtyIII);
+            Assert.AreEqual(2, m_Bag.CurrentWeight);
         }
 
         // ── Static Current ───────────────────────────────────────────

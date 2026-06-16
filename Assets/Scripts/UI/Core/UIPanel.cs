@@ -89,7 +89,6 @@ namespace MonsterKitchen.UI
 
         protected virtual void OnDestroy()
         {
-            LocaleManager.OnLanguageChanged -= RefreshLocale;
             UIManager.Instance?.Unregister(this);
             InputManager.Instance?.UnregisterUIToggle(PanelId);
         }
@@ -109,16 +108,11 @@ namespace MonsterKitchen.UI
 
             IsOpen = true;
             SetVisible(true);
-            RefreshLocale();
-
-            // 열려 있는 동안 언어 변경에 즉시 반응.
-            LocaleManager.OnLanguageChanged += RefreshLocale;
         }
 
         /// <summary>패널이 닫힐 때 UIManager 가 호출한다.</summary>
         public virtual void OnClose()
         {
-            LocaleManager.OnLanguageChanged -= RefreshLocale;
             IsOpen = false;
             SetVisible(false);
         }
@@ -149,11 +143,6 @@ namespace MonsterKitchen.UI
         // ── 헬퍼 ──────────────────────────────────────────────────────
 
         /// <summary>Root 내 모든 LocalizedLabel 을 현재 언어로 갱신한다.</summary>
-        protected virtual void RefreshLocale()
-        {
-            Root?.Query<LocalizedLabel>().ForEach(l => l.Refresh());
-        }
-
         /// <summary>Root VisualElement 의 display 를 토글한다.</summary>
         protected void SetVisible(bool visible)
         {

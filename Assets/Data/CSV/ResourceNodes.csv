@@ -7,3 +7,4 @@ _key,Id,NameKey,DisplayName,NodeType,DropIngredientId,DropMin,DropMax,MaxHp,Resp
 RNO_001,7001,,바위,Rock,2003,1,2,30,120,
 RNO_002,7002,,나무,Tree,2001,1,2,20,90,
 RNO_003,7003,,광석,Ore,2002,1,2,50,180,
+RNO_004,7004,,희귀 광석,Ore,2007,1,2,80,240,

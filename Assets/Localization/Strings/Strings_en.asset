@@ -1,0 +1,323 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e9620f8c34305754d8cc9a7e49e852d9, type: 3}
+  m_Name: Strings_en
+  m_EditorClassIdentifier: Unity.Localization::UnityEngine.Localization.Tables.StringTable
+  m_LocaleId:
+    m_Code: en
+  m_SharedData: {fileID: 11400000, guid: 544fd673867a0bb4f8e02143cf5e4c77, type: 2}
+  m_Metadata:
+    m_Items: []
+  m_TableData:
+  - m_Id: 8001
+    m_Localized: Green Slime
+    m_Metadata:
+      m_Items: []
+  - m_Id: 8002
+    m_Localized: A jelly-type monster commonly found in Evergreen Forest. Secretes
+      toxic slime.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 8003
+    m_Localized: Flame Slime
+    m_Metadata:
+      m_Items: []
+  - m_Id: 8004
+    m_Localized: A slime from the lava zone. Its body burns with intense heat.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 8005
+    m_Localized: Forest Goblin
+    m_Metadata:
+      m_Items: []
+  - m_Id: 8006
+    m_Localized: A small humanoid monster that calls Evergreen Forest home. Wields
+      a bone club.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 8007
+    m_Localized: Giant Mushroom Man
+    m_Metadata:
+      m_Items: []
+  - m_Id: 8008
+    m_Localized: A monster born from fungi deep in the forest. Releases spores to
+      obscure vision.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 8009
+    m_Localized: "Forest Boss \u2014 Green Worm"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 8010
+    m_Localized: A giant worm monster living beneath Evergreen Forest. Burrows underground
+      to ambush prey.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 8011
+    m_Localized: Slime Jelly
+    m_Metadata:
+      m_Items: []
+  - m_Id: 8012
+    m_Localized: Translucent jelly harvested from green slimes. Elastic and sweet.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 8013
+    m_Localized: Flame Slime Core
+    m_Metadata:
+      m_Items: []
+  - m_Id: 8014
+    m_Localized: The core of a flame slime. When cooled
+    m_Metadata:
+      m_Items: []
+  - m_Id: 8015
+    m_Localized: Goblin Bone
+    m_Metadata:
+      m_Items: []
+  - m_Id: 8016
+    m_Localized: Small dense bones from forest goblins. Used to make rich stock.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 8017
+    m_Localized: Goblin Meat
+    m_Metadata:
+      m_Items: []
+  - m_Id: 8018
+    m_Localized: Flesh from forest goblins. Has a gamey smell and requires preparation.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 8019
+    m_Localized: Mushroom Cap
+    m_Metadata:
+      m_Items: []
+  - m_Id: 8020
+    m_Localized: The cap of a giant mushroom man. Rich in flavor and satisfyingly
+      thick.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 8021
+    m_Localized: Mushroom Spore
+    m_Metadata:
+      m_Items: []
+  - m_Id: 8022
+    m_Localized: Spores secreted by mushroom men. In small amounts they work as seasoning.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 8023
+    m_Localized: Green Worm Meat
+    m_Metadata:
+      m_Items: []
+  - m_Id: 8024
+    m_Localized: Large cuts of meat from the green worm. Chewy and highly nutritious.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 8025
+    m_Localized: Green Worm Hide
+    m_Metadata:
+      m_Items: []
+  - m_Id: 8026
+    m_Localized: The thick outer skin of a green worm. Long boiling creates a rich
+      broth.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 8027
+    m_Localized: Slime Jelly Dessert
+    m_Metadata:
+      m_Items: []
+  - m_Id: 8028
+    m_Localized: A dessert made by setting sweet slime jelly. Has a restorative effect.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 8029
+    m_Localized: Spicy Slime Stir-fry
+    m_Metadata:
+      m_Items: []
+  - m_Id: 8030
+    m_Localized: A spicy stir-fry made from flame slime cores. Increases attack power.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 8031
+    m_Localized: Goblin Bone Broth
+    m_Metadata:
+      m_Items: []
+  - m_Id: 8032
+    m_Localized: Rich stock simmered from goblin bones. Excellent for HP recovery.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 8033
+    m_Localized: Grilled Mushroom Cap
+    m_Metadata:
+      m_Items: []
+  - m_Id: 8034
+    m_Localized: Thick slices of mushroom cap seared in a pan. Increases defense.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 8035
+    m_Localized: Green Worm Steak
+    m_Metadata:
+      m_Items: []
+  - m_Id: 8036
+    m_Localized: A premium steak cut thick from green worm meat. Raises all stats.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 8037
+    m_Localized: Slime Jelly Dessert Recipe
+    m_Metadata:
+      m_Items: []
+  - m_Id: 8038
+    m_Localized: A basic dessert. Set 2 slime jellies in a mold.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 8039
+    m_Localized: Spicy Slime Stir-fry Recipe
+    m_Metadata:
+      m_Items: []
+  - m_Id: 8040
+    m_Localized: Stir-fry 1 flame slime core with 1 slime jelly.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 8041
+    m_Localized: Goblin Bone Broth Recipe
+    m_Metadata:
+      m_Items: []
+  - m_Id: 8042
+    m_Localized: Simmer 3 goblin bones for a long time to extract rich broth.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 8043
+    m_Localized: Grilled Mushroom Cap Recipe
+    m_Metadata:
+      m_Items: []
+  - m_Id: 8044
+    m_Localized: Grill 2 mushroom caps in a pan.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 8045
+    m_Localized: Green Worm Steak Recipe
+    m_Metadata:
+      m_Items: []
+  - m_Id: 8046
+    m_Localized: A premium recipe. Cut 1 green worm meat thick and grill it.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 8047
+    m_Localized: Interact
+    m_Metadata:
+      m_Items: []
+  - m_Id: 8048
+    m_Localized: Enter Dungeon
+    m_Metadata:
+      m_Items: []
+  - m_Id: 8049
+    m_Localized: Enter Kitchen
+    m_Metadata:
+      m_Items: []
+  - m_Id: 8050
+    m_Localized: Enter Restaurant
+    m_Metadata:
+      m_Items: []
+  - m_Id: 8051
+    m_Localized: Talk
+    m_Metadata:
+      m_Items: []
+  - m_Id: 8052
+    m_Localized: Pick Up
+    m_Metadata:
+      m_Items: []
+  - m_Id: 8053
+    m_Localized: Open
+    m_Metadata:
+      m_Items: []
+  - m_Id: 8054
+    m_Localized: Kitchen
+    m_Metadata:
+      m_Items: []
+  - m_Id: 8055
+    m_Localized: Ingredient Slots
+    m_Metadata:
+      m_Items: []
+  - m_Id: 8056
+    m_Localized: Start Cooking
+    m_Metadata:
+      m_Items: []
+  - m_Id: 8057
+    m_Localized: Empty
+    m_Metadata:
+      m_Items: []
+  - m_Id: 8058
+    m_Localized: Select ingredients
+    m_Metadata:
+      m_Items: []
+  - m_Id: 8059
+    m_Localized: No matching recipe
+    m_Metadata:
+      m_Items: []
+  - m_Id: 8060
+    m_Localized: 'Recipe:'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 8061
+    m_Localized: No ingredients.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 8062
+    m_Localized: Inventory
+    m_Metadata:
+      m_Items: []
+  - m_Id: 8063
+    m_Localized: Ingredients
+    m_Metadata:
+      m_Items: []
+  - m_Id: 8064
+    m_Localized: Food
+    m_Metadata:
+      m_Items: []
+  - m_Id: 8065
+    m_Localized: Confirm
+    m_Metadata:
+      m_Items: []
+  - m_Id: 8066
+    m_Localized: Start Evening
+    m_Metadata:
+      m_Items: []
+  - m_Id: 8067
+    m_Localized: Saving...
+    m_Metadata:
+      m_Items: []
+  - m_Id: 8068
+    m_Localized: Orc Grunt
+    m_Metadata:
+      m_Items: []
+  - m_Id: 8069
+    m_Localized: A low-rank orc roaming the outskirts of Evergreen Forest. Charges
+      in packs.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 8070
+    m_Localized: Orc Warrior
+    m_Metadata:
+      m_Items: []
+  - m_Id: 8071
+    m_Localized: An orc warrior clad in tough leather armor. Knocks enemies back
+      with heavy blows.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 8072
+    m_Localized: Orc Berserker
+    m_Metadata:
+      m_Items: []
+  - m_Id: 8073
+    m_Localized: A rage-filled orc. Charges ferociously to overwhelm its prey.
+    m_Metadata:
+      m_Items: []
+  references:
+    version: 2
+    RefIds: []

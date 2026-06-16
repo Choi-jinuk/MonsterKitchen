@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace MonsterKitchen.Combat
@@ -33,7 +34,8 @@ namespace MonsterKitchen.Combat
     [RequireComponent(typeof(CircleCollider2D))]
     public class Projectile : MonoBehaviour
     {
-        static readonly Collider2D[] s_OverlapBuffer = new Collider2D[16];
+        static readonly Collider2D[]      s_OverlapBuffer = new Collider2D[16];
+        static readonly Queue<Projectile> s_Pool          = new();
 
         // ── 런타임 상태 ─────────────────────────────────────────────────
         int           m_Damage;
@@ -78,11 +80,50 @@ namespace MonsterKitchen.Combat
 
             if (GetComponent<SpriteRenderer>() == null)
             {
-                var sr       = gameObject.AddComponent<SpriteRenderer>();
-                sr.sprite       = GetOrCreateSprite();
-                sr.sortingOrder = 10;
+                var sr    = gameObject.AddComponent<SpriteRenderer>();
+                sr.sprite = GetOrCreateSprite();
+                // sortingOrder 지정 없음 — 월드 스프라이트 소팅 통일(0),
+                // 앞뒤는 Perspective Distance 소트가 Y 기준으로 결정
                 transform.localScale = Vector3.one * 0.3f;
             }
+        }
+
+        // ================================================================
+        //  풀링 — Spawn / Release
+        // ================================================================
+
+        /// <summary>
+        /// 풀에서 투사체를 꺼낸다 (없으면 생성). 호출 후 Init() 으로 동작을 설정할 것.
+        /// 씬 전환으로 파괴된 풀 항목은 자동 스킵된다.
+        /// </summary>
+        public static Projectile Spawn(Vector3 position)
+        {
+            Projectile p = null;
+            while (s_Pool.Count > 0)
+            {
+                var candidate = s_Pool.Dequeue();
+                if (candidate != null) { p = candidate; break; }   // 파괴된 항목 스킵
+            }
+
+            if (p == null)
+            {
+                var go = new GameObject("Projectile");
+                p = go.AddComponent<Projectile>();
+            }
+
+            p.transform.position = position;
+            p.gameObject.SetActive(true);
+            return p;
+        }
+
+        /// <summary>명중·사거리 초과 시 풀로 반환. Destroy 대신 사용한다.</summary>
+        void Release()
+        {
+            m_OnKill        = null;
+            m_HomingTarget  = null;
+            if (m_Rb != null) m_Rb.linearVelocity = Vector2.zero;
+            gameObject.SetActive(false);
+            s_Pool.Enqueue(this);
         }
 
         // ================================================================
@@ -154,10 +195,10 @@ namespace MonsterKitchen.Combat
         {
             if (m_Hit) return;
 
-            // 사거리 초과 소멸
+            // 사거리 초과 — 풀 반환
             if (Vector3.Distance(transform.position, m_StartPos) >= m_MaxDistance)
             {
-                Destroy(gameObject);
+                Release();
                 return;
             }
 
@@ -229,7 +270,7 @@ namespace MonsterKitchen.Combat
                 ApplyProjectileCC(other.transform);
             }
 
-            Destroy(gameObject);
+            Release();
         }
 
         // ================================================================

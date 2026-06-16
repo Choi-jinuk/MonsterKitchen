@@ -19,7 +19,6 @@ namespace MonsterKitchen.Data
     //    DataRegistry.Instance.Monsters.Get(id)
     //    DataRegistry.Instance.SkillGroups.FindByStringId("SGD_001")
     //    DataRegistry.Instance.UIPanels.FindUIByPanelId("CookingUI")
-    //    DataRegistry.Instance.Strings.FindByStringId("MON_001_NAME")
     //    GlobalController.Instance.Registry.IsReady
     // ====================================================================
 
@@ -49,7 +48,6 @@ namespace MonsterKitchen.Data
         public SkillGroupTable    SkillGroups        => m_Table?.SkillGroups;
         public WeaponTable        Weapons            => m_Table?.Weapons;
         public PlayerCharTable    PlayerChars        => m_Table?.PlayersChar;
-        public StringTable        Strings            => m_Table?.Strings;
 
         // ================================================================
         //  초기화
@@ -102,10 +100,7 @@ namespace MonsterKitchen.Data
             }
 
             DebugUtil.Log(
-                $"[DataRegistry] TableData 로드 완료 | Monsters:{m_Table.Monsters.Count} Ingredients:{m_Table.Ingredients.Count} Foods:{m_Table.Foods.Count} Recipes:{m_Table.Recipes.Count} DropTables:{m_Table.DropTables.Count} DungeonSpawns:{m_Table.DungeonSpawnTables.Count} GatheringTools:{m_Table.GatheringTools.Count} UIPanels:{m_Table.UIPanels.Count} SkillSteps:{m_Table.SkillSteps.Count} SkillGroups:{m_Table.SkillGroups.Count} Weapons:{m_Table.Weapons.Count} Players:{m_Table.PlayersChar.Count} Strings:{m_Table.Strings.Count}");
-
-            // LocaleManager 초기화 (StringTable 캐시 빌드 이후)
-            LocaleManager.Instance?.OnDataLoaded();
+                $"[DataRegistry] TableData 로드 완료 | Monsters:{m_Table.Monsters.Count} Ingredients:{m_Table.Ingredients.Count} Foods:{m_Table.Foods.Count} Recipes:{m_Table.Recipes.Count} DropTables:{m_Table.DropTables.Count} DungeonSpawns:{m_Table.DungeonSpawnTables.Count} GatheringTools:{m_Table.GatheringTools.Count} UIPanels:{m_Table.UIPanels.Count} SkillSteps:{m_Table.SkillSteps.Count} SkillGroups:{m_Table.SkillGroups.Count} Weapons:{m_Table.Weapons.Count} Players:{m_Table.PlayersChar.Count}");
         }
     }
 }

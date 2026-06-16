@@ -1,47 +1,30 @@
 using MonsterKitchen.Core;
 using MonsterKitchen.UI;
 using UnityEngine;
-using UnityEngine.InputSystem;
 using UnityEngine.UIElements;
 
 namespace MonsterKitchen.Dungeon
 {
     // ====================================================================
-    //  DungeonExit — 던전 출구. 항상 활성. E키 상호작용.
+    //  DungeonExit — 던전 출구. 항상 활성. E키 상호작용 (InteractionHub).
     //
-    //  ▶ 플레이어가 Trigger 진입 → m_PlayerInRange = true
-    //  ▶ E키 누름:
+    //  ▶ E키 (Interact):
     //    - 가방 비어있거나 꽉 참 → 즉시 귀환
     //    - 가방 여유 있음 → 확인 팝업 표시
     //  ▶ 귀환: DungeonBag.FlushToInventory() → SceneLoader.LoadScene("ManagementScene")
     // ====================================================================
 
-    public class DungeonExit : MonoBehaviour
+    public class DungeonExit : InteractableBehaviour
     {
-        bool          m_PlayerInRange;
         bool          m_PopupShown;
         VisualElement m_PopupRoot;
 
-        // ── Unity ────────────────────────────────────────────────────
+        // ── IInteractable ────────────────────────────────────────────
 
-        void OnTriggerEnter2D(Collider2D other)
+        public override bool CanInteract => !m_PopupShown;
+
+        public override void Interact()
         {
-            if (!other.CompareTag("Player")) return;
-            m_PlayerInRange = true;
-        }
-
-        void OnTriggerExit2D(Collider2D other)
-        {
-            if (!other.CompareTag("Player")) return;
-            m_PlayerInRange = false;
-            HidePopup();
-        }
-
-        void Update()
-        {
-            if (!m_PlayerInRange || m_PopupShown) return;
-            if (!Keyboard.current[Key.E].wasPressedThisFrame) return;
-
             var bag = DungeonBag.Current;
 
             // 가방 없거나, 비어있거나, 꽉 찼으면 즉시 귀환
@@ -55,6 +38,8 @@ namespace MonsterKitchen.Dungeon
             ShowConfirmPopup(bag.CurrentWeight, bag.MaxWeight);
         }
 
+        protected override void OnPlayerExit() => HidePopup();
+
         // ── 귀환 ─────────────────────────────────────────────────────
 
         void DoReturn()
@@ -62,7 +47,7 @@ namespace MonsterKitchen.Dungeon
             HidePopup();
             DungeonBag.Current?.FlushToInventory();
             DebugUtil.Log("[DungeonExit] 귀환 → ManagementScene");
-            SceneLoader.Instance?.LoadScene("ManagementScene");
+            SceneLoader.Instance?.LoadScene(CommonString.SceneManagement);
         }
 
         // ── 확인 팝업 (코드 생성) ─────────────────────────────────────

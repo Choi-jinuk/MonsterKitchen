@@ -12,32 +12,15 @@ namespace MonsterKitchen.Management
     //    플레이어 Trigger 진입 → 현재 레벨·비용 HUD 알림 표시
     //    Interact 키(E) → NetworkManager.RequestUpgrade → 성공/실패 HUD 알림
     // ====================================================================
-    public class ShopUpgradeStation : MonoBehaviour
+    public class ShopUpgradeStation : InteractableBehaviour
     {
         public enum UpgradeType { Seats, Tip }
 
         [SerializeField] UpgradeType m_UpgradeType = UpgradeType.Seats;
 
-        void OnTriggerEnter2D(Collider2D other)
-        {
-            if (!other.CompareTag("Player")) return;
-            ShowCostHint();
-            if (InputManager.Instance != null)
-                InputManager.Instance.OnInteract += Upgrade;
-        }
+        protected override void OnPlayerEnter() => ShowCostHint();
 
-        void OnTriggerExit2D(Collider2D other)
-        {
-            if (!other.CompareTag("Player")) return;
-            if (InputManager.Instance != null)
-                InputManager.Instance.OnInteract -= Upgrade;
-        }
-
-        void OnDisable()
-        {
-            if (InputManager.Instance != null)
-                InputManager.Instance.OnInteract -= Upgrade;
-        }
+        public override void Interact() => Upgrade();
 
         // ================================================================
         //  내부

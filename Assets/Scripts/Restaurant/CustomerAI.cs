@@ -132,7 +132,8 @@ namespace MonsterKitchen.Restaurant
                 if (onMenu && inv != null && inv.GetFoodCount(foodId) > 0)
                     return registry?.Foods?.Get(foodId);
             }
-            return registry?.Foods?.Get(m_PossibleOrderIds[0]);
+            // 서빙 가능한 음식 없음 — 주문 없이 이탈 (SitAndOrder 가 null 처리)
+            return null;
         }
 
         // ── Waiting ───────────────────────────────────────────────
@@ -239,8 +240,9 @@ namespace MonsterKitchen.Restaurant
 
         IEnumerator LeaveRoutine(bool paid)
         {
-            if (!paid)
+            if (!paid && OrderedFood != null)
             {
+                // 주문 후 서빙 못 받은 손님만 통계에 반영 (메뉴 없음 이탈은 제외)
                 AddSatisfaction(-30);
                 DayManager.Instance?.RecordServing(0, 0, m_Satisfaction);
                 DebugUtil.Log($"[Customer] 인내심 만료 퇴장. 만족도:{m_Satisfaction}");

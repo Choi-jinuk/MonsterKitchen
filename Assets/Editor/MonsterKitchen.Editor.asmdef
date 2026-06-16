@@ -3,7 +3,9 @@
     "rootNamespace": "MonsterKitchen.Editor",
     "references": [
         "MonsterKitchen",
-        "Unity.InputSystem"
+        "Unity.InputSystem",
+        "Unity.Localization",
+        "Unity.Localization.Editor"
     ],
     "includePlatforms": [
         "Editor"

@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::MonsterKitchen.Data.TableData
   Monsters:
     m_Dict:
-      m_Keys: e9030000ea030000eb030000ec030000ed030000ee030000
+      m_Keys: e9030000ea030000eb030000ec030000ed030000ee030000ef030000f0030000
       m_Values:
       - Id: 1001
         NameKey: MON_001_NAME
@@ -313,6 +313,96 @@ MonoBehaviour:
         ImmuneToKnockback: 0
         ImmuneToStun: 0
         ImmuneToPullIn: 0
+      - Id: 1007
+        NameKey: MON_007_NAME
+        DescKey: MON_007_DESC
+        Hp: 90
+        Attack: 12
+        Defense: 10
+        MoveSpeed: 2.8
+        Attribute: 4
+        Rarity: 1
+        SkillGroupIds:
+        - SGD_106
+        SkillGroups:
+        - Id: 10106
+          SkillGroupId: SGD_106
+          SkillIconAddress: sprite/skill/SGD_106
+          SkillName: "\uC624\uD06C \uAC15\uD0C0"
+          Description: 
+          StepIds:
+          - 11306
+          SkillChain:
+          - Id: 11306
+            SkillId: SKL_M06
+            SkillName: "\uC624\uD06C \uAC15\uD0C0"
+            Cooltime: 1.8
+            ComboWindow: 0
+            DamageMultiplier: 1.6
+            SearchRange: 6
+            AttackRange: 1.2
+            MaxTargets: 1
+            MissileSpeed: 0
+            MissileMaxRange: 8
+            CcForce: 6
+            CcDuration: 0.3
+            StunDuration: 0.2
+            AnimTriggerOverride: Attack
+            ProjectilePrefabAddress: prefab/projectile/SKL_M06
+          SkillCooltime: 0
+          AllowedWeaponTypes: 
+        DropTableId: 5004
+        PrefabAddress: prefab/monster/1007
+        SpriteAddress: sprite/monster/1007
+        BtAssetAddress: bt/monster/1007
+        ImmuneToKnockback: 1
+        ImmuneToStun: 0
+        ImmuneToPullIn: 0
+      - Id: 1008
+        NameKey: MON_008_NAME
+        DescKey: MON_008_DESC
+        Hp: 70
+        Attack: 15
+        Defense: 6
+        MoveSpeed: 3.6
+        Attribute: 1
+        Rarity: 2
+        SkillGroupIds:
+        - SGD_107
+        SkillGroups:
+        - Id: 10107
+          SkillGroupId: SGD_107
+          SkillIconAddress: sprite/skill/SGD_107
+          SkillName: "\uC624\uD06C \uB3CC\uC9C4"
+          Description: 
+          StepIds:
+          - 11307
+          SkillChain:
+          - Id: 11307
+            SkillId: SKL_M07
+            SkillName: "\uC624\uD06C \uB3CC\uC9C4"
+            Cooltime: 3
+            ComboWindow: 0
+            DamageMultiplier: 2
+            SearchRange: 7
+            AttackRange: 1.4
+            MaxTargets: 1
+            MissileSpeed: 0
+            MissileMaxRange: 8
+            CcForce: 8
+            CcDuration: 0.4
+            StunDuration: 0.3
+            AnimTriggerOverride: Attack
+            ProjectilePrefabAddress: prefab/projectile/SKL_M07
+          SkillCooltime: 0
+          AllowedWeaponTypes: 
+        DropTableId: 5005
+        PrefabAddress: prefab/monster/1008
+        SpriteAddress: sprite/monster/1008
+        BtAssetAddress: bt/monster/1008
+        ImmuneToKnockback: 0
+        ImmuneToStun: 0
+        ImmuneToPullIn: 0
   Ingredients:
     m_Dict:
       m_Keys: d1070000d2070000d3070000d4070000d5070000d6070000d7070000d8070000
@@ -588,12 +678,18 @@ MonoBehaviour:
         - MonsterId: 1001
           Count: 4
           SpawnRadius: 1.5
+        - MonsterId: 1006
+          Count: 2
+          SpawnRadius: 1
       - Id: 6004
         Monsters:
         - MonsterId: 1002
           Count: 3
           SpawnRadius: 1.5
         - MonsterId: 1003
+          Count: 1
+          SpawnRadius: 1
+        - MonsterId: 1007
           Count: 1
           SpawnRadius: 1
       - Id: 6005
@@ -604,6 +700,9 @@ MonoBehaviour:
         - MonsterId: 1004
           Count: 2
           SpawnRadius: 1.5
+        - MonsterId: 1008
+          Count: 1
+          SpawnRadius: 1
       - Id: 6006
         Monsters:
         - MonsterId: 1005
@@ -709,7 +808,7 @@ MonoBehaviour:
         ToggleKey: Tab
   SkillSteps:
     m_Dict:
-      m_Keys: f92a0000fa2a0000fb2a0000032b0000042b00000d2b00000e2b00000f2b0000102b00005d2b0000c12b0000252c0000262c0000272c0000282c0000292c0000
+      m_Keys: f92a0000fa2a0000fb2a0000032b0000042b00000d2b00000e2b00000f2b0000102b00005d2b0000c12b0000252c0000262c0000272c0000282c0000292c00002a2c00002b2c0000
       m_Values:
       - Id: 11001
         SkillId: SKL_SW1
@@ -967,9 +1066,41 @@ MonoBehaviour:
         StunDuration: 0.3
         AnimTriggerOverride: Rush
         ProjectilePrefabAddress: prefab/projectile/SKL_M05
+      - Id: 11306
+        SkillId: SKL_M06
+        SkillName: "\uC624\uD06C \uAC15\uD0C0"
+        Cooltime: 1.8
+        ComboWindow: 0
+        DamageMultiplier: 1.6
+        SearchRange: 6
+        AttackRange: 1.2
+        MaxTargets: 1
+        MissileSpeed: 0
+        MissileMaxRange: 8
+        CcForce: 6
+        CcDuration: 0.3
+        StunDuration: 0.2
+        AnimTriggerOverride: Attack
+        ProjectilePrefabAddress: prefab/projectile/SKL_M06
+      - Id: 11307
+        SkillId: SKL_M07
+        SkillName: "\uC624\uD06C \uB3CC\uC9C4"
+        Cooltime: 3
+        ComboWindow: 0
+        DamageMultiplier: 2
+        SearchRange: 7
+        AttackRange: 1.4
+        MaxTargets: 1
+        MissileSpeed: 0
+        MissileMaxRange: 8
+        CcForce: 8
+        CcDuration: 0.4
+        StunDuration: 0.3
+        AnimTriggerOverride: Attack
+        ProjectilePrefabAddress: prefab/projectile/SKL_M07
   SkillGroups:
     m_Dict:
-      m_Keys: 1127000012270000132700001a270000242700007527000076270000772700007827000079270000
+      m_Keys: 1127000012270000132700001a2700002427000075270000762700007727000078270000792700007a2700007b270000
       m_Values:
       - Id: 10001
         SkillGroupId: SGD_001
@@ -1333,6 +1464,58 @@ MonoBehaviour:
           StunDuration: 0.3
           AnimTriggerOverride: Rush
           ProjectilePrefabAddress: prefab/projectile/SKL_M05
+        SkillCooltime: 0
+        AllowedWeaponTypes: 
+      - Id: 10106
+        SkillGroupId: SGD_106
+        SkillIconAddress: sprite/skill/SGD_106
+        SkillName: "\uC624\uD06C \uAC15\uD0C0"
+        Description: 
+        StepIds:
+        - 11306
+        SkillChain:
+        - Id: 11306
+          SkillId: SKL_M06
+          SkillName: "\uC624\uD06C \uAC15\uD0C0"
+          Cooltime: 1.8
+          ComboWindow: 0
+          DamageMultiplier: 1.6
+          SearchRange: 6
+          AttackRange: 1.2
+          MaxTargets: 1
+          MissileSpeed: 0
+          MissileMaxRange: 8
+          CcForce: 6
+          CcDuration: 0.3
+          StunDuration: 0.2
+          AnimTriggerOverride: Attack
+          ProjectilePrefabAddress: prefab/projectile/SKL_M06
+        SkillCooltime: 0
+        AllowedWeaponTypes: 
+      - Id: 10107
+        SkillGroupId: SGD_107
+        SkillIconAddress: sprite/skill/SGD_107
+        SkillName: "\uC624\uD06C \uB3CC\uC9C4"
+        Description: 
+        StepIds:
+        - 11307
+        SkillChain:
+        - Id: 11307
+          SkillId: SKL_M07
+          SkillName: "\uC624\uD06C \uB3CC\uC9C4"
+          Cooltime: 3
+          ComboWindow: 0
+          DamageMultiplier: 2
+          SearchRange: 7
+          AttackRange: 1.4
+          MaxTargets: 1
+          MissileSpeed: 0
+          MissileMaxRange: 8
+          CcForce: 8
+          CcDuration: 0.4
+          StunDuration: 0.3
+          AnimTriggerOverride: Attack
+          ProjectilePrefabAddress: prefab/projectile/SKL_M07
         SkillCooltime: 0
         AllowedWeaponTypes: 
   Weapons:
