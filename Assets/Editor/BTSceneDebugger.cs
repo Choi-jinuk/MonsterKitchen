@@ -540,7 +540,7 @@ namespace MonsterKitchen.Editor
             BTRunner prev = m_SelRunner;
             m_Runners.Clear();
             m_Runners.AddRange(
-                FindObjectsByType<BTRunner>(FindObjectsInactive.Include).OrderBy(r => r.name));
+                FindObjectsByType<BTRunner>(FindObjectsInactive.Include, FindObjectsSortMode.None).OrderBy(r => r.name));
 
             // 이전 선택 유지 or 초기화
             bool prevAlive = prev != null && m_Runners.Contains(prev);

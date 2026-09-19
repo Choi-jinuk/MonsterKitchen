@@ -829,7 +829,7 @@ namespace MonsterKitchen.Editor
         void RefreshRunners()
         {
             m_Runners.Clear();
-            m_Runners.AddRange(FindObjectsByType<BTRunner>(FindObjectsInactive.Include));
+            m_Runners.AddRange(FindObjectsByType<BTRunner>(FindObjectsInactive.Include, FindObjectsSortMode.None));
             if (m_SelRunner != null && !m_Runners.Contains(m_SelRunner)) m_SelRunner = null;
         }
     }
