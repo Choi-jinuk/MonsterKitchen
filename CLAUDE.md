@@ -1,15 +1,24 @@
 # CLAUDE.md
 
-> 최종 갱신: 2026-06-01
+> 최종 갱신: 2026-09-19
 
 ---
 
 ## 프로젝트
 
-**몬스터 키친 (MonsterKitchen)** — Unity 6 (6000.4.2f1) URP 2D 타이쿤.
+**몬스터 키친 (MonsterKitchen)** — Unity 6 (**6000.3.24f1**, 6000.3 LTS) URP 2D 타이쿤.
 폴더명 `FantasyTycoon`, 게임명/네임스페이스 **MonsterKitchen**.
 사이클: 던전(재료) → 주방(요리) → 식당(운영) → 다음 날.
 빌드: Desktop 우선, Mobile Phase 2.
+
+**새 PC 세팅**: `docs/SETUP_NEW_PC.md` — Claude Code 가 순서대로 실행해 환경 재현.
+
+| 도구 | 버전 |
+|---|---|
+| Unity Editor | 6000.3.24f1 (LTS 최신 패치 추적, 정답은 `ProjectVersion.txt`) |
+| Unity CLI | 1.0.0-beta.10 · `com.unity.pipeline` 0.7.0-exp.1 |
+| Coplay MCP | `com.coplaydev.unity-mcp` `#main` (10.2.x, 실제 고정은 `packages-lock.json`) |
+| Rider | 2026.1.3 · `com.unity.ide.rider` 3.0.40 (`mcp__ide__getDiagnostics`) |
 
 ---
 

@@ -104,6 +104,9 @@ namespace MonsterKitchen.UI.Mobile
 
         /// <summary>EditMode 테스트에서 컨텍스트 설정을 직접 주입할 때 사용.</summary>
         public void SetConfigsForTest(ContextConfig[] configs) => m_Configs = configs;
+
+        /// <summary>EditMode 테스트에서 비모바일 플랫폼 표시 게이트를 우회할 때 사용.</summary>
+        public void SetForceShowForTest(bool forceShow) => m_ForceShow = forceShow;
 #endif
     }
 }

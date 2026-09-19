@@ -87,6 +87,7 @@ namespace MonsterKitchen.Tests
             var slot2GO = new GameObject(); var s2 = slot2GO.AddComponent<MobileButton>();
 
             hud.SetSlotsForTest(new[] { s0, s1, s2 });
+            hud.SetForceShowForTest(true);
             hud.SetConfigsForTest(new[]
             {
                 new MobileHUD.ContextConfig
@@ -122,6 +123,7 @@ namespace MonsterKitchen.Tests
             var slot2GO = new GameObject(); var s2 = slot2GO.AddComponent<MobileButton>();
 
             hud.SetSlotsForTest(new[] { s0, s1, s2 });
+            hud.SetForceShowForTest(true);
             hud.SetConfigsForTest(new[]
             {
                 new MobileHUD.ContextConfig

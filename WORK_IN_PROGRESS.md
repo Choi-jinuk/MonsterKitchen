@@ -1,5 +1,19 @@
 # Work In Progress
 
+## 완료: Unity 6000.3.24f1 LTS 업그레이드 + 로컬 PC 세팅 매뉴얼
+
+- [x] 6000.3.24f1 설치 (Android/iOS/Windows IL2CPP/SDK/NDK/OpenJDK)
+- [x] Editor 종료 → 6000.3.24f1 로 프로젝트 재오픈 (ProjectVersion.txt 갱신)
+- [x] 컴파일 에러/콘솔 확인 (에러 0) + EditMode 테스트 81/81
+  - 실패 2: MobileInputTests (SetContext_DungeonInteract / _Exploration_HidesSlot2) — 기존 버그, 버전 무관.
+    원인: MobileHUD.SetContext 가 `isMobilePlatform || m_ForceShow` 아니면 조기 return, 테스트는 ForceShow 미설정.
+    수정: MobileHUD.SetForceShowForTest() 추가 + 두 테스트에서 호출 → 통과
+- [x] CLAUDE.md 버전/도구 섹션 갱신
+- [x] docs/SETUP_NEW_PC.md 작성 (Claude Code 가 읽고 자동 세팅)
+- [x] .claude/settings.local.json PC 고유 경로 정리 (113→79)
+- [x] 넓은 권한 축소 (79→72, 조회용 unity CLI 권한 추가)
+- [x] karpathy-skills 1.0.0 + understand-anything 2.9.7 (Egonex-AI) 설치
+
 ## 완료: 모듈 7-6, 7-7 — 레시피 도감 UI + 요리 마스터리 보너스
 
 - RecipeBookUI: 마스터리 보너스 표시 (속도·재료절약·등급업)
