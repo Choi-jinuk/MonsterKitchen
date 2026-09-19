@@ -13,21 +13,37 @@
 
 ---
 
-## Unity CLI
+## Unity CLI (공식 `unity`, beta)
+
+설치: `winget install Unity.CLI` (업데이트 `winget upgrade Unity.CLI`). 진단: `unity doctor`.
+Editor 버전은 `ProjectSettings/ProjectVersion.txt` 기준 자동 선택 — 경로 하드코딩 금지.
+Editor 연동: `com.unity.pipeline` (experimental) → 열린 Editor에 `127.0.0.1:78xx` 로컬 서버.
+스킬: `.claude/skills/unity-cli`, `.claude/skills/unity-pipeline` (`unity skill refresh` 로 갱신).
 
 ```bash
-# Editor 열기
-"C:/Program Files/Unity/Hub/Editor/6000.4.2f1/Editor/Unity.exe" -projectPath "C:/Users/CHOI/Desktop/Program/Unity/FantasyTycoon"
+# ── Editor 열림 (pipeline 경유) ──
+unity pipeline list                      # Server Reachable=true 확인
+unity command                            # 노출 명령 목록 (~170)
+unity command editor_status --json
+unity command eval 'return UnityEditor.EditorApplication.isPlaying;'   # 재컴파일 없이 C# 실행
+unity command run_tests                  # 열린 Editor에서 테스트
+unity command console                    # 콘솔 로그
 
-# PlayMode 테스트
-"C:/Program Files/Unity/Hub/Editor/6000.4.2f1/Editor/Unity.exe" -projectPath "C:/Users/CHOI/Desktop/Program/Unity/FantasyTycoon" -runTests -testPlatform PlayMode -testResults results.xml -batchmode -quit
+# ── Editor 닫힘 (batchmode — 열려 있으면 프로젝트 락) ──
+unity test --mode EditMode --output Logs/test-editmode.xml
+unity test --mode PlayMode --output Logs/test-playmode.xml
+unity test --affected                    # 미커밋 변경 영향 테스트만
+unity build --target StandaloneWindows64 -o Builds/Win64
 
-# EditMode 테스트
-"C:/Program Files/Unity/Hub/Editor/6000.4.2f1/Editor/Unity.exe" -projectPath "C:/Users/CHOI/Desktop/Program/Unity/FantasyTycoon" -runTests -testPlatform EditMode -testResults results.xml -batchmode -quit
-
-# Windows 빌드
-"C:/Program Files/Unity/Hub/Editor/6000.4.2f1/Editor/Unity.exe" -projectPath "C:/Users/CHOI/Desktop/Program/Unity/FantasyTycoon" -buildTarget Win64 -batchmode -quit
+# ── 기타 ──
+unity open .                             # 맞는 버전 Editor로 열기
+unity editors -i                         # 설치 Editor 목록
+unity vcs diff <scene|prefab>            # 씬/프리팹 의미 단위 diff
 ```
+
+- Bash 에서 `eval` 코드는 **작은따옴표**로 감싸기 (PowerShell 따옴표 이스케이프 깨짐).
+- 연결 실패 시: `unity pipeline list` → Safe Mode(컴파일 에러) 여부 확인. 패키지 추가 직후 Editor 포커스/refresh 필요.
+- exit code: `unity test` 실패 8, 기타 오류 6.
 
 테스트 위치: `Assets/Tests/` (EditMode), `Assets/Tests/PlayMode/`.
 
@@ -347,9 +363,24 @@ CsvParser: `;` 주석, `_` 컬럼 무시, `#TYPE` 타입 지정, `|` 배열 구�
 | `com.unity.timeline` | 컷씬 |
 | `com.unity.feature.mobile` | 모바일 빌드 |
 | `com.unity.test-framework` | 유닛 테스트 |
-| `com.coplaydev.unity-mcp` | MCP Unity Editor 연동 |
+| `com.coplaydev.unity-mcp` | MCP Unity Editor 연동 (주력) |
+| `com.unity.pipeline` | Unity CLI ↔ Editor 연동 (experimental) |
 
 ---
+
+## Unity 도구 역할 분담 (MCP 2종 + CLI 병행)
+
+| 서버/도구 | 연결 | 담당 |
+|---|---|---|
+| **UnityMCP** (coplay, `mcp__UnityMCP__*`) | HTTP `127.0.0.1:8080` | **주력.** 씬/GameObject/컴포넌트/프리팹 편집, `read_console`, `manage_scene(save)`, `refresh_unity`, `run_tests`. 기존 작업 규칙 전부 이 서버 기준. |
+| **`unity` CLI** (Bash) | pipeline `127.0.0.1:78xx` | 조회·검증 보조: `command eval` (재컴파일 없는 C# 조회), `editor_status`, 스크린샷/`capture_game_view`, Editor 닫힘 시 `unity test`/`unity build`, `vcs diff`, Editor/모듈 설치. |
+| **unity-cli MCP** (`mcp__unity-cli__*`) | stdio `unity mcp` | 예비. UnityMCP 에 없는 기능(bake, timeline, audit, simulate_key/pointer 등)만. |
+
+규칙:
+- 같은 대상 변경은 **한 경로로만** (UnityMCP 편집 중 CLI eval 로 같은 오브젝트 수정 금지 — Undo/dirty 상태 꼬임).
+- 스크립트 수정 후 컴파일 확인은 UnityMCP `read_console` 표준 유지. CLI 는 교차 검증용.
+- 도메인 리로드 중엔 두 서버 모두 일시 불가 → `refresh_unity(wait_for_ready)` 또는 `unity command editor_status` 로 `ready` 확인 후 진행.
+- 등록 해제: `claude mcp remove unity-cli -s local`.
 
 ## MCP 제약
 
