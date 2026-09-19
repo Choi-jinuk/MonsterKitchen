@@ -13,6 +13,7 @@
 - [x] .claude/settings.local.json PC 고유 경로 정리 (113→79)
 - [x] 넓은 권한 축소 (79→72, 조회용 unity CLI 권한 추가)
 - [x] karpathy-skills 1.0.0 + understand-anything 2.9.7 (Egonex-AI) 설치
+- [x] 잔여 변경 정리 커밋: 6000.3 패키지/설정 동기화 (2d.animation·aseprite·psdimporter 제거 — 미사용), BT 에디터 FindObjectsByType, ItemDrop 콜라이더 클래스 ID
 
 ## 완료: 모듈 7-6, 7-7 — 레시피 도감 UI + 요리 마스터리 보너스
 

@@ -365,8 +365,6 @@ CsvParser: `;` 주석, `_` 컬럼 무시, `#TYPE` 타입 지정, `|` 배열 구�
 | `com.unity.addressables` | 에셋 로딩 |
 | `com.unity.cinemachine` | 카메라 전환 |
 | `com.unity.inputsystem` | 플레이어 입력 |
-| `com.unity.2d.animation` | 2D 스켈레탈 애니메이션 |
-| `com.unity.2d.aseprite` | Aseprite 임포트 |
 | `com.unity.2d.tilemap` + extras | 타일맵 맵 |
 | `com.unity.2d.spriteshape` | 유기적 지형 |
 | `com.unity.timeline` | 컷씬 |
